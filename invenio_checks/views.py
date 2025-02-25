@@ -7,10 +7,7 @@
 
 """Invenio checks views."""
 
-# TODO: This is an example file. Remove it if you do not need it, including
-# the templates and static folders as well as the test case.
-
-from flask import Blueprint, render_template
+from flask import Blueprint
 from invenio_i18n import gettext as _
 
 blueprint = Blueprint(
@@ -19,12 +16,3 @@ blueprint = Blueprint(
     template_folder="templates",
     static_folder="static",
 )
-
-
-@blueprint.route("/")
-def index():
-    """Render a basic view."""
-    return render_template(
-        "invenio_checks/index.html",
-        module_name=_("Invenio-Checks"),
-    )

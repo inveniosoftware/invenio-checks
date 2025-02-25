@@ -6,3 +6,6 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Invenio checks config."""
+
+CHECKS_ENABLED = False
+"""Enable checks."""
