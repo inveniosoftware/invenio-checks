@@ -10,9 +10,3 @@ API Docs
 
 .. automodule:: invenio_checks.ext
    :members:
-
-Views
------
-
-.. automodule:: invenio_checks.views
-   :members:
