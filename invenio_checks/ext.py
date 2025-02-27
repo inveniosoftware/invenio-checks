@@ -8,6 +8,7 @@
 """Invenio checks application."""
 
 from . import config
+from .base import ChecksRegistry
 
 
 class InvenioChecks(object):
@@ -22,6 +23,8 @@ class InvenioChecks(object):
         """Flask application initialization."""
         self.init_config(app)
         app.extensions["invenio-checks"] = self
+        self.checks_registry = ChecksRegistry()
+        self.checks_registry.load_from_entry_points(app, "invenio_checks.check_types")
 
     def init_config(self, app):
         """Initialize configuration."""

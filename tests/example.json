@@ -1,0 +1,93 @@
+{
+  "rules": [
+    {
+      "id": "open-access-publication",
+      "title": "Open Access Publication",
+      "description": "Publication articles must be Open Access",
+      "level": "failure",
+      "condition": {
+        "type": "comparison",
+        "left": {
+          "type": "field",
+          "path": "resource_type.id"
+        },
+        "operator": "==",
+        "right": "publication-article"
+      },
+      "checks": [
+        {
+          "type": "comparison",
+          "left": {
+            "type": "field",
+            "path": "access.files"
+          },
+          "operator": "==",
+          "right": "public"
+        }
+      ]
+    },
+    {
+      "id": "software-license",
+      "title": "Software License",
+      "description": "Software must have an appropriate license",
+      "level": "warning",
+      "condition": {
+        "type": "logical",
+        "operator": "and",
+        "expressions": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "resource_type.id"
+            },
+            "operator": "==",
+            "right": "software"
+          },
+          {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "access.files"
+            },
+            "operator": "==",
+            "right": "public"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "comparison",
+          "left": {
+            "type": "field",
+            "path": "license.type"
+          },
+          "operator": "==",
+          "right": "software-related-license"
+        }
+      ]
+    },
+    {
+      "id": "eu-funding",
+      "title": "EU Funding",
+      "description": "Records must have at least one EU-funded project",
+      "level": "info",
+      "checks": [
+        {
+          "type": "list",
+          "operator": "any",
+          "list_path": "funding",
+          "predicate": {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "funder.id"
+            },
+            "operator": "==",
+            "right": "00k4n6c32"
+          }
+        }
+      ]
+    }
+  ]
+}

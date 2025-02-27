@@ -14,36 +14,38 @@ from invenio_drafts_resources.services.records.components import ServiceComponen
 
 
 class ChecksComponent(ServiceComponent):
+    """Checks component."""
+
     @property
     def enabled(self):
         """Return if checks are enabled."""
         return current_app.config.get("CHECKS_ENABLED", False)
 
-    def update_draft(self, identity, draft=None, record=None, errors=None, **kwargs):
+    def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
         """Update handler."""
+        errors = errors or []
 
-        # 1. Check if checks are enabled
         if not self.enabled:
             return
 
-        # 2. Check if it's in review and get all the communities (only in review for the first version)
         communities = []
-        if draft.review.is_open:
-            communities.append(draft.review.community)
+        if record.review.is_open:
+            communities.append(record.review.community)
 
-        # 3. Get all checks for each community
-        communities.extend(draft.parent.communities.entires)
-        checks = itertools.chain([c.checks for c in communities])
+        communities.extend(record.parent.communities.entries)
+        checks = itertools.chain(*[c.checks for c in communities])
 
-        # 4. Run each check
         for check in checks:
             try:
-                res = check.run(draft, record)
+                res = check.run(data, record)
                 if not res.sync:
                     continue
-                # 5. For each error, append error to the error list
                 for error in res.errors:
-                    errors.append(res.error)
-            except Exception:
-                # log
-                pass
+                    errors.append(error)
+            except Exception as e:
+                errors.append(
+                    {
+                        "message": f"Error running check {check.id}: {str(e)}",
+                        "path": check.id,
+                    }
+                )
