@@ -1,0 +1,93 @@
+{
+  "rules": [
+    {
+      "id": "open-access-publication",
+      "name": "Open Access Publication",
+      "description": "Publication articles must be Open Access",
+      "level": "failure",
+      "condition": {
+        "type": "comparison",
+        "left": {
+          "type": "field",
+          "path": "resource_type.id"
+        },
+        "operator": "equals",
+        "right": "publication-article"
+      },
+      "checks": [
+        {
+          "type": "comparison",
+          "left": {
+            "type": "field",
+            "path": "access.files"
+          },
+          "operator": "equals",
+          "right": "public"
+        }
+      ]
+    },
+    {
+      "id": "software-license",
+      "name": "Software License",
+      "description": "Software must have an appropriate license",
+      "level": "warning",
+      "condition": {
+        "type": "logical",
+        "operator": "and",
+        "expressions": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "resource_type.id"
+            },
+            "operator": "equals",
+            "right": "software"
+          },
+          {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "access.files"
+            },
+            "operator": "equals",
+            "right": "public"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "type": "comparison",
+          "left": {
+            "type": "field",
+            "path": "license.type"
+          },
+          "operator": "equals",
+          "right": "software-related-license"
+        }
+      ]
+    },
+    {
+      "id": "eu-funding",
+      "name": "EU Funding",
+      "description": "Records must have at least one EU-funded project",
+      "level": "info",
+      "checks": [
+        {
+          "type": "list",
+          "operator": "any",
+          "list_path": "funding",
+          "predicate": {
+            "type": "comparison",
+            "left": {
+              "type": "field",
+              "path": "funder.name"
+            },
+            "operator": "contains",
+            "right": "European Union"
+          }
+        }
+      ]
+    }
+  ]
+}
