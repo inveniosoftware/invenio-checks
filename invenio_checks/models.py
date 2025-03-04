@@ -12,62 +12,67 @@ import uuid
 
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_db import db
+from sqlalchemy.orm import validates
 from sqlalchemy_utils import Timestamp
 from sqlalchemy_utils.types import ChoiceType, UUIDType
+
+from .proxies import current_checks_registry
 
 
 class Severity(enum.Enum):
     """Severity levels for checks."""
 
-    info = "info"
-    warn = "warning"
-    error = "error"
+    INFO = "I"
+    WARN = "W"
+    FAIL = "F"
 
 
 class CheckConfig(db.Model):
     """Configuration for a check in a community."""
 
-    __tablename__ = "checks_configs"
+    __tablename__ = "checks_config"
 
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
     community_id = db.Column(
         UUIDType, db.ForeignKey(CommunityMetadata.id), nullable=False
     )
-    check_id = db.Column(
-        db.String(255), nullable=False
-    )  # TODO: Should be enum from ChecksRegistry?
+    check_id = db.Column(db.String(255), nullable=False)
     params = db.Column(db.JSON, nullable=False)
     severity = db.Column(
-        ChoiceType(Severity, impl=db.String(1)), nullable=False, default=Severity.error
+        ChoiceType(Severity, impl=db.CHAR(1)), nullable=False, default=Severity.INFO
     )
     enabled = db.Column(db.Boolean, nullable=False, default=True)
+
+    @validates("check_id")
+    def validate_check_id(self, key, check_id):
+        """Validate check_id."""
+        if not current_checks_registry.get(check_id):
+            raise ValueError(f"Check with id '{check_id}' not found")
+        return check_id
 
 
 class CheckRunStatus(enum.Enum):
     """Status of a check run."""
 
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    ERROR = "error"
+    PENDING = "P"
+    RUNNING = "R"
+    COMPLETED = "C"
+    ERROR = "E"
 
 
 class CheckRun(db.Model, Timestamp):
     """Check run state."""
 
-    __tablename__ = "checks_runs"
+    __tablename__ = "checks_run"
 
     id = db.Column(db.Integer, primary_key=True)
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
-    # FIXME: Should we store a "snapshot" of the config params, severity, etc.?
-    #        What if the community changes the config after the check has run?
-
     record_id = db.Column(UUIDType, nullable=False)
     is_draft = db.Column(db.Boolean, nullable=False, default=False)
     revision_id = db.Column(db.Integer, nullable=False)
 
-    # TODO started/ended times?
-
-    status = db.Column(ChoiceType(CheckRunStatus, impl=db.String(255)), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=True)
+    end_time = db.Column(db.DateTime, nullable=True)
+    status = db.Column(ChoiceType(CheckRunStatus, impl=db.CHAR(1)), nullable=False)
     state = db.Column(db.JSON, nullable=False)
     result = db.Column(db.JSON, nullable=False)
