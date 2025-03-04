@@ -1,19 +1,32 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2025 CERN.
+#
+# Invenio-Checks is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+
+"""Database models."""
+
 import enum
 import uuid
 
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_db import db
-from sqlalchemy_utils import ChoiceType, Timestamp
+from sqlalchemy_utils import Timestamp
 from sqlalchemy_utils.types import ChoiceType, UUIDType
 
 
 class Severity(enum.Enum):
+    """Severity levels for checks."""
+
     info = "info"
     warn = "warning"
     error = "error"
 
 
 class CheckConfig(db.Model):
+    """Configuration for a check in a community."""
+
     __tablename__ = "checks_configs"
 
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
@@ -31,6 +44,8 @@ class CheckConfig(db.Model):
 
 
 class CheckRunStatus(enum.Enum):
+    """Status of a check run."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -38,6 +53,8 @@ class CheckRunStatus(enum.Enum):
 
 
 class CheckRun(db.Model, Timestamp):
+    """Check run state."""
+
     __tablename__ = "checks_runs"
 
     id = db.Column(db.Integer, primary_key=True)
