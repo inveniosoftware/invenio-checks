@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2025 CERN.
+#
+# Invenio-Checks is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+
+"""Record service component."""
+
 import itertools
 
 from flask import current_app
@@ -7,6 +16,7 @@ from invenio_drafts_resources.services.records.components import ServiceComponen
 class ChecksComponent(ServiceComponent):
     @property
     def enabled(self):
+        """Return if checks are enabled."""
         return current_app.config.get("CHECKS_ENABLED", False)
 
     def update_draft(self, identity, draft=None, record=None, errors=None, **kwargs):
