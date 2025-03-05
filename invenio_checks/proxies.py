@@ -12,3 +12,8 @@ from werkzeug.local import LocalProxy
 current_checks_registry = LocalProxy(
     lambda: current_app.extensions["invenio-checks"].checks_registry
 )
+
+current_checks_configs_service = LocalProxy(
+    lambda: current_app.extensions["invenio-checks"].checks_configs_service
+)
+"""Proxy to the instantiated checks_configs service."""
