@@ -35,13 +35,10 @@ class BaseClass(RecordService):
 
 def get_check_config(id_):
     """Get a check config by id."""
-    try:
-        check_config = CheckConfig.query.get(id_)
-        return check_config
-    except NoResultFound:
+    check_config = CheckConfig.query.get(id_)
+    if check_config == None:
         raise ValueError(f"Check configuration with id '{id_}' not found")
-    except MultipleResultsFound:
-        raise ValueError(f"Multiple check configurations found with id '{id_}'")
+    return check_config
 
 
 class CheckConfigService(RecordService):
