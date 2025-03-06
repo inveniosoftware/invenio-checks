@@ -14,6 +14,6 @@ current_checks_registry = LocalProxy(
 )
 
 current_checks_configs_service = LocalProxy(
-    lambda: current_app.extensions["invenio-checks"].checks_configs_service
+    lambda: current_app.extensions["invenio-checks"].service
 )
 """Proxy to the instantiated checks_configs service."""

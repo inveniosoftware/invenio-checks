@@ -9,15 +9,19 @@
 
 from uuid import UUID
 
+from invenio_records_resources.services.base import LinksTemplate
+from invenio_records_resources.services.base.utils import map_search_params
 from invenio_records_resources.services.records import RecordService
 from invenio_records_resources.services.uow import (
     ModelCommitOp,
     ModelDeleteOp,
     unit_of_work,
 )
-from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+from marshmallow import ValidationError
+from sqlalchemy.orm.exc import NoResultFound
 
-from ..models import CheckConfig
+from ..models import CheckConfig, Severity
+from .schema import CheckConfigSchema
 
 
 class BaseClass(RecordService):
@@ -49,13 +53,19 @@ class CheckConfigService(RecordService):
         """Create a check configuration."""
         self.require_permission(identity, "create")
 
+        schema = CheckConfigSchema()
+        try:
+            validated_data = schema.load(data)
+        except ValidationError as e:
+            raise ValueError(f"Validation error: {e.messages}")
+
         try:
             check_config = CheckConfig(
-                community_id=UUID(data["community_id"]),
-                check_id=data["check_id"],
-                params=data.get("params", {}),
-                severity=data.get("severity", "I"),
-                enabled=data.get("enabled", True),
+                community_id=UUID(validated_data["community_id"]),
+                check_id=validated_data["check_id"],
+                params=validated_data.get("params", {}),
+                severity=validated_data.get("severity", Severity.INFO.value),
+                enabled=validated_data.get("enabled", True),
             )
             uow.register(ModelCommitOp(check_config))
             return check_config
@@ -90,19 +100,20 @@ class CheckConfigService(RecordService):
         """Update a check configuration."""
         self.require_permission(identity, "update")
 
+        schema = CheckConfigSchema()
         try:
-            check_config = get_check_config(id_)
-            if "community_id" in data:
-                check_config.community_id = UUID(data["community_id"])
-            if "check_id" in data:
-                check_config.check_id = data["check_id"]
-            if "params" in data:
-                check_config.params = data["params"]
-            if "severity" in data:
-                check_config.severity = data["severity"]
-            if "enabled" in data:
-                check_config.enabled = data["enabled"]
+            validated_data = schema.load(data)
+        except ValidationError as e:
+            raise ValueError(f"Validation error: {e.messages}")
 
+        try:
+            check_config = CheckConfig(
+                community_id=UUID(validated_data["community_id"]),
+                check_id=validated_data["check_id"],
+                params=validated_data.get("params", {}),
+                severity=validated_data.get("severity", Severity.INFO.value),
+                enabled=validated_data.get("enabled", True),
+            )
             uow.register(ModelCommitOp(check_config))
             return check_config
         except NoResultFound:
