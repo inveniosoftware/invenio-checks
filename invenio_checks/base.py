@@ -67,9 +67,6 @@ class ChecksRegistry:
         """Load checks from entry points."""
         for ep in set(importlib_metadata.entry_points(group=ep_name)):
             check_cls_or_func = ep.load()
-            if callable(check_cls_or_func):
-                check_cls = check_cls_or_func(app)
-            else:
-                check_cls = check_cls_or_func
+            check_cls = check_cls_or_func
 
             self.register(check_cls)
