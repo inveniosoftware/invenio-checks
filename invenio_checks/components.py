@@ -12,6 +12,8 @@ import itertools
 from flask import current_app
 from invenio_drafts_resources.services.records.components import ServiceComponent
 
+from .models import CheckConfig
+
 
 class ChecksComponent(ServiceComponent):
     """Checks component."""
@@ -29,11 +31,21 @@ class ChecksComponent(ServiceComponent):
             return
 
         communities = []
-        if record.review.is_open:
-            communities.append(record.review.community)
+        if record.parent.review and (
+            record.parent.review.status == "submitted"
+            or record.parent.review.status == "created"
+        ):
+            # TODO handle multiple requests
+            communities.append(record.parent.review.receiver.resolve().id)
+        else:
+            return
 
-        communities.extend(record.parent.communities.entries)
-        checks = itertools.chain(*[c.checks for c in communities])
+        checks = itertools.chain(
+            *[
+                CheckConfig.query.filter(CheckConfig.community_id == c).all()
+                for c in communities
+            ]
+        )
 
         for check in checks:
             try:
