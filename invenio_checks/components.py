@@ -13,6 +13,7 @@ from flask import current_app
 from invenio_drafts_resources.services.records.components import ServiceComponent
 
 from .models import CheckConfig
+from .proxies import current_checks_registry
 
 
 class ChecksComponent(ServiceComponent):
@@ -49,11 +50,12 @@ class ChecksComponent(ServiceComponent):
 
         for check in checks:
             try:
-                res = check.run(data, record)
+                check_cls = current_checks_registry.get(check.check_id)
+                res = check_cls().run(record, check.params)
                 if not res.sync:
                     continue
                 for error in res.errors:
-                    errors.append(error)
+                    errors.append(*error)
             except Exception as e:
                 errors.append(
                     {

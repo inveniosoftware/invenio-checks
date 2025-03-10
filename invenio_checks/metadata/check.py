@@ -8,10 +8,10 @@
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 
 from ..base import Check
-from .rules import RuleParser
+from .rules import RuleParser, RuleResult
 
 
 @dataclass
@@ -31,12 +31,17 @@ class CheckResult:
     rule_results: List[RuleResult] = field(default_factory=list)
     timestamp: datetime = field(default_factory=datetime.utcnow)
     sync: bool = True  # Default to synchronous
+    errors: List[Dict] = field(default_factory=list)
 
     def add_rule_result(self, rule_result: RuleResult):
         """Add a rule result and update the overall success."""
         self.rule_results.append(rule_result)
         if not rule_result.success and rule_result.level == "failure":
             self.success = False
+
+    def add_errors(self, errors: Dict):
+        """Add error messages for the UI."""
+        self.errors.append(errors)
 
     def to_dict(self):
         """Convert the result to a dictionary."""
@@ -76,28 +81,41 @@ class MetadataCheck(Check):
         result = CheckResult(self.id)
 
         # Parse the rules from the configuration
-        rules = []
-        for rule_config in config.get("rules", []):
-            try:
-                rule = RuleParser.parse(rule_config)
-                rules.append(rule)
-            except Exception:
-                # Skip this rule
-                continue
+        rule = RuleParser.parse(config)
 
         # If we have no valid rules, return early
-        if not rules:
+        if not rule:
             return result
 
-        # Evaluate each rule
-        for rule in rules:
-            try:
-                rule_result = rule.evaluate(record)
-                result.add_rule_result(rule_result)
-            except Exception:
-                pass
+        try:
+            rule_result = rule.evaluate(record)
+            errors = self.to_service_errors(rule_result)
+            result.add_rule_result(rule_result)
+            result.add_errors(errors)
+        except Exception:
+            pass
 
         return result
+
+    def to_service_errors(self, rule_result: RuleResult) -> Dict:
+        """Create error messages for the UI."""
+        if rule_result.success == True:
+            return
+
+        output = [
+            {
+                "field": f"metadata.{check.path}",
+                "messages": [rule_result.rule_description],
+                "severity": rule_result.level,
+                # "context": {
+                #     "community": community_id,
+                #     "check": check_id,
+                # }
+            }
+            for check in rule_result.check_results
+        ]
+
+        return output
 
 
 class MetadataCheckConfig:
