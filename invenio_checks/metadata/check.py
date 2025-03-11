@@ -75,7 +75,7 @@ class MetadataCheck(Check):
 
         return True
 
-    def run(self, record, config):
+    def run(self, record, config, community):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id)
@@ -89,7 +89,7 @@ class MetadataCheck(Check):
 
         try:
             rule_result = rule.evaluate(record)
-            errors = self.to_service_errors(rule_result)
+            errors = self.to_service_errors(rule_result, community)
             result.add_rule_result(rule_result)
             result.add_errors(errors)
         except Exception:
@@ -97,7 +97,7 @@ class MetadataCheck(Check):
 
         return result
 
-    def to_service_errors(self, rule_result: RuleResult) -> Dict:
+    def to_service_errors(self, rule_result: RuleResult, community_id) -> Dict:
         """Create error messages for the UI."""
         if rule_result.success == True:
             return
@@ -107,10 +107,11 @@ class MetadataCheck(Check):
                 "field": f"metadata.{check.path}",
                 "messages": [rule_result.rule_description],
                 "severity": rule_result.level,
-                # "context": {
-                #     "community": community_id,
-                #     "check": check_id,
-                # }
+                "context": {
+                    "community": community_id,
+                    "check": self.id,
+                    "rule": rule_result.rule_id,
+                },
             }
             for check in rule_result.check_results
         ]
