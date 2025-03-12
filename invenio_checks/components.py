@@ -24,7 +24,7 @@ class ChecksComponent(ServiceComponent):
         """Return if checks are enabled."""
         return current_app.config.get("CHECKS_ENABLED", False)
 
-    def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
+    def _run_checks(self, identity, data=None, record=None, errors=None, **kwargs):
         """Update handler."""
         errors = errors or []
 
@@ -77,3 +77,6 @@ class ChecksComponent(ServiceComponent):
                         "path": check.id,
                     }
                 )
+
+    update_draft = _run_checks
+    create = _run_checks
