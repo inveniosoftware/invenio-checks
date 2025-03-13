@@ -68,8 +68,7 @@ class ChecksComponent(ServiceComponent):
                     res = check_cls().run(record, check.params, community)
                     if not res.sync:
                         continue
-                    for error in res.errors:
-                        errors.append(*error)
+                    errors.extend(res.errors)
             except Exception as e:
                 errors.append(
                     {

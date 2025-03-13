@@ -11,7 +11,8 @@ from datetime import datetime
 from typing import Dict, List
 
 from ..base import Check
-from .rules import RuleParser, RuleResult
+from .rules import RuleParser
+from .rules import RuleResult as RuleResultClass
 
 
 @dataclass
@@ -39,9 +40,9 @@ class CheckResult:
         if not rule_result.success and rule_result.level == "failure":
             self.success = False
 
-    def add_errors(self, errors: Dict):
+    def add_errors(self, errors: List[Dict]):
         """Add error messages for the UI."""
-        self.errors.append(errors)
+        self.errors.extend(errors)
 
     def to_dict(self):
         """Convert the result to a dictionary."""
@@ -54,7 +55,7 @@ class MetadataCheck(Check):
     """Check for validating record metadata against configured rules."""
 
     id = "metadata"
-    name = "Metadata Validation"
+    title = "Metadata Validation"
     description = "Validates record metadata against configured rules."
 
     def validate_config(self, config):
@@ -81,26 +82,37 @@ class MetadataCheck(Check):
         result = CheckResult(self.id)
 
         # Parse the rules from the configuration
-        rule = RuleParser.parse(config)
+        rules = []
+        for rule_config in config.get("rules", []):
+            try:
+                rule = RuleParser.parse(rule_config)
+                rules.append(rule)
+            except Exception:
+                # Skip this rule
+                continue
 
         # If we have no valid rules, return early
-        if not rule:
+        if not rules:
             return result
 
-        try:
-            rule_result = rule.evaluate(record)
-            errors = self.to_service_errors(rule_result, community)
-            result.add_rule_result(rule_result)
-            result.add_errors(errors)
-        except Exception:
-            pass
+        # Evaluate each rule
+        for rule in rules:
+            try:
+                rule_result = rule.evaluate(record)
+                errors = self.to_service_errors(rule_result, community)
+                result.add_rule_result(rule_result)
+                result.add_errors(errors)
+            except Exception:
+                pass
 
         return result
 
-    def to_service_errors(self, rule_result: RuleResult, community_id) -> Dict:
+    def to_service_errors(
+        self, rule_result: RuleResultClass, community_id
+    ) -> List[Dict]:
         """Create error messages for the UI."""
-        if rule_result.success == True:
-            return
+        if rule_result.success:
+            return []
 
         output = [
             {
