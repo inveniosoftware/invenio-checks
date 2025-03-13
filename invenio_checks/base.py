@@ -12,13 +12,13 @@ import importlib_metadata
 class Check:
     """Base Check class for all curation checks."""
 
-    id = None
+    id: str
     """Unique identifier for the check."""
 
-    title = None
+    title: str
     """Human-readable name."""
 
-    description = None
+    description: str
     """Description of the check's purpose."""
 
     def validate_config(self, config):

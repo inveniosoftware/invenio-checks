@@ -10,10 +10,7 @@
 from collections.abc import Iterable, Sized
 
 from flask_sqlalchemy.pagination import Pagination
-from invenio_records_resources.services.records.results import (
-    RecordItem,
-    RecordList,
-)
+from invenio_records_resources.services.records.results import RecordItem, RecordList
 
 
 class Item(RecordItem):
