@@ -25,9 +25,7 @@ class ChecksComponent(ServiceComponent):
         return current_app.config.get("CHECKS_ENABLED", False)
 
     def _run_checks(self, identity, data=None, record=None, errors=None, **kwargs):
-        """Update handler."""
-        errors = errors or []
-
+        """Handler to run checks."""
         if not self.enabled:
             return
 
