@@ -4,6 +4,7 @@
       "id": "open-access-publication",
       "title": "Open Access Publication",
       "description": "Publication articles must be Open Access",
+      "information": "The EU curation policy requires publication articles must be Open Access",
       "level": "failure",
       "condition": {
         "type": "comparison",
@@ -30,6 +31,7 @@
       "id": "software-license",
       "title": "Software License",
       "description": "Software must have an appropriate license",
+      "information": "The EU curation policy requires software to have an appropriate license",
       "level": "warning",
       "condition": {
         "type": "logical",
@@ -71,6 +73,7 @@
       "id": "eu-funding",
       "title": "EU Funding",
       "description": "Records must have at least one EU-funded project",
+      "information": "The EU curation policy requires author to have persistent identifiers",
       "level": "info",
       "checks": [
         {

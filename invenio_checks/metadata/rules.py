@@ -17,11 +17,21 @@ from .expressions import (
 class Rule:
     """Class representing a metadata validation rule."""
 
-    def __init__(self, id, title, description, level, condition=None, checks=None):
+    def __init__(
+        self,
+        id,
+        title,
+        description,
+        level,
+        information=None,
+        condition=None,
+        checks=None,
+    ):
         """Initialize the rule."""
         self.id = id
         self.title = title
         self.description = description
+        self.information = information
         self.level = level
         self.condition = condition
         self.checks = checks or []
@@ -50,6 +60,7 @@ class RuleResult:
         self.rule_id = rule.id
         self.rule_title = rule.title
         self.rule_description = rule.description
+        self.rule_information = rule.information
         self.level = rule.level
         self.success = success
         self.check_results = check_results
@@ -60,6 +71,7 @@ class RuleResult:
             "rule_id": self.rule_id,
             "rule_title": self.rule_title,
             "rule_description": self.rule_description,
+            "rule_information": self.rule_information,
             "level": self.level,
             "success": self.success,
             "check_results": self.check_results,
@@ -110,6 +122,7 @@ class RuleParser:
         rule_id = config.get("id")
         title = config.get("title", "Unnamed rule")
         description = config.get("description", "")
+        information = config.get("information", "")
         level = config.get("level", "info")
 
         # Parse condition if present
@@ -123,4 +136,4 @@ class RuleParser:
             check = ExpressionParser.parse(check_config)
             checks.append(check)
 
-        return Rule(rule_id, title, description, level, condition, checks)
+        return Rule(rule_id, title, description, level, information, condition, checks)

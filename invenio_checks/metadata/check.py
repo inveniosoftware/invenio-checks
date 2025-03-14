@@ -118,11 +118,10 @@ class MetadataCheck(Check):
             {
                 "field": f"metadata.{check.path}",
                 "messages": [rule_result.rule_description],
+                "rule_info": rule_result.rule_information,
                 "severity": rule_result.level,
                 "context": {
                     "community": community_id,
-                    "check": self.id,
-                    "rule": rule_result.rule_id,
                 },
             }
             for check in rule_result.check_results
