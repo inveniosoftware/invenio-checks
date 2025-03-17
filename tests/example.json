@@ -28,6 +28,33 @@
             ]
         },
         {
+            "id": "journal-info",
+            "title": "Journal Information",
+            "description": "Publication articles must state the journal it was published in",
+            "information": "The EU curation policy requires publication articles must state the journal it was published in",
+            "level": "failure",
+            "condition": {
+                "type": "comparison",
+                "left": {
+                    "type": "field",
+                    "path": "metadata.resource_type.id"
+                },
+                "operator": "==",
+                "right": "publication-article"
+            },
+            "checks": [
+                {
+                    "type": "comparison",
+                    "left": {
+                        "type": "field",
+                        "path": "custom_fields.journal:journal.title"
+                    },
+                    "operator": "!=",
+                    "right": ""
+                }
+            ]
+        },
+        {
             "id": "license",
             "title": "License",
             "description": "All records must have a license",
