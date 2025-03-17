@@ -116,7 +116,7 @@ class MetadataCheck(Check):
 
         output = [
             {
-                "field": f"metadata.{check.path}",
+                "field": check.path,
                 "messages": [rule_result.rule_description],
                 "rule_info": rule_result.rule_information,
                 "severity": rule_result.level,

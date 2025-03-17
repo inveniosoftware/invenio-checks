@@ -10,7 +10,7 @@
         "type": "comparison",
         "left": {
           "type": "field",
-          "path": "resource_type.id"
+          "path": "metadata.resource_type.id"
         },
         "operator": "==",
         "right": "publication-article"
@@ -41,7 +41,7 @@
             "type": "comparison",
             "left": {
               "type": "field",
-              "path": "resource_type.id"
+              "path": "metadata.resource_type.id"
             },
             "operator": "==",
             "right": "software"
@@ -62,7 +62,7 @@
           "type": "comparison",
           "left": {
             "type": "field",
-            "path": "license.type"
+            "path": "metadata.license.type"
           },
           "operator": "==",
           "right": "software-related-license"
@@ -79,7 +79,7 @@
         {
           "type": "list",
           "operator": "any",
-          "list_path": "funding",
+          "list_path": "metadata.funding",
           "predicate": {
             "type": "comparison",
             "left": {
