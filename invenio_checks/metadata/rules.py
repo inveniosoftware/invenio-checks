@@ -103,7 +103,7 @@ class ExpressionParser:
         elif expr_type == "list":
             operator = config["operator"]
             path = config["path"]
-            predicate = cls.parse(config["predicate"])
+            predicate = cls.parse(config["predicate"]) if operator != "exists" else None
             return ListExpression(operator, path, predicate)
 
         raise ValueError(f"Unknown expression type: {expr_type}")

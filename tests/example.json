@@ -28,6 +28,21 @@
             ]
         },
         {
+            "id": "license",
+            "title": "License",
+            "description": "All records must have a license",
+            "information": "The EU curation policy requires all records to have a license",
+            "level": "failure",
+            "checks": [
+                {
+                    "type": "list",
+                    "operator": "exists",
+                    "path": "metadata.rights",
+                    "predicate": {}
+                }
+            ]
+        },
+        {
             "id": "software-license",
             "title": "Software License",
             "description": "Software must have an appropriate license",

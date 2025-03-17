@@ -241,10 +241,11 @@ class ListExpression(Expression):
     # Error message templates
     LIST_MISSING = "List field {path} is missing"
     NOT_A_LIST = "Field {path} is not a list"
+    NO_ITEMS = "No items in list {path}"
     NO_ITEMS_MATCH = "No items in {path} match the required criteria"
     NOT_ALL_ITEMS_MATCH = "Not all items in {path} match the required criteria"
 
-    VALID_OPERATORS = ["any", "all"]
+    VALID_OPERATORS = ["any", "all", "exists"]
 
     def __init__(self, operator, path, predicate):
         """Initialize the list expression."""
@@ -254,7 +255,8 @@ class ListExpression(Expression):
             )
         self.operator = operator
         self.path = path
-        self.predicate = predicate
+        if operator != "exists":
+            self.predicate = predicate
 
     def evaluate(self, record):
         """Evaluate the list expression."""
@@ -287,6 +289,17 @@ class ListExpression(Expression):
                 )
             else:  # all
                 return ExpressionResult(True, self.path, list_value)
+
+        if self.operator == "exists":
+            if len(list_value) > 0:
+                return ExpressionResult(success, self.path, list_value)
+            else:
+                return ExpressionResult(
+                    False,
+                    self.path,
+                    list_value,
+                    self.NO_ITEMS.format(path=self.path),
+                )
 
         # Evaluate the predicate against each item
         results = [self.predicate.evaluate(item) for item in list_value]
