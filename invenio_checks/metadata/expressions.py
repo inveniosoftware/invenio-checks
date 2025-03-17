@@ -246,34 +246,34 @@ class ListExpression(Expression):
 
     VALID_OPERATORS = ["any", "all"]
 
-    def __init__(self, operator, list_path, predicate):
+    def __init__(self, operator, path, predicate):
         """Initialize the list expression."""
         if operator not in self.VALID_OPERATORS:
             raise ValueError(
                 f"Invalid operator: {operator}. Valid operators are {self.VALID_OPERATORS}"
             )
         self.operator = operator
-        self.list_path = list_path
+        self.path = path
         self.predicate = predicate
 
     def evaluate(self, record):
         """Evaluate the list expression."""
         try:
-            list_value = self._get_nested_field(record, self.list_path)
+            list_value = self._get_nested_field(record, self.path)
         except (KeyError, IndexError, TypeError):
             return ExpressionResult(
                 False,
-                self.list_path,
+                self.path,
                 None,
-                self.LIST_MISSING.format(path=self.list_path),
+                self.LIST_MISSING.format(path=self.path),
             )
 
         if not isinstance(list_value, list):
             return ExpressionResult(
                 False,
-                self.list_path,
+                self.path,
                 list_value,
-                self.NOT_A_LIST.format(path=self.list_path),
+                self.NOT_A_LIST.format(path=self.path),
             )
 
         if not list_value:
@@ -281,12 +281,12 @@ class ListExpression(Expression):
             if self.operator == "any":
                 return ExpressionResult(
                     False,
-                    self.list_path,
+                    self.path,
                     list_value,
-                    self.NO_ITEMS_MATCH.format(path=self.list_path),
+                    self.NO_ITEMS_MATCH.format(path=self.path),
                 )
             else:  # all
-                return ExpressionResult(True, self.list_path, list_value)
+                return ExpressionResult(True, self.path, list_value)
 
         # Evaluate the predicate against each item
         results = [self.predicate.evaluate(item) for item in list_value]
@@ -296,21 +296,21 @@ class ListExpression(Expression):
             if not success:
                 return ExpressionResult(
                     False,
-                    self.list_path,
+                    self.path,
                     list_value,
-                    self.NO_ITEMS_MATCH.format(path=self.list_path),
+                    self.NO_ITEMS_MATCH.format(path=self.path),
                 )
         elif self.operator == "all":
             success = all(r.success for r in results)
             if not success:
                 return ExpressionResult(
                     False,
-                    self.list_path,
+                    self.path,
                     list_value,
-                    self.NOT_ALL_ITEMS_MATCH.format(path=self.list_path),
+                    self.NOT_ALL_ITEMS_MATCH.format(path=self.path),
                 )
 
-        return ExpressionResult(success, self.list_path, list_value)
+        return ExpressionResult(success, self.path, list_value)
 
     def _get_nested_field(self, obj, path):
         """Get a nested field from an object using dot notation."""

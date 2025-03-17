@@ -351,7 +351,7 @@ class TestRuleParser:
                 {
                     "type": "list",
                     "operator": "any",
-                    "list_path": "authors",
+                    "path": "authors",
                     "predicate": {
                         "type": "comparison",
                         "left": {"type": "field", "path": "affiliation"},

@@ -1,96 +1,96 @@
 {
-  "rules": [
-    {
-      "id": "open-access-publication",
-      "title": "Open Access Publication",
-      "description": "Publication articles must be Open Access",
-      "information": "The EU curation policy requires publication articles must be Open Access",
-      "level": "failure",
-      "condition": {
-        "type": "comparison",
-        "left": {
-          "type": "field",
-          "path": "metadata.resource_type.id"
+    "rules": [
+        {
+            "id": "open-access-publication",
+            "title": "Open Access Publication",
+            "description": "Publication articles must be Open Access",
+            "information": "The EU curation policy requires publication articles must be Open Access",
+            "level": "failure",
+            "condition": {
+                "type": "comparison",
+                "left": {
+                    "type": "field",
+                    "path": "metadata.resource_type.id"
+                },
+                "operator": "==",
+                "right": "publication-article"
+            },
+            "checks": [
+                {
+                    "type": "comparison",
+                    "left": {
+                        "type": "field",
+                        "path": "access.files"
+                    },
+                    "operator": "==",
+                    "right": "public"
+                }
+            ]
         },
-        "operator": "==",
-        "right": "publication-article"
-      },
-      "checks": [
         {
-          "type": "comparison",
-          "left": {
-            "type": "field",
-            "path": "access.files"
-          },
-          "operator": "==",
-          "right": "public"
-        }
-      ]
-    },
-    {
-      "id": "software-license",
-      "title": "Software License",
-      "description": "Software must have an appropriate license",
-      "information": "The EU curation policy requires software to have an appropriate license",
-      "level": "warning",
-      "condition": {
-        "type": "logical",
-        "operator": "and",
-        "expressions": [
-          {
-            "type": "comparison",
-            "left": {
-              "type": "field",
-              "path": "metadata.resource_type.id"
+            "id": "software-license",
+            "title": "Software License",
+            "description": "Software must have an appropriate license",
+            "information": "The EU curation policy requires software to have an appropriate license",
+            "level": "warning",
+            "condition": {
+                "type": "logical",
+                "operator": "and",
+                "expressions": [
+                    {
+                        "type": "comparison",
+                        "left": {
+                            "type": "field",
+                            "path": "metadata.resource_type.id"
+                        },
+                        "operator": "==",
+                        "right": "software"
+                    },
+                    {
+                        "type": "comparison",
+                        "left": {
+                            "type": "field",
+                            "path": "access.files"
+                        },
+                        "operator": "==",
+                        "right": "public"
+                    }
+                ]
             },
-            "operator": "==",
-            "right": "software"
-          },
-          {
-            "type": "comparison",
-            "left": {
-              "type": "field",
-              "path": "access.files"
-            },
-            "operator": "==",
-            "right": "public"
-          }
-        ]
-      },
-      "checks": [
+            "checks": [
+                {
+                    "type": "comparison",
+                    "left": {
+                        "type": "field",
+                        "path": "metadata.license.type"
+                    },
+                    "operator": "==",
+                    "right": "software-related-license"
+                }
+            ]
+        },
         {
-          "type": "comparison",
-          "left": {
-            "type": "field",
-            "path": "metadata.license.type"
-          },
-          "operator": "==",
-          "right": "software-related-license"
+            "id": "eu-funding",
+            "title": "EU Funding",
+            "description": "Records must have at least one EU-funded project",
+            "information": "The EU curation policy requires author to have persistent identifiers",
+            "level": "info",
+            "checks": [
+                {
+                    "type": "list",
+                    "operator": "any",
+                    "path": "metadata.funding",
+                    "predicate": {
+                        "type": "comparison",
+                        "left": {
+                            "type": "field",
+                            "path": "funder.id"
+                        },
+                        "operator": "==",
+                        "right": "00k4n6c32"
+                    }
+                }
+            ]
         }
-      ]
-    },
-    {
-      "id": "eu-funding",
-      "title": "EU Funding",
-      "description": "Records must have at least one EU-funded project",
-      "information": "The EU curation policy requires author to have persistent identifiers",
-      "level": "info",
-      "checks": [
-        {
-          "type": "list",
-          "operator": "any",
-          "list_path": "metadata.funding",
-          "predicate": {
-            "type": "comparison",
-            "left": {
-              "type": "field",
-              "path": "funder.id"
-            },
-            "operator": "==",
-            "right": "00k4n6c32"
-          }
-        }
-      ]
-    }
-  ]
+    ]
 }
