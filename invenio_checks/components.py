@@ -29,13 +29,18 @@ class ChecksComponent(ServiceComponent):
         if not self.enabled:
             return
 
-        communities = []
+        communities = set()
         if record.parent.review and (
             record.parent.review.status == "submitted"
             or record.parent.review.status == "created"
         ):
             # drafts can only be submitted to one community
-            communities.append(record.parent.review.receiver.resolve().id)
+            community = record.parent.review.receiver.resolve()
+            community_id = str(community.id)  # from UUID
+            communities.add(community_id)
+            community_parent_id = community.get("parent", {}).get("id")
+            if community_parent_id:
+                communities.add(community_parent_id)
         else:
             results = current_requests_service.search(
                 identity,
@@ -50,7 +55,8 @@ class ChecksComponent(ServiceComponent):
 
             if results.total > 0:
                 for result in results:
-                    communities.append(result.get("receiver", {}).get("community"))
+                    communities.add(result.get("receiver", {}).get("community"))
+                    # check if it is a subcommunity
             else:
                 return
 
