@@ -23,7 +23,7 @@ class Rule:
         title,
         message,
         level,
-        information=None,
+        description=None,
         condition=None,
         checks=None,
     ):
@@ -31,7 +31,7 @@ class Rule:
         self.id = id
         self.title = title
         self.message = message
-        self.information = information
+        self.description = description
         self.level = level
         self.condition = condition
         self.checks = checks or []
@@ -60,7 +60,7 @@ class RuleResult:
         self.rule_id = rule.id
         self.rule_title = rule.title
         self.rule_message = rule.message
-        self.rule_information = rule.information
+        self.rule_description = rule.description
         self.level = rule.level
         self.success = success
         self.check_results = check_results
@@ -71,7 +71,7 @@ class RuleResult:
             "rule_id": self.rule_id,
             "rule_title": self.rule_title,
             "rule_message": self.rule_message,
-            "rule_information": self.rule_information,
+            "rule_description": self.rule_description,
             "level": self.level,
             "success": self.success,
             "check_results": self.check_results,
@@ -122,7 +122,7 @@ class RuleParser:
         rule_id = config.get("id")
         title = config.get("title", "Unnamed rule")
         message = config.get("message", "")
-        information = config.get("information", "")
+        description = config.get("description", "")
         level = config.get("level", "info")
 
         # Parse condition if present
@@ -136,4 +136,4 @@ class RuleParser:
             check = ExpressionParser.parse(check_config)
             checks.append(check)
 
-        return Rule(rule_id, title, message, level, information, condition, checks)
+        return Rule(rule_id, title, message, level, description, condition, checks)

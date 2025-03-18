@@ -117,8 +117,8 @@ class MetadataCheck(Check):
         output = [
             {
                 "field": check.path,
-                "messages": [rule_result.rule_description],
-                "rule_info": rule_result.rule_information,
+                "messages": [rule_result.rule_message],
+                "description": rule_result.rule_description,
                 "severity": rule_result.level,
                 "context": {
                     "community": community_id,
