@@ -21,7 +21,7 @@ class Rule:
         self,
         id,
         title,
-        description,
+        message,
         level,
         information=None,
         condition=None,
@@ -30,7 +30,7 @@ class Rule:
         """Initialize the rule."""
         self.id = id
         self.title = title
-        self.description = description
+        self.message = message
         self.information = information
         self.level = level
         self.condition = condition
@@ -59,7 +59,7 @@ class RuleResult:
         """Initialize the rule result."""
         self.rule_id = rule.id
         self.rule_title = rule.title
-        self.rule_description = rule.description
+        self.rule_message = rule.message
         self.rule_information = rule.information
         self.level = rule.level
         self.success = success
@@ -70,7 +70,7 @@ class RuleResult:
         return {
             "rule_id": self.rule_id,
             "rule_title": self.rule_title,
-            "rule_description": self.rule_description,
+            "rule_message": self.rule_message,
             "rule_information": self.rule_information,
             "level": self.level,
             "success": self.success,
@@ -121,7 +121,7 @@ class RuleParser:
 
         rule_id = config.get("id")
         title = config.get("title", "Unnamed rule")
-        description = config.get("description", "")
+        message = config.get("message", "")
         information = config.get("information", "")
         level = config.get("level", "info")
 
@@ -136,4 +136,4 @@ class RuleParser:
             check = ExpressionParser.parse(check_config)
             checks.append(check)
 
-        return Rule(rule_id, title, description, level, information, condition, checks)
+        return Rule(rule_id, title, message, level, information, condition, checks)

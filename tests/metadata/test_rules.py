@@ -27,7 +27,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             checks=[
                 ComparisonExpression(FieldExpression("access"), "==", "open"),
@@ -39,7 +39,7 @@ class TestRule:
         assert result.success is True
         assert result.rule_id == "test-rule"
         assert result.rule_title == "Test Rule"
-        assert result.rule_description == "A test rule"
+        assert result.rule_message == "A test rule"
         assert result.level == "error"
 
     def test_rule_with_multiple_checks(self):
@@ -50,7 +50,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             checks=[
                 ComparisonExpression(FieldExpression("type"), "==", "article"),
@@ -73,7 +73,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             checks=[
                 ComparisonExpression(FieldExpression("type"), "==", "article"),
@@ -96,7 +96,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             condition=ComparisonExpression(FieldExpression("type"), "==", "article"),
             checks=[
@@ -118,7 +118,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             condition=ComparisonExpression(FieldExpression("type"), "==", "article"),
             checks=[
@@ -141,7 +141,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
             condition=LogicalExpression(
                 "and",
@@ -169,7 +169,7 @@ class TestRule:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
         )
 
@@ -191,7 +191,7 @@ class TestRule:
         rule = Rule(
             id="negation-test-rule",
             title="Negation Test Rule",
-            description="A rule with negated operators",
+            message="A rule with negated operators",
             level="error",
             checks=[
                 ComparisonExpression(FieldExpression("type"), "!=", "dataset"),
@@ -220,7 +220,7 @@ class TestRule:
         rule = Rule(
             id="negation-fail-rule",
             title="Negation Failure Rule",
-            description="A rule with negated operators that fail",
+            message="A rule with negated operators that fail",
             level="error",
             checks=[
                 ComparisonExpression(FieldExpression("type"), "!=", "dataset"),
@@ -253,7 +253,7 @@ class TestRuleParser:
         rule_config = {
             "id": "test-rule",
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "checks": [
                 {
@@ -269,7 +269,7 @@ class TestRuleParser:
 
         assert rule.id == "test-rule"
         assert rule.title == "Test Rule"
-        assert rule.description == "A test rule"
+        assert rule.message == "A test rule"
         assert rule.level == "error"
         assert len(rule.checks) == 1
         assert isinstance(rule.checks[0], ComparisonExpression)
@@ -279,7 +279,7 @@ class TestRuleParser:
         rule_config = {
             "id": "test-rule",
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "condition": {
                 "type": "comparison",
@@ -309,7 +309,7 @@ class TestRuleParser:
         rule_config = {
             "id": "test-rule",
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "checks": [
                 {
@@ -345,7 +345,7 @@ class TestRuleParser:
         rule_config = {
             "id": "test-rule",
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "checks": [
                 {
@@ -374,7 +374,7 @@ class TestRuleParser:
         rule_config = {
             "id": "test-rule",
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "checks": [{"type": "invalid-type", "some": "value"}],
         }
@@ -391,7 +391,7 @@ class TestRuleParser:
         # Missing "id" field
         rule_config = {
             "title": "Test Rule",
-            "description": "A test rule",
+            "message": "A test rule",
             "level": "error",
             "checks": [],
         }
@@ -410,7 +410,7 @@ class TestRuleParser:
         rule_config = {
             "id": "negation-test-rule",
             "title": "Negation Test Rule",
-            "description": "A rule with negated operators",
+            "message": "A rule with negated operators",
             "level": "error",
             "checks": [
                 {
@@ -452,7 +452,7 @@ class TestRuleResult:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
         )
 
@@ -468,7 +468,7 @@ class TestRuleResult:
 
         assert rule_result.rule_id == "test-rule"
         assert rule_result.rule_title == "Test Rule"
-        assert rule_result.rule_description == "A test rule"
+        assert rule_result.rule_message == "A test rule"
         assert rule_result.level == "error"
         assert rule_result.success is True
         assert len(rule_result.check_results) == 2
@@ -478,7 +478,7 @@ class TestRuleResult:
         rule = Rule(
             id="test-rule",
             title="Test Rule",
-            description="A test rule",
+            message="A test rule",
             level="error",
         )
 

@@ -3,7 +3,7 @@
         {
             "id": "open-access-publication",
             "title": "Open Access Publication",
-            "description": "Publication articles must be Open Access",
+            "message": "Publication articles must be Open Access",
             "information": "The EU curation policy requires publication articles must be Open Access",
             "level": "failure",
             "condition": {
@@ -30,7 +30,7 @@
         {
             "id": "journal-info",
             "title": "Journal Information",
-            "description": "Publication articles must state the journal it was published in",
+            "message": "Publication articles must state the journal it was published in",
             "information": "The EU curation policy requires publication articles must state the journal it was published in",
             "level": "failure",
             "condition": {
@@ -57,7 +57,7 @@
         {
             "id": "license",
             "title": "License",
-            "description": "All records must have a license",
+            "message": "All records must have a license",
             "information": "The EU curation policy requires all records to have a license",
             "level": "failure",
             "checks": [
@@ -72,7 +72,7 @@
         {
             "id": "software-license",
             "title": "Software License",
-            "description": "Software must have an appropriate license",
+            "message": "Software must have an appropriate license",
             "information": "The EU curation policy requires software to have an appropriate license",
             "level": "warning",
             "condition": {
@@ -114,7 +114,7 @@
         {
             "id": "eu-funding",
             "title": "EU Funding",
-            "description": "Records must have at least one EU-funded project",
+            "message": "Records must have at least one EU-funded project",
             "information": "The EU curation policy requires author to have persistent identifiers",
             "level": "info",
             "checks": [
