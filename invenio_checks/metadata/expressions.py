@@ -8,7 +8,12 @@
 """Metadata check expression engine."""
 
 from dataclasses import dataclass, field
+from types import GeneratorType
 from typing import Optional
+
+from invenio_records.systemfields.relations.results import (
+    RelationResult,
+)
 
 
 @dataclass
@@ -56,10 +61,17 @@ class FieldExpression(Expression):
         """Get a nested field from an object using dot notation."""
         parts = path.split(".")
         for part in parts:
+            if isinstance(obj, RelationResult):
+                obj = obj()
+            if isinstance(obj, GeneratorType):
+                obj = list(obj)
+
             if isinstance(obj, dict):
                 if part not in obj:
                     raise KeyError(f"Key '{part}' not found")
                 obj = obj[part]
+            elif hasattr(obj, part):
+                obj = getattr(obj, part)
             elif isinstance(obj, list):
                 if not part.isdigit():
                     raise KeyError(f"Invalid list index: {part}")

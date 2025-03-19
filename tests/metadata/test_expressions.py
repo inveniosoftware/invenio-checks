@@ -7,6 +7,10 @@
 """Tests for metadata expression classes."""
 
 import pytest
+from invenio_records.systemfields.relations.results import (
+    RelationListResult,
+    RelationResult,
+)
 
 from invenio_checks.metadata.expressions import (
     ComparisonExpression,
@@ -14,6 +18,29 @@ from invenio_checks.metadata.expressions import (
     ListExpression,
     LogicalExpression,
 )
+
+
+# Minimal implementations of relation classes for testing
+class SimpleRelationResult(RelationResult):
+    """Minimal implementation of RelationResult for testing."""
+
+    def __init__(self, value):
+        self._value = value
+
+    def __call__(self, *args, **kwargs):
+        """Return the stored value when called."""
+        return self._value
+
+
+class SimpleRelationListResult(RelationListResult):
+    """Minimal implementation of RelationListResult for testing."""
+
+    def __init__(self, values):
+        self._values = values
+
+    def __call__(self, *args, **kwargs):
+        """Return the stored values when called."""
+        return self._values
 
 
 class TestFieldExpression:
@@ -29,6 +56,79 @@ class TestFieldExpression:
         assert result.path == "title"
         assert result.value == "Test Record"
         assert result.message is None
+
+    def test_attribute_access(self):
+        """Test accessing object attributes."""
+
+        class Person:
+            def __init__(self):
+                self.name = "John"
+                self.age = 30
+
+        record = {"author": Person()}
+        expr = FieldExpression("author.name")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "author.name"
+        assert result.value == "John"
+        assert result.message is None
+
+    def test_nested_attribute_access(self):
+        """Test accessing nested object attributes."""
+
+        class Address:
+            def __init__(self):
+                self.city = "New York"
+                self.country = "USA"
+
+        class Person:
+            def __init__(self):
+                self.name = "John"
+                self.address = Address()
+
+        record = {"author": Person()}
+        expr = FieldExpression("author.address.city")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "author.address.city"
+        assert result.value == "New York"
+        assert result.message is None
+
+    def test_mixed_dict_and_attribute_access(self):
+        """Test mixed dictionary and attribute access."""
+
+        class Person:
+            def __init__(self):
+                self.name = "John"
+                self.details = {"age": 30, "occupation": "Researcher"}
+
+        record = {"author": Person()}
+        expr = FieldExpression("author.details.occupation")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "author.details.occupation"
+        assert result.value == "Researcher"
+        assert result.message is None
+
+    def test_missing_attribute(self):
+        """Test behavior when attributes are missing."""
+
+        class Person:
+            def __init__(self):
+                self.name = "John"
+
+        record = {"author": Person()}
+        expr = FieldExpression("author.age")
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "author.age"
+        assert result.value is None
+        assert result.message is not None
+        assert "missing" in result.message.lower()
 
     def test_nested_field_access(self):
         """Test accessing nested fields using dot notation."""
@@ -118,6 +218,119 @@ class TestFieldExpression:
 
         assert result.success is False
         assert result.path == "title.something"
+        assert result.value is None
+        assert result.message is not None
+        assert "missing" in result.message.lower()
+
+    def test_relation_result_access(self):
+        """Test accessing RelationResult fields."""
+        relation_result = SimpleRelationResult(
+            {"id": "12345", "title": "Related Record"}
+        )
+
+        record = {"relations": relation_result}
+        expr = FieldExpression("relations.title")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "relations.title"
+        assert result.value == "Related Record"
+        assert result.message is None
+
+    def test_relation_list_result_access(self):
+        """Test accessing RelationListResult fields."""
+        relation_list_result = SimpleRelationListResult(
+            [
+                {"id": "1", "title": "First Related Record"},
+                {"id": "2", "title": "Second Related Record"},
+            ]
+        )
+
+        record = {"relations": relation_list_result}
+
+        # Access the first relations item's title
+        expr = FieldExpression("relations.0.title")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "relations.0.title"
+        assert result.value == "First Related Record"
+        assert result.message is None
+
+    def test_nested_relation_results(self):
+        """Test nested relation result access."""
+        inner_relation = SimpleRelationResult({"value": "Inner Value"})
+        outer_relation = SimpleRelationResult({"nested": inner_relation})
+
+        record = {"relations": outer_relation}
+        expr = FieldExpression("relations.nested.value")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "relations.nested.value"
+        assert result.value == "Inner Value"
+        assert result.message is None
+
+    def test_relation_list_result_null_handling(self):
+        """Test RelationListResult handling when it returns None."""
+        relation_list_result = SimpleRelationListResult(None)
+
+        record = {"relations": relation_list_result}
+        expr = FieldExpression("relations.0")
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "relations.0"
+        assert result.value is None
+        assert result.message is not None
+        assert "missing" in result.message.lower()
+
+    def test_generator_access(self):
+        """Test accessing a generator field."""
+
+        def generate_items():
+            yield "item1"
+            yield "item2"
+            yield "item3"
+
+        record = {"items": generate_items()}
+        expr = FieldExpression("items.1")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "items.1"
+        assert result.value == "item2"
+        assert result.message is None
+
+    def test_nested_generator_access(self):
+        """Test accessing a nested generator field."""
+
+        def generate_authors():
+            yield {"name": "Smith", "id": 1}
+            yield {"name": "Johnson", "id": 2}
+
+        record = {"publication": {"authors": generate_authors()}}
+        expr = FieldExpression("publication.authors.0.name")
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "publication.authors.0.name"
+        assert result.value == "Smith"
+        assert result.message is None
+
+    def test_empty_generator(self):
+        """Test behavior with empty generator."""
+
+        def empty_gen():
+            if False:  # Never yields
+                yield None
+
+        record = {"items": empty_gen()}
+        expr = FieldExpression("items.0")
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "items.0"
         assert result.value is None
         assert result.message is not None
         assert "missing" in result.message.lower()
