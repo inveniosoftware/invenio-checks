@@ -89,11 +89,24 @@ class ComparisonExpression(Expression):
 
     # Error message templates
     NOT_EQUAL = "Expected {path} to be {expected}, but got {actual}"
-    NOT_CONTAINS = "Expected {path} to contain {expected}"
     EQUAL = "Expected {path} not to be {unexpected}, but got {actual}"
-    CONTAINS = "Expected {path} not to contain {unexpected}"
+    NOT_CONTAINS = "Expected {path} to contain {expected}, but got {actual}"
+    CONTAINS = "Expected {path} not to contain {unexpected}, but got {actual}"
+    NOT_IN = "Expected {expected} in {path}, but got {actual}"
+    IN = "Expected {unexpected} to not be in {path}, but got {actual}"
 
-    VALID_OPERATORS = ["==", "~=", "^=", "$=", "!=", "!~=", "!^=", "!$="]
+    VALID_OPERATORS = [
+        "==",
+        "!=",
+        "~=",
+        "!~=",
+        "^=",
+        "!^=",
+        "$=",
+        "!$=",
+        "in",
+        "not in",
+    ]
 
     def __init__(self, left, operator, right):
         """Initialize the comparison."""
@@ -143,7 +156,9 @@ class ComparisonExpression(Expression):
                 message = (
                     None
                     if success
-                    else self.NOT_CONTAINS.format(path=path, expected=self.right)
+                    else self.NOT_CONTAINS.format(
+                        path=path, expected=self.right, actual=left_value
+                    )
                 )
             else:
                 success = False
@@ -154,11 +169,39 @@ class ComparisonExpression(Expression):
                 message = (
                     None
                     if success
-                    else self.CONTAINS.format(path=path, unexpected=self.right)
+                    else self.CONTAINS.format(
+                        path=path, unexpected=self.right, actual=left_value
+                    )
                 )
             else:
                 success = False
                 message = f"Cannot check if {type(left_value)} does not contain a value"
+        elif self.operator == "in":
+            if isinstance(self.right, (list, dict, str)):
+                success = left_value in self.right
+                message = (
+                    None
+                    if success
+                    else self.NOT_IN.format(
+                        path=path, expected=self.right, actual=left_value
+                    )
+                )
+            else:
+                success = False
+                message = f"Cannot check if {type(self.right)} contains a value"
+        elif self.operator == "not in":
+            if isinstance(self.right, (list, dict, str)):
+                success = left_value not in self.right
+                message = (
+                    None
+                    if success
+                    else self.IN.format(
+                        path=path, unexpected=self.right, actual=left_value
+                    )
+                )
+            else:
+                success = False
+                message = f"Cannot check if {type(self.right)} does not contain a value"
         # Implement other operators as needed
         elif self.operator == "^=":
             if isinstance(left_value, str):

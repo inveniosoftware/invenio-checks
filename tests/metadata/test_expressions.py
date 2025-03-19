@@ -502,6 +502,60 @@ class TestComparisonExpression:
         assert result.message is not None
         assert "cannot check if" in result.message.lower()
 
+    def test_in_operator_with_list_success(self):
+        """Test in operator with list success case."""
+        record = {"tag": "research"}
+        expr = ComparisonExpression(
+            FieldExpression("tag"), "in", ["open-access", "research", "science"]
+        )
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "tag"
+        assert result.value == "research"
+        assert result.message is None
+
+    def test_in_operator_with_list_failure(self):
+        """Test in operator with list failure case."""
+        record = {"tag": "education"}
+        expr = ComparisonExpression(
+            FieldExpression("tag"), "in", ["open-access", "research", "science"]
+        )
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "tag"
+        assert result.message is not None
+        assert "in" in result.message.lower()
+        assert "education" in result.message.lower()
+
+    def test_not_in_operator_with_list_success(self):
+        """Test not-in operator with list success case."""
+        record = {"tag": "education"}
+        expr = ComparisonExpression(
+            FieldExpression("tag"), "not in", ["open-access", "research", "science"]
+        )
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "tag"
+        assert result.value == "education"
+        assert result.message is None
+
+    def test_not_in_operator_with_list_failure(self):
+        """Test not-in operator with list failure case."""
+        record = {"tag": "research"}
+        expr = ComparisonExpression(
+            FieldExpression("tag"), "not in", ["open-access", "research", "science"]
+        )
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "tag"
+        assert result.message is not None
+        assert "to not be in" in result.message.lower()
+        assert "research" in result.message.lower()
+
     def test_startswith_operator_success(self):
         """Test startswith operator with success case."""
         record = {"identifier": "10.1234/abcd"}
