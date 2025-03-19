@@ -302,7 +302,7 @@ class ListExpression(Expression):
 
     VALID_OPERATORS = ["any", "all", "exists"]
 
-    def __init__(self, operator, path, predicate):
+    def __init__(self, operator, path, predicate=None):
         """Initialize the list expression."""
         if operator not in self.VALID_OPERATORS:
             raise ValueError(
@@ -342,12 +342,19 @@ class ListExpression(Expression):
                     list_value,
                     self.NO_ITEMS_MATCH.format(path=self.path),
                 )
+            elif self.operator == "exists":
+                return ExpressionResult(
+                    False,
+                    self.path,
+                    list_value,
+                    self.NO_ITEMS.format(path=self.path),
+                )
             else:  # all
                 return ExpressionResult(True, self.path, list_value)
 
         if self.operator == "exists":
             if len(list_value) > 0:
-                return ExpressionResult(success, self.path, list_value)
+                return ExpressionResult(True, self.path, list_value)
             else:
                 return ExpressionResult(
                     False,

@@ -937,6 +937,21 @@ class TestListExpression:
         assert "not all items" in result.message.lower()
         assert "match" in result.message.lower()
 
+    def test_exists_operator_with_list(self):
+        """Test behavior with list with at least one item."""
+        record = {"authors": ["Grace Hopper"]}
+
+        exists_expr = ListExpression(
+            "exists",
+            "authors",
+        )
+
+        result = exists_expr.evaluate(record)
+
+        assert result.success is True
+        assert result.message is None
+        assert result.path == "authors"
+
     def test_list_empty_list(self):
         """Test behavior with empty lists."""
         record = {"authors": []}
@@ -951,14 +966,22 @@ class TestListExpression:
             "authors",
             ComparisonExpression(FieldExpression("affiliation"), "==", "University"),
         )
+        exists_expr = ListExpression(
+            "exists",
+            "authors",
+        )
 
         any_result = any_expr.evaluate(record)
         all_result = all_expr.evaluate(record)
+        exists_result = exists_expr.evaluate(record)
 
         assert any_result.success is False
-        assert all_result.success is True
         assert any_result.message is not None
         assert "no items" in any_result.message.lower()
+        assert all_result.success is True
+        assert exists_result.success is False
+        assert exists_result.message is not None
+        assert "no items" in exists_result.message.lower()
 
     def test_list_missing_list_field(self):
         """Test behavior when list field is missing."""
