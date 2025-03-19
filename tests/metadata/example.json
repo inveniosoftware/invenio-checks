@@ -133,6 +133,60 @@
                     }
                 }
             ]
+        },
+        {
+            "id": "creator-identifiers",
+            "title": "Creator Identifiers",
+            "description": "All creators must have at least one identifier",
+            "level": "warning",
+            "checks": [
+                {
+                    "type": "list",
+                    "operator": "all",
+                    "path": "metadata.creators",
+                    "predicate": {
+                        "type": "logical",
+                        "operator": "and",
+                        "expressions": [
+                            {
+                                "type": "field",
+                                "path": "person_or_org.identifiers"
+                            },
+                            {
+                                "type": "list",
+                                "operator": "any",
+                                "path": "person_or_org.identifiers",
+                                "predicate": {
+                                    "type": "field",
+                                    "path": "identifier"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "affiliation-identifiers",
+            "title": "Affiliation Identifiers",
+            "description": "All creator affiliations must have IDs",
+            "level": "warning",
+            "checks": [
+                {
+                    "type": "list",
+                    "operator": "all",
+                    "path": "metadata.creators",
+                    "predicate": {
+                        "type": "list",
+                        "operator": "all",
+                        "list_path": "affiliations",
+                        "predicate": {
+                            "type": "field",
+                            "path": "id"
+                        }
+                    }
+                }
+            ]
         }
     ]
 }
