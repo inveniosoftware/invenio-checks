@@ -1,11 +1,11 @@
 {
     "rules": [
         {
-            "id": "open-access-publication",
+            "id": "access:open/publication",
             "title": "Open Access Publication",
             "message": "Publication articles must be Open Access",
             "description": "The EU curation policy requires publication articles must be Open Access",
-            "level": "failure",
+            "level": "error",
             "condition": {
                 "type": "comparison",
                 "left": {
@@ -28,11 +28,11 @@
             ]
         },
         {
-            "id": "journal-info",
+            "id": "journal:title/publication",
             "title": "Journal Information",
             "message": "Publication articles must state the journal it was published in",
             "description": "The EU curation policy requires publication articles must state the journal it was published in",
-            "level": "failure",
+            "level": "error",
             "condition": {
                 "type": "comparison",
                 "left": {
@@ -55,11 +55,11 @@
             ]
         },
         {
-            "id": "license",
+            "id": "license:exists",
             "title": "License",
             "message": "All records must have a license",
             "description": "The EU curation policy requires all records to have a license",
-            "level": "failure",
+            "level": "error",
             "checks": [
                 {
                     "type": "list",
@@ -70,11 +70,11 @@
             ]
         },
         {
-            "id": "software-license",
+            "id": "license:osi/software",
             "title": "Software License",
             "message": "Software must have an appropriate license",
             "description": "The EU curation policy requires software to have an appropriate license",
-            "level": "warning",
+            "level": "info",
             "condition": {
                 "type": "logical",
                 "operator": "and",
@@ -112,11 +112,11 @@
             ]
         },
         {
-            "id": "eu-funding",
+            "id": "funding:eu",
             "title": "EU Funding",
             "message": "Records must have at least one EU-funded project",
             "description": "The EU curation policy requires author to have persistent identifiers",
-            "level": "info",
+            "level": "error",
             "checks": [
                 {
                     "type": "list",
