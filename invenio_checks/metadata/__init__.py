@@ -6,7 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 """Metadata check module."""
 
-from .check import CheckResult, MetadataCheck, MetadataCheckConfig
+from .check import CheckResult, MetadataCheck
 from .expressions import (
     ComparisonExpression,
     Expression,
@@ -19,7 +19,6 @@ from .rules import Rule, RuleParser, RuleResult
 
 __all__ = (
     "MetadataCheck",
-    "MetadataCheckConfig",
     "CheckResult",
     "Rule",
     "RuleResult",
