@@ -7,12 +7,16 @@
 
 """Record service component."""
 
+from datetime import datetime
+
 from flask import current_app
+from invenio_db import db
 from invenio_drafts_resources.services.records.components import ServiceComponent
+from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
 from invenio_requests.proxies import current_requests_service
 from invenio_search.engine import dsl
 
-from .models import CheckConfig
+from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
 
 
@@ -60,28 +64,45 @@ class ChecksComponent(ServiceComponent):
             else:
                 return
 
-        all_checks = [
-            (CheckConfig.query.filter(CheckConfig.community_id == c).all(), c)
-            for c in communities
-        ]
+        all_checks = CheckConfig.query.filter(
+            CheckConfig.community_id.in_(communities)
+        ).all()
 
-        for checks, community in all_checks:
+        for check in all_checks:
             try:
-                for check in checks:
-                    check_cls = current_checks_registry.get(check.check_id)
-                    res = check_cls().run(record, check.params)
-                    if not res.sync:
-                        continue
-                    check_errors = [
-                        {
-                            **error,
-                            "context": {
-                                "community": community,
-                            },
-                        }
-                        for error in res.errors
-                    ]
-                    errors.extend(check_errors)
+                check_cls = current_checks_registry.get(check.check_id)
+                start_time = datetime.now()
+                res = check_cls().run(record, check.params)
+                if not res.sync:
+                    continue
+
+                check_errors = [
+                    {
+                        **error,
+                        "context": {
+                            "community": check.community_id,
+                        },
+                    }
+                    for error in res.errors
+                ]
+
+                new_check_run = CheckRun(
+                    config_id=check.id,
+                    record_id=record.id,
+                    is_draft=record.is_draft,
+                    revision_id=record.revision_id,
+                    start_time=start_time,
+                    end_time=datetime.now(),
+                    status=CheckRunStatus.COMPLETED,
+                    state={},
+                    result=check_errors,
+                )
+
+                # Add the new CheckRun to the session
+                db.session.add(new_check_run)
+
+                self.uow.register(ParentRecordCommitOp(record))
+                errors.extend(check_errors)
             except Exception as e:
                 errors.append(
                     {
