@@ -91,7 +91,7 @@
                     {
                         "type": "list",
                         "operator": "exists",
-                        "path": "metadata.license",
+                        "path": "metadata.rights",
                         "predicate": {}
                     }
                 ]
@@ -146,7 +146,7 @@
                     {
                         "type": "list",
                         "operator": "exists",
-                        "path": "metadata.license",
+                        "path": "metadata.rights",
                         "predicate": {}
                     }
                 ]
@@ -223,7 +223,7 @@
                     {
                         "type": "list",
                         "operator": "exists",
-                        "path": "metadata.license",
+                        "path": "metadata.rights",
                         "predicate": {}
                     }
                 ]
@@ -267,7 +267,7 @@
                     {
                         "type": "list",
                         "operator": "exists",
-                        "path": "metadata.license",
+                        "path": "metadata.rights",
                         "predicate": {}
                     }
                 ]
