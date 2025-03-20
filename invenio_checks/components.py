@@ -69,10 +69,19 @@ class ChecksComponent(ServiceComponent):
             try:
                 for check in checks:
                     check_cls = current_checks_registry.get(check.check_id)
-                    res = check_cls().run(record, check.params, community)
+                    res = check_cls().run(record, check.params)
                     if not res.sync:
                         continue
-                    errors.extend(res.errors)
+                    check_errors = [
+                        {
+                            **error,
+                            "context": {
+                                "community": community,
+                            },
+                        }
+                        for error in res.errors
+                    ]
+                    errors.extend(check_errors)
             except Exception as e:
                 errors.append(
                     {
