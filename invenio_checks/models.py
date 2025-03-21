@@ -65,7 +65,7 @@ class CheckRun(db.Model, Timestamp):
 
     __tablename__ = "checks_run"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
     record_id = db.Column(UUIDType, nullable=False)
     is_draft = db.Column(db.Boolean, nullable=False, default=False)
