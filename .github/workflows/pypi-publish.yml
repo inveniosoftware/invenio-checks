@@ -15,7 +15,7 @@ on:
 
 jobs:
   build-n-publish:
-    uses: inveniosoftware/workflows/.github/workflows/pypi-publish.yml@pkginfo-fix
+    uses: inveniosoftware/workflows/.github/workflows/pypi-publish.yml@b1bba156336fda98eb4ab8a27974f4752a095a74
     secrets: inherit
     with:
       babel-compile-catalog: false
