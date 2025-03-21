@@ -76,3 +76,7 @@ class CheckRun(db.Model, Timestamp):
     status = db.Column(ChoiceType(CheckRunStatus, impl=db.CHAR(1)), nullable=False)
     state = db.Column(db.JSON, nullable=False)
     result = db.Column(db.JSON, nullable=False)
+
+    __table_args__ = (
+        db.Index("idx_checks_run_config_id_record_id", config_id, record_id),
+    )

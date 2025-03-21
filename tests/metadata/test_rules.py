@@ -457,7 +457,7 @@ class TestRuleResult:
         )
 
         # Create a successful result with some check results
-        rule_result = RuleResult(
+        rule_result = RuleResult.from_rule(
             rule,
             True,
             [
@@ -483,7 +483,7 @@ class TestRuleResult:
         )
 
         # Create a result
-        rule_result = RuleResult(
+        rule_result = RuleResult.from_rule(
             rule,
             False,
             [{"success": False, "path": "field1", "message": "Error message"}],
