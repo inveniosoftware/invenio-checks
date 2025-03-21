@@ -89,6 +89,8 @@ def upgrade():
             .with_variant(JSONType(), "sqlite"),
             nullable=False,
         ),
+        sa.Column("state", sa.JSON(), nullable=False),
+        sa.Column("result", sa.JSON(), nullable=False),
         sa.Column("created", sa.DateTime(), nullable=False),
         sa.Column("updated", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
