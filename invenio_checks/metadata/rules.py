@@ -6,8 +6,12 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 """Metadata check rules."""
 
+from dataclasses import dataclass
+from typing import List
+
 from .expressions import (
     ComparisonExpression,
+    ExpressionResult,
     FieldExpression,
     ListExpression,
     LogicalExpression,
@@ -43,27 +47,41 @@ class Rule:
             condition_result = self.condition.evaluate(record)
             if not condition_result.success:
                 # Condition failed, rule doesn't apply
-                return RuleResult(self, True, [])
+                return RuleResult.from_rule(self, True, [])
 
         # Evaluate all checks
         check_results = [check.evaluate(record) for check in self.checks]
 
         # Create the rule result
-        return RuleResult(self, all(r.success for r in check_results), check_results)
+        return RuleResult.from_rule(
+            self, all(r.success for r in check_results), check_results
+        )
 
 
+@dataclass
 class RuleResult:
     """Class representing the result of evaluating a rule."""
 
-    def __init__(self, rule, success, check_results):
-        """Initialize the rule result."""
-        self.rule_id = rule.id
-        self.rule_title = rule.title
-        self.rule_message = rule.message
-        self.rule_description = rule.description
-        self.level = rule.level
-        self.success = success
-        self.check_results = check_results
+    rule_id: str
+    rule_title: str
+    rule_message: str
+    rule_description: str
+    level: str
+    success: bool
+    check_results: List[ExpressionResult]
+
+    @classmethod
+    def from_rule(cls, rule, success: bool, check_results: List[ExpressionResult]):
+        """Alternative constructor to create a RuleResult from a rule object."""
+        return cls(
+            rule_id=rule.id,
+            rule_title=rule.title,
+            rule_message=rule.message,
+            rule_description=rule.description,
+            level=rule.level,
+            success=success,
+            check_results=check_results,
+        )
 
     def to_dict(self):
         """Convert the result to a dictionary."""

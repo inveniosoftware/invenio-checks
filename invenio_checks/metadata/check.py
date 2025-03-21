@@ -11,16 +11,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from ..base import Check
-from .rules import RuleParser
-from .rules import RuleResult as RuleResultClass
-
-
-@dataclass
-class RuleResult:
-    """Result of running a rule."""
-
-    success: bool
-    level: str
+from .rules import RuleParser, RuleResult
 
 
 @dataclass
@@ -107,7 +98,7 @@ class MetadataCheck(Check):
 
         return result
 
-    def to_service_errors(self, rule_result: RuleResultClass) -> List[Dict]:
+    def to_service_errors(self, rule_result: RuleResult) -> List[Dict]:
         """Create error messages for the UI."""
         if rule_result.success:
             return []
