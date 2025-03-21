@@ -85,24 +85,42 @@ class ChecksComponent(ServiceComponent):
                     }
                     for error in res.errors
                 ]
+                errors.extend(check_errors)
 
-                new_check_run = CheckRun(
-                    config_id=check.id,
-                    record_id=record.id,
-                    is_draft=record.is_draft,
-                    revision_id=record.revision_id,
-                    start_time=start_time,
-                    end_time=datetime.now(),
-                    status=CheckRunStatus.COMPLETED,
-                    state={},
-                    result=check_errors,
+                latest_check = (
+                    CheckRun.query.filter(
+                        CheckRun.config_id == check.id,
+                        CheckRun.record_id == record.id,
+                        CheckRun.is_draft.is_(True),
+                    )
+                    .order_by(CheckRun.start_time.desc())
+                    .first()
                 )
 
-                # Add the new CheckRun to the session
-                db.session.add(new_check_run)
+                # FIXME: We should use service
+                if not latest_check:
+                    new_check_run = CheckRun(
+                        config_id=check.id,
+                        record_id=record.id,
+                        is_draft=record.is_draft,
+                        revision_id=record.revision_id,
+                        start_time=start_time,
+                        end_time=datetime.now(),
+                        status=CheckRunStatus.COMPLETED,
+                        state=None,
+                        result=res.to_dict(),
+                    )
+
+                    db.session.add(new_check_run)
+                else:
+                    latest_check.is_draft = record.is_draft
+                    latest_check.revision_id = record.revision_id
+                    latest_check.start_time = start_time
+                    latest_check.end_time = datetime.now()
+                    latest_check.start_time = start_time
+                    latest_check.result = res.to_dict()
 
                 self.uow.register(ParentRecordCommitOp(record))
-                errors.extend(check_errors)
             except Exception as e:
                 errors.append(
                     {
