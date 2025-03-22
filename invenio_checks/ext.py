@@ -9,6 +9,10 @@
 
 from . import config
 from .base import ChecksRegistry
+from .services import (
+    CheckConfigService,
+    ChecksConfigServiceConfig,
+)
 
 
 class InvenioChecks(object):
@@ -25,6 +29,9 @@ class InvenioChecks(object):
         app.extensions["invenio-checks"] = self
         self.checks_registry = ChecksRegistry()
         self.checks_registry.load_from_entry_points(app, "invenio_checks.check_types")
+        self.service = CheckConfigService(
+            config=ChecksConfigServiceConfig.build(app),
+        )
 
     def init_config(self, app):
         """Initialize configuration."""
