@@ -10,7 +10,7 @@
 from datetime import timezone
 
 from marshmallow import EXCLUDE, Schema, fields
-from marshmallow_utils.fields import SanitizedUnicode, TZDateTime
+from marshmallow_utils.fields import SanitizedHTML, SanitizedUnicode, TZDateTime
 from marshmallow_utils.permissions import FieldPermissionsMixin
 
 from ..models import CheckRunStatus
@@ -30,7 +30,8 @@ class CheckConfigSchema(Schema, FieldPermissionsMixin):
     updated = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
 
     title = SanitizedUnicode(required=True)
-    description = SanitizedUnicode()
+    # Rule descriptions can contain HTML to link to a page with more details about the rule
+    description = SanitizedHTML()
 
     active = fields.Boolean(load_default=True)
 
