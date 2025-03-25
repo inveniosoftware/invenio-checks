@@ -1,0 +1,36 @@
+{# -*- coding: utf-8 -*-
+
+This file is part of Invenio.
+Copyright (C) 2025 CERN.
+
+Invenio is free software; you can redistribute it and/or modify it
+under the terms of the MIT License; see LICENSE file for more details.
+#}
+
+{# FIXME: This logic should be computed on the backend in the CheckRun #}
+
+{#
+  Get the icon class for the overall severity level of all rule errors.
+  This code depends on the `severity` field of the each `errors`.
+#}
+
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+
+{# A namespaced variable is used so that the variable is still defined after the loop #}
+{% set ns = namespace(overall_severity_level="success") %}
+
+{% for check in checks %}
+  {% for error in check.result.errors %}
+
+    {% if error.severity == "info" and ns.severity_icon != "error" %}
+      {% set ns.overall_severity_level = "warning" %}
+    {% endif %}
+
+    {% if error.severity == "error" %}
+      {% set ns.overall_severity_level = "error" %}
+    {% endif %}
+
+  {% endfor %}
+{% endfor %}
+
+{{ severity_level_icons_tpl.severity_level_icons[ns.overall_severity_level] }}
