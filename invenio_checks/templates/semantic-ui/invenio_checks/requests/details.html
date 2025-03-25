@@ -1,0 +1,59 @@
+{# -*- coding: utf-8 -*-
+
+This file is part of Invenio.
+Copyright (C) 2025 CERN.
+
+Invenio is free software; you can redistribute it and/or modify it
+under the terms of the MIT License; see LICENSE file for more details.
+#}
+
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+
+<div class="ui column stackable divided grid">
+  <div class="three wide column pr-0">
+
+    <h5 class="ui header text-muted">Checks</h5>
+    <div class="ui fluid secondary vertical menu ml-0 mr-0">
+      <a class="item active"><i class="{% include 'invenio_checks/requests/overall_severity_level.html' %}"></i> {{ _("Metadata check") }}</a>
+    </div>
+  </div>
+  <div class="twelve wide column">
+
+    <h5 class="ui header text-muted rel-pl-2 rel-pb-1">Rules</h5>
+
+    <div class="ui very relaxed list rel-pl-2">
+    {% for check in checks %}
+      {% for rule_result in check.result.rule_results %}
+        {#
+          Get the icon class for the rule result of one rule result.
+          This code depends on 2 fields of each `rule_results` : `success` and `level`.
+          If the boolean `success` field is true, it means that the check was successful.
+          Otherwise, it means that the check failed, and we display the severity `level` of the check.
+        #}
+        {% if rule_result.success %}
+          {% set rule_severity_level = "success" %}
+        {% elif rule_result.level == "info" %}
+          {% set rule_severity_level = "warning" %}
+        {% elif rule_result.level == "error" %}
+          {% set rule_severity_level = "error" %}
+        {% else %}
+          {% set rule_severity_level = "unknown" %}
+        {% endif %}
+
+        <div class="item">
+          <i class="{{ severity_level_icons_tpl.severity_level_icons[rule_severity_level] }}"></i>
+          <div class="content">
+            <div class="header">{{ rule_result.rule_message }}</div>
+            {#
+              Rule descriptions can contain HTML to link to a page with more details about the rule.
+              This field is sanitized in the backend with SanitizedHTML.
+            #}
+            <div class="pt-5 text-muted">{{ rule_result.rule_description | safe }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+    </div>
+
+  </div>
+</div>

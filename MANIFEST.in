@@ -10,6 +10,7 @@ include .editorconfig
 include .tx/config
 prune docs/_build
 recursive-include .github/workflows *.yml
+recursive-include invenio_checks *.html
 recursive-include invenio_checks/translations *.po *.pot *.mo
 
 # added by check-manifest
