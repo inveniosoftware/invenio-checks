@@ -107,7 +107,7 @@ class ChecksComponent(ServiceComponent):
                         start_time=start_time,
                         end_time=datetime.now(timezone.utc),
                         status=CheckRunStatus.COMPLETED,
-                        state=None,
+                        state="",
                         result=res.to_dict(),
                     )
 
