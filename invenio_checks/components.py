@@ -7,7 +7,7 @@
 
 """Record service component."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 from invenio_db import db
@@ -71,7 +71,7 @@ class ChecksComponent(ServiceComponent):
         for check in all_checks:
             try:
                 check_cls = current_checks_registry.get(check.check_id)
-                start_time = datetime.now()
+                start_time = datetime.now(timezone.utc)
                 res = check_cls().run(record, check.params)
                 if not res.sync:
                     continue
@@ -105,7 +105,7 @@ class ChecksComponent(ServiceComponent):
                         is_draft=record.is_draft,
                         revision_id=record.revision_id,
                         start_time=start_time,
-                        end_time=datetime.now(),
+                        end_time=datetime.now(timezone.utc),
                         status=CheckRunStatus.COMPLETED,
                         state=None,
                         result=res.to_dict(),
@@ -116,7 +116,7 @@ class ChecksComponent(ServiceComponent):
                     latest_check.is_draft = record.is_draft
                     latest_check.revision_id = record.revision_id
                     latest_check.start_time = start_time
-                    latest_check.end_time = datetime.now()
+                    latest_check.end_time = datetime.now(timezone.utc)
                     latest_check.start_time = start_time
                     latest_check.result = res.to_dict()
 
