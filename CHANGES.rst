@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v0.2.1 (released 2025-03-26)
+
+- component: fix null constraint on CheckRun.state
+
 Version v0.2.0 (released 2025-03-26)
 
 - views: checks requests tab templates
