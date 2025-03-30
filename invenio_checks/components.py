@@ -7,7 +7,7 @@
 
 """Record service component."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import current_app
 from invenio_db import db
@@ -70,7 +70,7 @@ class ChecksComponent(ServiceComponent):
         for check_config in all_check_configs:
             try:
                 check_cls = current_checks_registry.get(check_config.check_id)
-                start_time = datetime.now(timezone.utc)
+                start_time = datetime.utcnow()
                 res = check_cls().run(record, check_config)
                 if not res.sync:
                     continue
@@ -78,9 +78,7 @@ class ChecksComponent(ServiceComponent):
                 check_errors = [
                     {
                         **error,
-                        "context": {
-                            "community": check_config.community_id,
-                        },
+                        "context": {"community": check_config.community_id},
                     }
                     for error in res.errors
                 ]
@@ -104,7 +102,7 @@ class ChecksComponent(ServiceComponent):
                         is_draft=record.is_draft,
                         revision_id=record.revision_id,
                         start_time=start_time,
-                        end_time=datetime.now(timezone.utc),
+                        end_time=datetime.utcnow(),
                         status=CheckRunStatus.COMPLETED,
                         state="",
                         result=res.to_dict(),
@@ -115,12 +113,11 @@ class ChecksComponent(ServiceComponent):
                     latest_check.is_draft = record.is_draft
                     latest_check.revision_id = record.revision_id
                     latest_check.start_time = start_time
-                    latest_check.end_time = datetime.now(timezone.utc)
-                    latest_check.start_time = start_time
+                    latest_check.end_time = datetime.utcnow()
                     latest_check.result = res.to_dict()
 
                 self.uow.register(ParentRecordCommitOp(record))
-            except Exception as e:
+            except Exception:
                 current_app.logger.exception(
                     "Error running check on record",
                     extra={
