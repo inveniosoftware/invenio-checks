@@ -10,9 +10,8 @@
 from datetime import datetime
 
 from flask import current_app
-from invenio_db import db
 from invenio_drafts_resources.services.records.components import ServiceComponent
-from invenio_drafts_resources.services.records.uow import ParentRecordCommitOp
+from invenio_records_resources.services.uow import ModelCommitOp
 from invenio_requests.proxies import current_requests_service
 from invenio_search.engine import dsl
 
@@ -33,39 +32,43 @@ class ChecksComponent(ServiceComponent):
         if not self.enabled:
             return
 
-        communities = set()
-        if record.parent.review and (
-            record.parent.review.status == "submitted"
-            or record.parent.review.status == "created"
-        ):
+        community_ids = set()
+
+        # Check draft review request
+        if record.parent.review:
             # drafts can only be submitted to one community
             community = record.parent.review.receiver.resolve()
-            community_id = str(community.id)  # from UUID
-            communities.add(community_id)
+            community_ids.add(str(community.id))
             community_parent_id = community.get("parent", {}).get("id")
             if community_parent_id:
-                communities.add(community_parent_id)
-        else:
-            results = current_requests_service.search(
-                identity,
-                extra_filter=dsl.query.Bool(
-                    "must",
-                    must=[
-                        dsl.Q("term", **{"topic.record": record.pid.pid_value}),
-                        dsl.Q("term", **{"is_open": True}),
-                    ],
-                ),
-            )
+                community_ids.add(community_parent_id)
 
-            if results.total > 0:
-                for result in results:
-                    communities.add(result.get("receiver", {}).get("community"))
-                    # check if it is a subcommunity
-            else:
-                return
+        # Check inclusion requests
+        results = current_requests_service.search(
+            identity,
+            extra_filter=dsl.query.Bool(
+                "must",
+                must=[
+                    dsl.Q("term", **{"type": "community-inclusion"}),
+                    dsl.Q("term", **{"topic.record": record.pid.pid_value}),
+                    dsl.Q("term", **{"is_open": True}),
+                ],
+            ),
+        )
+        for result in results:
+            community_id = result.get("receiver", {}).get("community")
+            if community_id:
+                community_ids.add(community_id)
+
+        # Check already included communities
+        for community in record.parent.communities:
+            community_ids.add(str(community.id))
+            community_parent_id = community.get("parent", {}).get("id")
+            if community_parent_id:
+                community_ids.add(community_parent_id)
 
         all_check_configs = CheckConfig.query.filter(
-            CheckConfig.community_id.in_(communities)
+            CheckConfig.community_id.in_(community_ids)
         ).all()
         for check_config in all_check_configs:
             try:
@@ -96,7 +99,7 @@ class ChecksComponent(ServiceComponent):
 
                 # FIXME: We should use the service
                 if not latest_check:
-                    new_check_run = CheckRun(
+                    latest_check = CheckRun(
                         config_id=check_config.id,
                         record_id=record.id,
                         is_draft=record.is_draft,
@@ -107,8 +110,6 @@ class ChecksComponent(ServiceComponent):
                         state="",
                         result=res.to_dict(),
                     )
-
-                    db.session.add(new_check_run)
                 else:
                     latest_check.is_draft = record.is_draft
                     latest_check.revision_id = record.revision_id
@@ -116,7 +117,8 @@ class ChecksComponent(ServiceComponent):
                     latest_check.end_time = datetime.utcnow()
                     latest_check.result = res.to_dict()
 
-                self.uow.register(ParentRecordCommitOp(record))
+                # Create/update the check run to the database
+                self.uow.register(ModelCommitOp(latest_check))
             except Exception:
                 current_app.logger.exception(
                     "Error running check on record",
