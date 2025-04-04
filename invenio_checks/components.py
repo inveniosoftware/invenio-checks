@@ -9,7 +9,8 @@
 
 from datetime import datetime
 
-from flask import current_app
+from flask import current_app, g
+from invenio_communities.proxies import current_communities
 from invenio_drafts_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.uow import ModelCommitOp
 from invenio_requests.proxies import current_requests_service
@@ -59,6 +60,13 @@ class ChecksComponent(ServiceComponent):
             community_id = result.get("receiver", {}).get("community")
             if community_id:
                 community_ids.add(community_id)
+                # check if it is a subcommunity
+                community = current_communities.service.read(
+                    id_=community_id, identity=g.identity
+                )
+                community_parent_id = community.to_dict().get("parent", {}).get("id")
+                if community_parent_id:
+                    community_ids.add(community_parent_id)
 
         # Check already included communities
         for community in record.parent.communities:
