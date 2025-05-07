@@ -10,7 +10,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Dict, List
 
-from ..base import Check
+from invenio_checks.base import Check
+
 from .rules import RuleParser, RuleResult
 
 

@@ -8,12 +8,12 @@
 
 import pytest
 
-from invenio_checks.metadata.expressions import (
+from invenio_checks.contrib.metadata.expressions import (
     ComparisonExpression,
     FieldExpression,
     LogicalExpression,
 )
-from invenio_checks.metadata.rules import Rule, RuleParser, RuleResult
+from invenio_checks.contrib.metadata.rules import Rule, RuleParser, RuleResult
 
 
 class TestRule:

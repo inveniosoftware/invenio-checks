@@ -12,7 +12,7 @@ from invenio_records.systemfields.relations.results import (
     RelationResult,
 )
 
-from invenio_checks.metadata.expressions import (
+from invenio_checks.contrib.metadata.expressions import (
     ComparisonExpression,
     FieldExpression,
     ListExpression,
