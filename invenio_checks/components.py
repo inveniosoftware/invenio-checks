@@ -121,12 +121,13 @@ class ChecksComponent(ServiceComponent):
                     latest_check.result = res.to_dict()
 
                 self.uow.register(ParentRecordCommitOp(record))
-            except Exception as e:
-                errors.append(
-                    {
-                        "message": f"Error running check {check.id}: {str(e)}",
-                        "path": check.id,
-                    }
+            except Exception:
+                current_app.logger.exception(
+                    "Error running check on record",
+                    extra={
+                        "record_id": str(record.id),
+                        "check_id": str(check.id),
+                    },
                 )
 
     update_draft = _run_checks
