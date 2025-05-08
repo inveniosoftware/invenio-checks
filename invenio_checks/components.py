@@ -64,15 +64,15 @@ class ChecksComponent(ServiceComponent):
             else:
                 return
 
-        all_checks = CheckConfig.query.filter(
+        all_check_configs = CheckConfig.query.filter(
             CheckConfig.community_id.in_(communities)
         ).all()
 
-        for check in all_checks:
+        for check_config in all_check_configs:
             try:
-                check_cls = current_checks_registry.get(check.check_id)
+                check_cls = current_checks_registry.get(check_config.check_id)
                 start_time = datetime.now(timezone.utc)
-                res = check_cls().run(record, check.params)
+                res = check_cls().run(record, check_config)
                 if not res.sync:
                     continue
 
@@ -80,7 +80,7 @@ class ChecksComponent(ServiceComponent):
                     {
                         **error,
                         "context": {
-                            "community": check.community_id,
+                            "community": check_config.community_id,
                         },
                     }
                     for error in res.errors
@@ -89,7 +89,7 @@ class ChecksComponent(ServiceComponent):
 
                 latest_check = (
                     CheckRun.query.filter(
-                        CheckRun.config_id == check.id,
+                        CheckRun.config_id == check_config.id,
                         CheckRun.record_id == record.id,
                         CheckRun.is_draft.is_(True),
                     )
@@ -100,7 +100,7 @@ class ChecksComponent(ServiceComponent):
                 # FIXME: We should use service
                 if not latest_check:
                     new_check_run = CheckRun(
-                        config_id=check.id,
+                        config_id=check_config.id,
                         record_id=record.id,
                         is_draft=record.is_draft,
                         revision_id=record.revision_id,
@@ -126,7 +126,7 @@ class ChecksComponent(ServiceComponent):
                     "Error running check on record",
                     extra={
                         "record_id": str(record.id),
-                        "check_id": str(check.id),
+                        "check_config_id": str(check_config.id),
                     },
                 )
 

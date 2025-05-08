@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import pytest
 
 from invenio_checks.contrib.file_formats import FileFormatsCheck
+from invenio_checks.models import CheckConfig, Severity
 
 
 @dataclass
@@ -37,13 +38,19 @@ def record_with_files():
 def test_default_file_format_check(app, record_with_files):
     """Test the file format check."""
     check = FileFormatsCheck()
-    config = {}
-    result = check.run(record_with_files, config)
+    check_config = CheckConfig(
+        check_id="file_formats",
+        params={},  # default params for this test
+        severity=Severity.INFO,
+        enabled=True,
+    )
+
+    result = check.run(record_with_files, check_config)
     assert result.errors == [
         {
             "field": "files.entries.file1.dwg",
             "messages": ["file1.dwg (AutoCAD) is not open or scientific."],
-            "severity": "warning",
+            "severity": "info",
         }
     ]
 
@@ -51,11 +58,16 @@ def test_default_file_format_check(app, record_with_files):
 def test_configured_file_format_check(app, record_with_files):
     """Test the file format check."""
     check = FileFormatsCheck()
-    config = {
-        "suggest_alternatives": True,
-        "suggest_missing": True,
-    }
-    result = check.run(record_with_files, config)
+    check_config = CheckConfig(
+        check_id="file_formats",
+        params={
+            "suggest_alternatives": True,
+            "suggest_missing": True,
+        },
+        severity=Severity.WARN,
+        enabled=True,
+    )
+    result = check.run(record_with_files, check_config)
     assert result.errors == [
         {
             "field": "files.entries.file1.dwg",

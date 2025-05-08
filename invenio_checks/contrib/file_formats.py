@@ -15,6 +15,7 @@ from pathlib import Path
 from flask import current_app
 
 from invenio_checks.base import Check
+from invenio_checks.models import CheckConfig
 from invenio_checks.utils import classproperty
 
 
@@ -125,22 +126,23 @@ class FileFormatsCheck(Check):
             data = json.load(f)
             return FileFormatDatabase.load(data)
 
-    def run(self, record, config):
+    def run(self, record, config: CheckConfig):
         """Run the check against the record's files."""
         # Load config
-        included_formats = set(config.get("include", []))
-        excluded_formats = set(config.get("exclude", []))
-        suggest_alternatives = config.get("suggest_alternatives", False)
-        suggest_alternatives_text = config.get(
+        params = config.params
+        included_formats = set(params.get("include", []))
+        excluded_formats = set(params.get("exclude", []))
+        suggest_alternatives = params.get("suggest_alternatives", False)
+        suggest_alternatives_text = params.get(
             "suggest_alternatives_text",
             self._default_suggest_alternatives_text,
         )
-        suggest_missing = config.get("suggest_missing", False)
-        suggest_missing_text = config.get(
+        suggest_missing = params.get("suggest_missing", False)
+        suggest_missing_text = params.get(
             "suggest_missing_text",
             self._default_suggest_missing_text,
         )
-        closed_format_text = config.get(
+        closed_format_text = params.get(
             "closed_format_text",
             self._default_closed_format_text,
         )
@@ -193,7 +195,7 @@ class FileFormatsCheck(Check):
                             # TODO: What goes here?
                             # "description": "???",
                             # TODO: Get from config?
-                            "severity": "warning",
+                            "severity": config.severity.error_value,
                         },
                     )
         return result

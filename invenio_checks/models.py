@@ -34,6 +34,16 @@ class Severity(enum.Enum):
     WARN = "W"
     FAIL = "F"
 
+    @property
+    def error_value(self):
+        """Convert to error value."""
+        if self == Severity.INFO:
+            return "info"
+        if self == Severity.WARN:
+            return "warning"
+        if self == Severity.FAIL:
+            return "error"
+
 
 class CheckConfig(db.Model):
     """Configuration for a check in a community."""

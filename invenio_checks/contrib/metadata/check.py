@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from invenio_checks.base import Check
+from invenio_checks.models import CheckConfig
 
 from .rules import RuleParser, RuleResult
 
@@ -68,14 +69,14 @@ class MetadataCheck(Check):
 
         return True
 
-    def run(self, record, config):
+    def run(self, record, config: CheckConfig):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = CheckResult(self.id)
 
         # Parse the rules from the configuration
         rules = []
-        for rule_config in config.get("rules", []):
+        for rule_config in config.params.get("rules", []):
             try:
                 rule = RuleParser.parse(rule_config)
                 rules.append(rule)
