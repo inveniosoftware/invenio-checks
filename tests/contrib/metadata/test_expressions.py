@@ -685,7 +685,6 @@ class TestComparisonExpression:
 
     def test_invalid_operator(self):
         """Test with invalid operator."""
-        record = {"title": "Test Record"}
         with pytest.raises(ValueError) as excinfo:
             ComparisonExpression(FieldExpression("title"), "<>", "Test Record")
 
