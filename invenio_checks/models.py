@@ -61,6 +61,11 @@ class CheckConfig(db.Model):
     )
     enabled = db.Column(db.Boolean, nullable=False, default=True)
 
+    @property
+    def check_cls(self):
+        """Provides access to the Python Class."""
+        return current_checks_registry.get(self.check_id)
+
     @validates("check_id")
     def validate_check_id(self, key, check_id):
         """Validate check_id."""
@@ -85,6 +90,7 @@ class CheckRun(db.Model, Timestamp):
 
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
+    config = db.relationship(CheckConfig)
     record_id = db.Column(UUIDType, nullable=False)
     is_draft = db.Column(db.Boolean, nullable=False, default=False)
     revision_id = db.Column(db.Integer, nullable=False)

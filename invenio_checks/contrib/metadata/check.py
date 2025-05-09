@@ -48,8 +48,9 @@ class MetadataCheck(Check):
     """Check for validating record metadata against configured rules."""
 
     id = "metadata"
-    title = "Metadata Validation"
+    title = "Metadata validation"
     description = "Validates record metadata against configured rules."
+    sort_order = 10
 
     def validate_config(self, config):
         """Validate the configuration for this metadata check."""

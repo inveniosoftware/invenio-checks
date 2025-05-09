@@ -1,0 +1,31 @@
+{# -*- coding: utf-8 -*-
+
+This file is part of Invenio.
+Copyright (C) 2025 CERN.
+
+Invenio is free software; you can redistribute it and/or modify it
+under the terms of the MIT License; see LICENSE file for more details.
+#}
+
+{% set severity = check.result.errors | map(attribute='severity') | first %}
+
+<div class="ui column stackable grid">
+  <div class="ten wide column">
+    <div class="ui very relaxed list rel-pl-2">
+      <div class="item">
+        <i class="{{ severity_level_icons_tpl.severity_level_icons[severity] }}"></i>
+        <div class="content">
+          {% for error in check.result.errors %}
+            <div class="header">{{ error.messages | first }}</div>
+            <div class="pt-5 text-muted">{{ error.description | safe }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="six wide column">
+    {% include 'invenio_checks/requests/help_message.html' %}
+  </div>
+
+</div>

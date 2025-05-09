@@ -92,6 +92,7 @@ class FileFormatsCheck(Check):
         "Validates that record files are in open and scientific formats, "
         "optionally suggesting alternatives."
     )
+    sort_order = 20
 
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 
