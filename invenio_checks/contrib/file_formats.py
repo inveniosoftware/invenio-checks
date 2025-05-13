@@ -66,8 +66,11 @@ class CheckResult:
     """Result of a check."""
 
     id: str
+    title: str
+    description: str
     errors: list[dict] = field(default_factory=list)
     sync: bool = True
+    success: bool = True
 
     def to_dict(self):
         """Convert the result to a dictionary."""
@@ -96,16 +99,11 @@ class FileFormatsCheck(Check):
 
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 
-    _default_suggest_missing_text = (
-        "If you know the format to be open and/or scientific, please contact us to "
-        "add it to our database."
-    )
-    _default_suggest_alternatives_text = (
-        "Consider using one of the following formats: {alternatives}."
-    )
-    _default_closed_format_text = (
-        "{key} ({file_format.name}) is not open or scientific."
-    )
+    default_messages = {
+        "closed_format_message": ".{ext} is not a known open or scientific file format.",
+        "closed_format_description": "Using closed or proprietary formats hinders reusability and preservation of published files.",
+        "title": "All files should be in open or scientific formats",
+    }
 
     @classproperty
     @functools.cache
@@ -129,74 +127,43 @@ class FileFormatsCheck(Check):
 
     def run(self, record, config: CheckConfig):
         """Run the check against the record's files."""
-        # Load config
         params = config.params
-        included_formats = set(params.get("include", []))
-        excluded_formats = set(params.get("exclude", []))
-        suggest_alternatives = params.get("suggest_alternatives", False)
-        suggest_alternatives_text = params.get(
-            "suggest_alternatives_text",
-            self._default_suggest_alternatives_text,
+        title = params.get("title", self.default_messages["title"])
+        closed_format_msg = params.get(
+            "closed_format_message",
+            self.default_messages["closed_format_message"],
         )
-        suggest_missing = params.get("suggest_missing", False)
-        suggest_missing_text = params.get(
-            "suggest_missing_text",
-            self._default_suggest_missing_text,
-        )
-        closed_format_text = params.get(
-            "closed_format_text",
-            self._default_closed_format_text,
+        closed_format_description = params.get(
+            "closed_format_description",
+            self.default_messages["closed_format_description"],
         )
 
-        result = CheckResult(id=self.id)
+        result = CheckResult(
+            id=self.id,
+            title=title,
+            # NOTE: We default to this description for now
+            description=closed_format_description,
+        )
         for file in record.files.values():
             file_ext = Path(file.key).suffix[1:]
             if not file_ext:
                 continue
 
-            ff_ids: set[str] = self.known_formats.get_by_extension(file_ext)
+            # TODO: This doesn't handle cases with multi-part extensions (e.g. .tar.gz)
+            found_format_ids = self.known_formats.get_by_extension(file_ext)
 
-            # Filter out included/excluded formats based on the configuration
-            if included_formats:
-                ff_ids &= included_formats
-            if excluded_formats:
-                ff_ids -= excluded_formats
-
-            if not ff_ids:
+            # NOTE: For now if we don't have information about the file format, we
+            # assume it is a closed format. Later on we can explicitly handle known
+            # closed formats and suggest alternatives.
+            if not found_format_ids:
+                result.errors.append(
+                    {
+                        "field": f"files.entries.{file.key}",
+                        "messages": [closed_format_msg.format(ext=file_ext)],
+                        "description": closed_format_description,
+                        "severity": config.severity.error_value,
+                    }
+                )
                 continue
 
-            # Resolve the file format specs
-            file_formats = [self.known_formats[ff_id] for ff_id in ff_ids]
-            for file_format in file_formats:
-                if "closed" in file_format.classifiers:
-                    message_lines = []
-                    message_lines.append(
-                        closed_format_text.format(key=file.key, file_format=file_format)
-                    )
-                    if suggest_alternatives and file_format.alternatives:
-                        alternatives = [
-                            self.known_formats[alt_id].name
-                            for alt_id in file_format.alternatives
-                        ]
-                        message_lines.append(
-                            suggest_alternatives_text.format(
-                                alternatives=", ".join(alternatives)
-                            )
-                        )
-
-                        # It might be that the file format is not closed, but not in
-                        # our database. In that case, we can suggest to add it.
-                        if suggest_missing:
-                            message_lines.append(suggest_missing_text)
-
-                    result.errors.append(
-                        {
-                            "field": f"files.entries.{file.key}",
-                            "messages": ["\n".join(message_lines)],
-                            # TODO: What goes here?
-                            # "description": "???",
-                            # TODO: Get from config?
-                            "severity": config.severity.error_value,
-                        },
-                    )
         return result

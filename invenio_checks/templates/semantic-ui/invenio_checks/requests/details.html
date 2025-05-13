@@ -16,8 +16,10 @@ under the terms of the MIT License; see LICENSE file for more details.
     <div class="ui fluid secondary vertical menu ml-0 mr-0 rdm-tab-menu">
       {% set check_classes = checks | map(attribute='config.check_cls') %}
       {% for check_class in check_classes|sort(attribute='sort_order') %}
-      <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}"><i
-          class="{% include 'invenio_checks/requests/overall_severity_level.html' %}"></i> {{ check_class.title }}</a>
+      <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
+        {% set check_class_id = check_class.id %}
+        <i class="{% include 'invenio_checks/requests/overall_severity_level.html' %}"></i>
+        {{ check_class.title }}</a>
       {% endfor %}
     </div>
   </div>

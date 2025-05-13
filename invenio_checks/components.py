@@ -97,7 +97,7 @@ class ChecksComponent(ServiceComponent):
                     .first()
                 )
 
-                # FIXME: We should use service
+                # FIXME: We should use the service
                 if not latest_check:
                     new_check_run = CheckRun(
                         config_id=check_config.id,

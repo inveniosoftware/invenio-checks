@@ -11,14 +11,29 @@ under the terms of the MIT License; see LICENSE file for more details.
 
 <div class="ui column stackable grid">
   <div class="ten wide column">
-    <div class="ui very relaxed list rel-pl-2">
-      <div class="item">
-        <i class="{{ severity_level_icons_tpl.severity_level_icons[severity] }}"></i>
-        <div class="content">
-          {% for error in check.result.errors %}
-            <div class="header">{{ error.messages | first }}</div>
-            <div class="pt-5 text-muted">{{ error.description | safe }}</div>
-          {% endfor %}
+    <div class="ten wide column">
+      <div class="ui very relaxed list rel-pl-2">
+        {% set has_errors = check.result.errors %}
+        {% set icon = has_errors and severity_level_icons_tpl.severity_level_icons['warning'] or severity_level_icons_tpl.severity_level_icons['success'] %}
+
+        <div class="item">
+          <i class="{{ icon }}"></i>
+          <div class="content">
+            <div class="header">{{ check.result.title }}</div>
+            <div class="pt-5 text-muted">
+              <p>{{ check.result.description | safe }}</p>
+              {% if has_errors %}
+              <p>The following files are not using open or scientific formats:</p>
+              <ul>
+                {# NOTE: We just care about listing filenames #}
+                {% for error in check.result.errors %}
+                  {% set file_name = error.field.split('entries.')[-1] %}
+                  <li>{{ file_name }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </div>
+          </div>
         </div>
       </div>
     </div>

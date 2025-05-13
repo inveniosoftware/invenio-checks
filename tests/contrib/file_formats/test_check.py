@@ -49,35 +49,8 @@ def test_default_file_format_check(app, record_with_files):
     assert result.errors == [
         {
             "field": "files.entries.file1.dwg",
-            "messages": ["file1.dwg (AutoCAD) is not open or scientific."],
+            "messages": [".dwg is not a known open or scientific file format."],
+            "description": "Using closed or proprietary formats hinders reusability and preservation of published files.",
             "severity": "info",
-        }
-    ]
-
-
-def test_configured_file_format_check(app, record_with_files):
-    """Test the file format check."""
-    check = FileFormatsCheck()
-    check_config = CheckConfig(
-        check_id="file_formats",
-        params={
-            "suggest_alternatives": True,
-            "suggest_missing": True,
-        },
-        severity=Severity.WARN,
-        enabled=True,
-    )
-    result = check.run(record_with_files, check_config)
-    assert result.errors == [
-        {
-            "field": "files.entries.file1.dwg",
-            "messages": [
-                "file1.dwg (AutoCAD) is not open or scientific.\n"
-                "Consider using one of the following formats: Portable Document "
-                "Format, STEP File (ISO 10303-21), STL Stereolithography Format.\n"
-                "If you know the format to be open and/or scientific, please "
-                "contact us to add it to our database."
-            ],
-            "severity": "warning",
         }
     ]
