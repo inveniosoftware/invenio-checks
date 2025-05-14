@@ -12,6 +12,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+import yaml
 from flask import current_app
 
 from invenio_checks.base import Check
@@ -122,7 +123,14 @@ class FileFormatsCheck(Check):
             raise FileNotFoundError(f"Known formats data file not found: {data_path}")
 
         with data_path.open("r") as f:
-            data = json.load(f)
+            if data_path.suffix == ".yaml":
+                data = yaml.safe_load(f)
+            elif data_path.suffix == ".json":
+                data = json.load(f)
+            else:
+                raise ValueError(
+                    f"Unsupported file format for known formats data file: {data_path}"
+                )
             return FileFormatDatabase.load(data)
 
     def run(self, record, config: CheckConfig):
