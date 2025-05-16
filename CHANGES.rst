@@ -7,6 +7,15 @@
 Changes
 =======
 
+Version v0.3.0 (released 2025-05-16)
+
+- contrib: implement file formats check for open and scientific file formats
+- global: pass CheckConfig object when running checks
+    * Instead of just passing the `CheckConfig.params` when running a check,
+      we now pass the entire object, since the check might want to use other
+      fields (e.g. the `CheckConfig.severity`).
+- global: move metadata checks to "contrib" directory
+
 Version v0.2.2 (released 2025-03-28)
 
 - views: explanation text in checks requests tab
