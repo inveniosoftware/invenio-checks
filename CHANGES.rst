@@ -7,6 +7,13 @@
 Changes
 =======
 
+Version v0.3.1 (released 2025-05-20)
+
+- requests-ui: handle multiple check runs of same type
+    * Handles rendering of multiple check run results for the metadata
+      check type.
+    * Uses the first instance of file format checks.
+
 Version v0.3.0 (released 2025-05-16)
 
 - contrib: implement file formats check for open and scientific file formats
