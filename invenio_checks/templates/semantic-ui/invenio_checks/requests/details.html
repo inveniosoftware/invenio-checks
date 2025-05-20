@@ -10,12 +10,12 @@ under the terms of the MIT License; see LICENSE file for more details.
 {% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
 
 {% set first_check = (checks | map(attribute='config.check_cls') | sort(attribute='sort_order') | first).id %}
+{% set check_classes = checks | map(attribute="config.check_cls") | unique(attribute="id") %}
 
 <div class="ui column stackable divided grid">
   <div class="three wide column pr-0">
     <div class="ui fluid secondary vertical menu ml-0 mr-0 rdm-tab-menu">
-      {% set check_classes = checks | map(attribute='config.check_cls') %}
-      {% for check_class in check_classes|sort(attribute='sort_order') %}
+      {% for check_class in check_classes|sort(attribute="sort_order") %}
       <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
         {% set check_class_id = check_class.id %}
         <i class="{% include 'invenio_checks/requests/overall_severity_level.html' %}"></i>
@@ -24,9 +24,8 @@ under the terms of the MIT License; see LICENSE file for more details.
     </div>
   </div>
   <div class="thirteen wide column">
-    {% set check_classes = checks | map(attribute='config.check_cls') %}
-    {% for check in checks %}
-      {% set check_id = check.config.check_cls.id %}
+    {% for checks_group in checks | groupby('config.check_id') %}
+      {% set check_id = checks_group.grouper %}
       <div class="ui tab {% if check_id == first_check %}active{% endif %}" data-tab="{{check_id}}">
         {% set tab_template = 'invenio_checks/requests/' + check_id + '_tab.html' %}
         {% include tab_template %}
