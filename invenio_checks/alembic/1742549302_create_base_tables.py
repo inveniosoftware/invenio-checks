@@ -11,6 +11,8 @@ import sqlalchemy as sa
 import sqlalchemy_utils
 from alembic import op
 
+from invenio_checks.models import CheckRunStatus, Severity
+
 # revision identifiers, used by Alembic.
 revision = "1742549302"
 down_revision = "1742548610"
@@ -31,7 +33,7 @@ def upgrade():
         sa.Column("params", sa.JSON(), nullable=False),
         sa.Column(
             "severity",
-            sqlalchemy_utils.types.choice.ChoiceType(length=1),
+            sqlalchemy_utils.types.choice.ChoiceType(Severity, impl=sa.String(1)),
             nullable=False,
         ),
         sa.Column("enabled", sa.Boolean(), nullable=False),
@@ -52,7 +54,9 @@ def upgrade():
         sa.Column("start_time", sa.DateTime(), nullable=True),
         sa.Column("end_time", sa.DateTime(), nullable=True),
         sa.Column(
-            "status", sqlalchemy_utils.types.choice.ChoiceType(length=1), nullable=False
+            "status",
+            sqlalchemy_utils.types.choice.ChoiceType(CheckRunStatus, impl=sa.String(1)),
+            nullable=False,
         ),
         sa.Column("state", sa.JSON(), nullable=False),
         sa.Column("result", sa.JSON(), nullable=False),
