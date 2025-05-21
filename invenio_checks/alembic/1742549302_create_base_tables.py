@@ -10,6 +10,8 @@
 import sqlalchemy as sa
 import sqlalchemy_utils
 from alembic import op
+from sqlalchemy.dialects import postgresql
+from sqlalchemy_utils import JSONType
 
 from invenio_checks.models import CheckRunStatus, Severity
 
@@ -30,7 +32,16 @@ def upgrade():
             "community_id", sqlalchemy_utils.types.uuid.UUIDType(), nullable=False
         ),
         sa.Column("check_id", sa.String(length=255), nullable=False),
-        sa.Column("params", sa.JSON(), nullable=False),
+        sa.Column(
+            "params",
+            sa.JSON()
+            .with_variant(JSONType(), "mysql")
+            .with_variant(
+                postgresql.JSONB(none_as_null=True, astext_type=sa.Text()), "postgresql"
+            )
+            .with_variant(JSONType(), "sqlite"),
+            nullable=False
+        ),
         sa.Column(
             "severity",
             sqlalchemy_utils.types.choice.ChoiceType(Severity, impl=sa.String(1)),
@@ -58,8 +69,26 @@ def upgrade():
             sqlalchemy_utils.types.choice.ChoiceType(CheckRunStatus, impl=sa.String(1)),
             nullable=False,
         ),
-        sa.Column("state", sa.JSON(), nullable=False),
-        sa.Column("result", sa.JSON(), nullable=False),
+        sa.Column(
+            "state",
+            sa.JSON()
+            .with_variant(JSONType(), "mysql")
+            .with_variant(
+                postgresql.JSONB(none_as_null=True, astext_type=sa.Text()), "postgresql"
+            )
+            .with_variant(JSONType(), "sqlite"),
+            nullable=False
+        ),
+        sa.Column(
+            "result",
+            sa.JSON()
+            .with_variant(JSONType(), "mysql")
+            .with_variant(
+                postgresql.JSONB(none_as_null=True, astext_type=sa.Text()), "postgresql"
+            )
+            .with_variant(JSONType(), "sqlite"),
+            nullable=False
+        ),
         sa.Column("created", sa.DateTime(), nullable=False),
         sa.Column("updated", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
