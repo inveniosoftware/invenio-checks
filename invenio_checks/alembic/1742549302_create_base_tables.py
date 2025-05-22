@@ -48,6 +48,8 @@ def upgrade():
             nullable=False,
         ),
         sa.Column("enabled", sa.Boolean(), nullable=False),
+        sa.Column("created", sa.DateTime(), nullable=False),
+        sa.Column("updated", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
             ["community_id"],
             ["communities_metadata.id"],

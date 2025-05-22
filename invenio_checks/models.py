@@ -45,7 +45,7 @@ class Severity(enum.Enum):
             return "error"
 
 
-class CheckConfig(db.Model):
+class CheckConfig(db.Model, Timestamp):
     """Configuration for a check in a community."""
 
     __tablename__ = "checks_config"
