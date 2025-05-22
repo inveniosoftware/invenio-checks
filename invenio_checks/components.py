@@ -67,7 +67,6 @@ class ChecksComponent(ServiceComponent):
         all_check_configs = CheckConfig.query.filter(
             CheckConfig.community_id.in_(communities)
         ).all()
-
         for check_config in all_check_configs:
             try:
                 check_cls = current_checks_registry.get(check_config.check_id)
@@ -121,7 +120,7 @@ class ChecksComponent(ServiceComponent):
                     latest_check.result = res.to_dict()
 
                 self.uow.register(ParentRecordCommitOp(record))
-            except Exception:
+            except Exception as e:
                 current_app.logger.exception(
                     "Error running check on record",
                     extra={
