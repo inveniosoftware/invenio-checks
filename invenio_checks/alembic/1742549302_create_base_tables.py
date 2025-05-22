@@ -57,7 +57,7 @@ def upgrade():
     )
     op.create_table(
         "checks_run",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sqlalchemy_utils.types.uuid.UUIDType(), nullable=False),
         sa.Column("config_id", sqlalchemy_utils.types.uuid.UUIDType(), nullable=False),
         sa.Column("record_id", sqlalchemy_utils.types.uuid.UUIDType(), nullable=False),
         sa.Column("is_draft", sa.Boolean(), nullable=False),
