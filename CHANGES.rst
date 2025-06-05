@@ -7,6 +7,14 @@
 Changes
 =======
 
+Version v0.4.0 (released 2025-06-05)
+
+- installation: bump communities and draft-resources
+- component: fetch parent community for inclusion requests
+- component: improve communities fetching
+- alembic: recipes
+- models: add missing timestamp columns to CheckConfig
+
 Version v0.3.1 (released 2025-05-20)
 
 - requests-ui: handle multiple check runs of same type
