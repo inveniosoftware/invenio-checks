@@ -7,17 +7,12 @@
 
 """Record service component."""
 
-from datetime import datetime
-
-from flask import current_app, g
-from invenio_communities.proxies import current_communities
+from flask import current_app
+from invenio_db.uow import ModelCommitOp, ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
-from invenio_records_resources.services.uow import ModelCommitOp
-from invenio_requests.proxies import current_requests_service
-from invenio_search.engine import dsl
 
-from .models import CheckConfig, CheckRun, CheckRunStatus
-from .proxies import current_checks_registry
+from .api import ChecksAPI
+from .models import CheckRun
 
 
 class ChecksComponent(ServiceComponent):
@@ -25,116 +20,139 @@ class ChecksComponent(ServiceComponent):
 
     @property
     def enabled(self):
-        """Return if checks are enabled."""
+        """Check if checks are enabled."""
         return current_app.config.get("CHECKS_ENABLED", False)
 
-    def _run_checks(self, identity, data=None, record=None, errors=None, **kwargs):
-        """Handler to run checks."""
+    def read_draft(self, identity, draft=None, errors=None, **kwargs):
+        """Fetch checks on draft read."""
         if not self.enabled:
             return
 
-        community_ids = set()
-
-        # Check draft review request
-        if record.parent.review:
-            # drafts can only be submitted to one community
-            community = record.parent.review.receiver.resolve()
-            community_ids.add(str(community.id))
-            community_parent_id = community.get("parent", {}).get("id")
-            if community_parent_id:
-                community_ids.add(community_parent_id)
-
-        # Check inclusion requests
-        results = current_requests_service.search(
-            identity,
-            extra_filter=dsl.query.Bool(
-                "must",
-                must=[
-                    dsl.Q("term", **{"type": "community-inclusion"}),
-                    dsl.Q("term", **{"topic.record": record.pid.pid_value}),
-                    dsl.Q("term", **{"is_open": True}),
-                ],
-            ),
-        )
-        for result in results:
-            community_id = result.get("receiver", {}).get("community")
-            if community_id:
-                community_ids.add(community_id)
-                # check if it is a subcommunity
-                community = current_communities.service.read(
-                    id_=community_id, identity=g.identity
-                )
-                community_parent_id = community.to_dict().get("parent", {}).get("id")
-                if community_parent_id:
-                    community_ids.add(community_parent_id)
-
-        # Check already included communities
-        for community in record.parent.communities:
-            community_ids.add(str(community.id))
-            community_parent_id = community.get("parent", {}).get("id")
-            if community_parent_id:
-                community_ids.add(community_parent_id)
-
-        all_check_configs = CheckConfig.query.filter(
-            CheckConfig.community_id.in_(community_ids)
-        ).all()
-        for check_config in all_check_configs:
-            try:
-                check_cls = current_checks_registry.get(check_config.check_id)
-                start_time = datetime.utcnow()
-                res = check_cls().run(record, check_config)
-                if not res.sync:
-                    continue
-
-                check_errors = [
+        runs = ChecksAPI.get_runs(draft)
+        for run in runs:
+            config = run.config
+            run_errors = run.result.get("errors", [])
+            for error in run_errors:
+                errors.append(
                     {
                         **error,
-                        "context": {"community": check_config.community_id},
+                        "context": {"community": str(config.community_id)},
                     }
-                    for error in res.errors
-                ]
-                errors.extend(check_errors)
-
-                latest_check = (
-                    CheckRun.query.filter(
-                        CheckRun.config_id == check_config.id,
-                        CheckRun.record_id == record.id,
-                        CheckRun.is_draft.is_(True),
-                    )
-                    .order_by(CheckRun.start_time.desc())
-                    .first()
                 )
 
-                # FIXME: We should use the service
-                if not latest_check:
-                    latest_check = CheckRun(
-                        config_id=check_config.id,
-                        record_id=record.id,
-                        is_draft=record.is_draft,
-                        revision_id=record.revision_id,
-                        start_time=start_time,
-                        end_time=datetime.utcnow(),
-                        status=CheckRunStatus.COMPLETED,
-                        state="",
-                        result=res.to_dict(),
+    def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
+        """Run checks on draft update."""
+        if not self.enabled:
+            return
+
+        draft = record  # rename for clarity
+
+        # Take into account already included communities
+        community_ids = self._get_record_communities(draft)
+
+        # Take into account configs from past check runs (could be inclusion requests)
+        past_runs = ChecksAPI.get_runs(draft)
+        for run in past_runs:
+            community_ids.add(str(run.config.community_id))
+
+        configs = ChecksAPI.get_configs(community_ids)
+        for config in configs:
+            run = ChecksAPI.run_check(config, draft, self.uow)
+            if run and run.result.get("errors", []):
+                for error in run.result["errors"]:
+                    errors.append(
+                        {
+                            **error,
+                            "context": {"community": str(config.community_id)},
+                        }
                     )
-                else:
-                    latest_check.is_draft = record.is_draft
-                    latest_check.revision_id = record.revision_id
-                    latest_check.start_time = start_time
-                    latest_check.end_time = datetime.utcnow()
-                    latest_check.result = res.to_dict()
 
-                # Create/update the check run to the database
-                self.uow.register(ModelCommitOp(latest_check))
-            except Exception:
-                current_app.logger.exception(
-                    "Error running check on record",
-                    extra={
-                        "record_id": str(record.id),
-                        "check_config_id": str(check_config.id),
-                    },
-                )
+    def new_version(self, identity, draft=None, record=None, **kwargs):
+        """Initialize checks on new version creation."""
+        if not self.enabled:
+            return
 
-    update_draft = _run_checks
-    create = _run_checks
+        # Take into account already included communities
+        community_ids = self._get_record_communities(draft)
+
+        # Take into account configs from past check runs (could be inclusion requests)
+        # from the latest published record version
+        record_runs = ChecksAPI.get_runs(record)
+        for run in record_runs:
+            community_ids.add(str(run.config.community_id))
+
+        configs = ChecksAPI.get_configs(community_ids)
+        for config in configs:
+            # Run checks on the new version draft
+            ChecksAPI.run_check(config, draft, self.uow)
+
+    def edit(self, identity, draft=None, record=None, **kwargs):
+        """Run checks on draft edit."""
+        if not self.enabled:
+            return
+
+        # Take into account already included communities
+        community_ids = self._get_record_communities(draft)
+
+        # Take into account configs from past check runs (could be inclusion requests).
+        # NOTE: we want both draft and record runs here, since we just care about
+        # getting all the involved community IDs.
+        past_runs = CheckRun.query.filter_by(record_id=record.id).all()
+        for run in past_runs:
+            community_ids.add(str(run.config.community_id))
+
+        # Run checks for all relevant communities
+        configs = ChecksAPI.get_configs(community_ids)
+        for config in configs:
+            # Run checks on the draft
+            ChecksAPI.run_check(config, draft, self.uow)
+
+    def publish(self, identity, draft=None, record=None, **kwargs):
+        """Update checks on publish."""
+        if not self.enabled:
+            return
+
+        # Create or update record runs based on draft runs
+        draft_runs = ChecksAPI.get_runs(draft)
+        for draft_run in draft_runs:
+            record_run = CheckRun.query.filter_by(
+                config_id=draft_run.config_id,
+                record_id=record.id,
+                is_draft=False,
+            ).one_or_none()
+
+            if record_run:  # If the run already exists, update it
+                record_run.start_time = draft_run.start_time
+                record_run.end_time = draft_run.end_time
+
+                record_run.status = draft_run.status
+                record_run.state = draft_run.state
+                record_run.result = draft_run.result
+
+                # Delete the draft run
+                self.uow.register(ModelDeleteOp(draft_run))
+            else:  # Otherwise, "convert" the draft run to a record run
+                draft_run.is_draft = False
+                record_run = draft_run
+
+            record_run.revision_id = record.revision_id
+            self.uow.register(ModelCommitOp(record_run))
+
+    def delete_draft(self, identity, draft=None, record=None, force=False, **kwargs):
+        """Delete draft checks."""
+        if not self.enabled:
+            return
+
+        # Delete all draft runs
+        draft_runs = ChecksAPI.get_runs(draft)
+        for draft_run in draft_runs:
+            self.uow.register(ModelDeleteOp(draft_run))
+
+    def _get_record_communities(self, record_or_draft):
+        """Get community IDs from the record or draft."""
+        community_ids = set()
+        for community in record_or_draft.parent.communities:
+            community_ids.add(str(community.id))
+            if community.parent:
+                community_ids.add(str(community.parent.id))
+        return community_ids
