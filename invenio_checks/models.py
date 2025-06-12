@@ -91,7 +91,7 @@ class CheckRun(db.Model, Timestamp):
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
     config = db.relationship(CheckConfig)
-    record_id = db.Column(UUIDType, nullable=False)
+    record_id = db.Column(UUIDType, nullable=False, index=True)
     is_draft = db.Column(db.Boolean, nullable=False, default=False)
     revision_id = db.Column(db.Integer, nullable=False)
 
