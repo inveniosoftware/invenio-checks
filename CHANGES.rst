@@ -7,6 +7,17 @@
 Changes
 =======
 
+Version v0.5.0 (released 2025-06-12)
+
+- models: add index on `CheckRun.record_id`
+- requests-ui: add warning in checks tab when there is a draft
+- requests-ui: fix checks scoping in Jinja templates
+- api: refactor checks lifecycle management
+    * Hook-in to all draft lifecycle methods (publish, edit, discard, etc.).
+    * Check runs now depend on either existing communities the record/drafts
+      is included in, or from community requests having properly initialized
+      them.
+
 Version v0.4.0 (released 2025-06-05)
 
 - installation: bump communities and draft-resources
