@@ -27,8 +27,10 @@ under the terms of the MIT License; see LICENSE file for more details.
     {% for checks_group in checks | groupby('config.check_id') %}
       {% set check_id = checks_group.grouper %}
       <div class="ui tab {% if check_id == first_check %}active{% endif %}" data-tab="{{check_id}}">
-        {% set tab_template = 'invenio_checks/requests/' + check_id + '_tab.html' %}
-        {% include tab_template %}
+        {% with checks=checks_group.list %}
+          {% set tab_template = 'invenio_checks/requests/' + check_id + '_tab.html' %}
+          {% include tab_template %}
+        {% endwith %}
       </div>
     {% endfor %}
   </div>
