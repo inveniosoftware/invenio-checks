@@ -12,6 +12,7 @@ import functools
 from flask import current_app
 from invenio_db.uow import ModelCommitOp, ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
+from invenio_records_resources.services.errors import ValidationErrorGroup
 
 from .api import ChecksAPI
 from .models import CheckRun
@@ -42,17 +43,9 @@ class ChecksComponent(ServiceComponent):
 
     def read_draft(self, identity, draft=None, errors=None, **kwargs):
         """Fetch checks on draft read."""
+        errors = errors or []
         runs = ChecksAPI.get_runs(draft)
-        for run in runs:
-            config = run.config
-            run_errors = run.result.get("errors", [])
-            for error in run_errors:
-                errors.append(
-                    {
-                        **error,
-                        "context": {"community": str(config.community_id)},
-                    }
-                )
+        errors.extend(self._extract_run_errors(runs))
 
     def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
         """Run checks on draft update."""
@@ -66,17 +59,14 @@ class ChecksComponent(ServiceComponent):
         for run in past_runs:
             community_ids.add(str(run.config.community_id))
 
+        updated_runs = []
         configs = ChecksAPI.get_configs(community_ids)
         for config in configs:
             run = ChecksAPI.run_check(config, draft, self.uow)
-            if run and run.result.get("errors", []):
-                for error in run.result["errors"]:
-                    errors.append(
-                        {
-                            **error,
-                            "context": {"community": str(config.community_id)},
-                        }
-                    )
+            if run:
+                updated_runs.append(run)
+
+        errors.extend(self._extract_run_errors(updated_runs))
 
     def new_version(self, identity, draft=None, record=None, **kwargs):
         """Initialize checks on new version creation."""
@@ -115,6 +105,14 @@ class ChecksComponent(ServiceComponent):
     def publish(self, identity, draft=None, record=None, **kwargs):
         """Create or update record runs based on draft runs."""
         draft_runs = ChecksAPI.get_runs(draft)
+
+        # Check if there are any check runs with errors
+        run_errors = self._extract_run_errors(draft_runs)
+        error_severity_errors = [e for e in run_errors if e.get("severity") == "error"]
+        if error_severity_errors:
+            raise ValidationErrorGroup(errors=error_severity_errors)
+
+        # If no errors, we clean up and convert the draft runs to record runs.
         for draft_run in draft_runs:
             record_run = CheckRun.query.filter_by(
                 config_id=draft_run.config_id,
@@ -145,6 +143,16 @@ class ChecksComponent(ServiceComponent):
         for draft_run in draft_runs:
             self.uow.register(ModelDeleteOp(draft_run))
 
+    def submit_record(self, identity, data=None, record=None, **kwargs):
+        """Check for run errors in draft review submission."""
+        draft = record  # rename for clarity
+
+        draft_runs = ChecksAPI.get_runs(draft)
+        run_errors = self._extract_run_errors(draft_runs)
+        error_severity_errors = [e for e in run_errors if e.get("severity") == "error"]
+        if error_severity_errors:
+            raise ValidationErrorGroup(errors=error_severity_errors)
+
     def _get_record_communities(self, record_or_draft):
         """Get community IDs from the record or draft."""
         community_ids = set()
@@ -153,3 +161,20 @@ class ChecksComponent(ServiceComponent):
             if community.parent:
                 community_ids.add(str(community.parent.id))
         return community_ids
+
+    def _extract_run_errors(self, runs):
+        """Build errors list from a list of check runs."""
+        errors = []
+        for run in runs:
+            if not run.result or not run.result.get("errors"):
+                continue
+
+            for error in run.result.get("errors", []):
+                errors.append(
+                    {
+                        **error,
+                        "context": {"community": str(run.config.community_id)},
+                    }
+                )
+
+        return errors
