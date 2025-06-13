@@ -7,6 +7,8 @@
 
 """Record service component."""
 
+import functools
+
 from flask import current_app
 from invenio_db.uow import ModelCommitOp, ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
@@ -15,19 +17,31 @@ from .api import ChecksAPI
 from .models import CheckRun
 
 
+def toggle_on_feature_flag(cls):
+    """Class decorator to apply to all public methods."""
+
+    def _decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_app.config.get("CHECKS_ENABLED", False):
+                return
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    for attr_name in dir(cls):
+        attr_value = getattr(cls, attr_name)
+        if callable(attr_value) and not attr_name.startswith("_"):
+            setattr(cls, attr_name, _decorator(attr_value))
+    return cls
+
+
+@toggle_on_feature_flag
 class ChecksComponent(ServiceComponent):
     """Checks component."""
 
-    @property
-    def enabled(self):
-        """Check if checks are enabled."""
-        return current_app.config.get("CHECKS_ENABLED", False)
-
     def read_draft(self, identity, draft=None, errors=None, **kwargs):
         """Fetch checks on draft read."""
-        if not self.enabled:
-            return
-
         runs = ChecksAPI.get_runs(draft)
         for run in runs:
             config = run.config
@@ -42,9 +56,6 @@ class ChecksComponent(ServiceComponent):
 
     def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
         """Run checks on draft update."""
-        if not self.enabled:
-            return
-
         draft = record  # rename for clarity
 
         # Take into account already included communities
@@ -69,9 +80,6 @@ class ChecksComponent(ServiceComponent):
 
     def new_version(self, identity, draft=None, record=None, **kwargs):
         """Initialize checks on new version creation."""
-        if not self.enabled:
-            return
-
         # Take into account already included communities
         community_ids = self._get_record_communities(draft)
 
@@ -88,9 +96,6 @@ class ChecksComponent(ServiceComponent):
 
     def edit(self, identity, draft=None, record=None, **kwargs):
         """Run checks on draft edit."""
-        if not self.enabled:
-            return
-
         # Take into account already included communities
         community_ids = self._get_record_communities(draft)
 
@@ -108,11 +113,7 @@ class ChecksComponent(ServiceComponent):
             ChecksAPI.run_check(config, draft, self.uow)
 
     def publish(self, identity, draft=None, record=None, **kwargs):
-        """Update checks on publish."""
-        if not self.enabled:
-            return
-
-        # Create or update record runs based on draft runs
+        """Create or update record runs based on draft runs."""
         draft_runs = ChecksAPI.get_runs(draft)
         for draft_run in draft_runs:
             record_run = CheckRun.query.filter_by(
@@ -139,11 +140,7 @@ class ChecksComponent(ServiceComponent):
             self.uow.register(ModelCommitOp(record_run))
 
     def delete_draft(self, identity, draft=None, record=None, force=False, **kwargs):
-        """Delete draft checks."""
-        if not self.enabled:
-            return
-
-        # Delete all draft runs
+        """Delete all draft runs."""
         draft_runs = ChecksAPI.get_runs(draft)
         for draft_run in draft_runs:
             self.uow.register(ModelDeleteOp(draft_run))
