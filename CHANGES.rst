@@ -7,6 +7,11 @@
 Changes
 =======
 
+Version v0.6.0 (released 2025-06-23)
+
+- components: handle error-severity results on publish and draft review submit
+- components: refactor feature flag application
+
 Version v0.5.0 (released 2025-06-12)
 
 - models: add index on `CheckRun.record_id`
