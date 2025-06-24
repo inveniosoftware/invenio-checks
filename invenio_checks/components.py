@@ -19,7 +19,7 @@ from .models import CheckRun
 
 
 def toggle_on_feature_flag(cls):
-    """Class decorator to apply to all public methods."""
+    """Class decorator to apply to all direct public methods."""
 
     def _decorator(func):
         @functools.wraps(func)
@@ -30,7 +30,8 @@ def toggle_on_feature_flag(cls):
 
         return wrapper
 
-    for attr_name in dir(cls):
+    # Using `vars` instead of `dir` to get direct methods from this class only (and not the base class ones).
+    for attr_name in vars(cls):
         attr_value = getattr(cls, attr_name)
         if callable(attr_value) and not attr_name.startswith("_"):
             setattr(cls, attr_name, _decorator(attr_value))
