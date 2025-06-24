@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v0.6.1 (released 2025-06-24)
+
+- fix: components: fix feature flag application to direct methods only
+
 Version v0.6.0 (released 2025-06-23)
 
 - components: handle error-severity results on publish and draft review submit
