@@ -6,7 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 """Check implementations and registry."""
 
-import importlib_metadata
+from invenio_base.utils import entry_points
 
 
 class Check:
@@ -65,7 +65,7 @@ class ChecksRegistry:
 
     def load_from_entry_points(self, app, ep_name):
         """Load checks from entry points."""
-        for ep in set(importlib_metadata.entry_points(group=ep_name)):
+        for ep in entry_points(group=ep_name):
             check_cls_or_func = ep.load()
             check_cls = check_cls_or_func
 
