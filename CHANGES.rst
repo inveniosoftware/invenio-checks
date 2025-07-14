@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v0.6.2 (released 2025-07-14)
+
+- chores: replaced importlib_xyz with importlib
+
 Version v0.6.1 (released 2025-06-24)
 
 - fix: components: fix feature flag application to direct methods only
