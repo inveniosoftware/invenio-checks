@@ -64,7 +64,7 @@ class ChecksAPI:
 
             if not previous_run:
                 result_run = CheckRun(
-                    config_id=config.id,
+                    config=config,
                     record_id=record.id,
                     is_draft=is_draft,
                     revision_id=record.revision_id,
