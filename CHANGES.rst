@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v0.6.3 (released 2025-07-17)
+
+- api: fix check run model initialization
+
 Version v0.6.2 (released 2025-07-14)
 
 - chores: replaced importlib_xyz with importlib
