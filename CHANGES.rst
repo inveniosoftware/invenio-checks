@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v1.0.0 (released 2025-08-01)
+
+- setup: bump invenio-communities to v20.0.0
+
 Version v0.6.3 (released 2025-07-17)
 
 - api: fix check run model initialization
