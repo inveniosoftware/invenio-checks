@@ -1,5 +1,6 @@
 {#
   SPDX-FileCopyrightText: 2025 CERN.
+  SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
   SPDX-License-Identifier: MIT
 #}
 
@@ -17,11 +18,11 @@
         <div class="item">
           <i class="{{ icon }}"></i>
           <div class="content">
-            <div class="header">{{ check.result.title }}</div>
+            <div class="header">{{ check.result.title | translate_field }}</div>
             <div class="pt-5 text-muted">
-              <p>{{ check.result.description | safe }}</p>
+              <p>{{ check.result.description | translate_field | safe }}</p>
               {% if has_errors %}
-              <p>The following files are not using open or scientific formats:</p>
+              <p>{{ _('The following files are not using open or scientific formats:') }}</p>
               <ul>
                 {# NOTE: We just care about listing filenames #}
                 {% for error in check.result.errors %}

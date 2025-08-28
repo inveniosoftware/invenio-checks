@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2025-2026 CERN.
+# SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 """Metadata check rules."""
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from .expressions import (
     ComparisonExpression,
@@ -61,9 +62,10 @@ class RuleResult:
     """Class representing the result of evaluating a rule."""
 
     rule_id: str
-    rule_title: str
-    rule_message: str
-    rule_description: str
+    # Can be string or multilingual dict for backward compatibility
+    rule_title: Union[str, dict[str, str]]
+    rule_message: Union[str, dict[str, str]]
+    rule_description: Union[str, dict[str, str]]
     level: str
     success: bool
     check_results: List[ExpressionResult]
