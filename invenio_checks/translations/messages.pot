@@ -1,0 +1,107 @@
+# Translations template for invenio-checks.
+# Copyright (C) 2025 CERN
+# This file is distributed under the same license as the invenio-checks
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-checks 1.0.0\n"
+"Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
+"POT-Creation-Date: 2025-08-28 23:49+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: invenio_checks/contrib/file_formats.py:95
+msgid "File formats check"
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:97
+msgid ""
+"Validates that record files are in open and scientific formats, "
+"optionally suggesting alternatives."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:106
+#, python-brace-format
+msgid ".{ext} is not a known open or scientific file format."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:109
+msgid ""
+"Using closed or proprietary formats hinders reusability and preservation "
+"of published files."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:111
+msgid "All files should be in open or scientific formats"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:54
+msgid "Metadata validation"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:55
+msgid "Validates record metadata against configured rules."
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:139
+msgid "Unnamed check"
+msgstr ""
+
+#: invenio_checks/services/config.py:30
+msgid "Ascending"
+msgstr ""
+
+#: invenio_checks/services/config.py:31
+msgid "Descending"
+msgstr ""
+
+#: invenio_checks/services/config.py:33
+msgid "Title"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/file_formats_tab.html:28
+msgid "The following files are not using open or scientific formats:"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:12
+msgid "Editing in progress"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:13
+msgid "You're viewing checks and feedback results for unpublished changes."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:15
+msgid ""
+"The published version available to users may differ from what's shown "
+"here."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:21
+msgid "What is this about?"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:22
+msgid ""
+"These checks help ensure that your submission is compliant with this "
+"community's guidelines."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:23
+msgid "How do I fix warnings/errors?"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:24
+msgid ""
+"Go to the \"Record\" tab and click the orange \"Edit\" button. All errors"
+" and recommendations are displayed inline in the upload form."
+msgstr ""
+
