@@ -8,7 +8,7 @@
 """Metadata check rules."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import List, Union
 
 from .expressions import (
     ComparisonExpression,
@@ -65,9 +65,9 @@ class RuleResult:
 
     rule_id: str
     # Can be string or multilingual dict for backward compatibility
-    rule_title: Union[str, Dict[str, str]]
-    rule_message: Union[str, Dict[str, str]]
-    rule_description: Union[str, Dict[str, str]]
+    rule_title: Union[str, dict[str, str]]
+    rule_message: Union[str, dict[str, str]]
+    rule_description: Union[str, dict[str, str]]
     level: str
     success: bool
     check_results: List[ExpressionResult]

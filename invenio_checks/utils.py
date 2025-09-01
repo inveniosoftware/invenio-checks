@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+# Copyright (C) 2025 CERN.
 # Copyright (C) 2025 KTH Royal Institute of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
