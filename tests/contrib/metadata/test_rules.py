@@ -18,8 +18,8 @@ from invenio_checks.contrib.metadata.rules import (
     Rule,
     RuleParser,
     RuleResult,
-    _translate_field,
 )
+from invenio_checks.utils import translate_field
 
 
 class TestRule:
@@ -510,11 +510,11 @@ class TestTranslation:
     def test_translate_field_with_string(self):
         """Test that string fields are returned as-is."""
 
-        result = _translate_field("Simple string")
+        result = translate_field("Simple string")
         assert result == "Simple string"
 
         # Test None
-        result = _translate_field(None)
+        result = translate_field(None)
         assert result == ""
 
     def test_translate_field_with_dict(self):
@@ -527,7 +527,7 @@ class TestTranslation:
         }
 
         # Without app context, should fallback to English
-        result = _translate_field(multilingual_field)
+        result = translate_field(multilingual_field)
         assert result == "English text"
 
     def test_translate_field_dict_no_english(self):
@@ -536,17 +536,17 @@ class TestTranslation:
         multilingual_field = {"sv": "Swedish text", "de": "German text"}
 
         # Should fallback to first available value
-        result = _translate_field(multilingual_field)
+        result = translate_field(multilingual_field)
         assert result in ["Swedish text", "German text"]  # Either is acceptable
 
     def test_translate_field_empty_dict(self):
         """Test translation of empty dict."""
 
-        result = _translate_field({})
+        result = translate_field({})
         assert result == ""
 
     def test_rule_result_translation(self):
-        """Test that RuleResult.from_rule translates multilingual fields."""
+        """Test that RuleResult.from_rule stores raw multilingual fields for display-time translation."""
         # Create a rule with multilingual fields
         rule = Rule(
             id="test-translation",
@@ -567,13 +567,25 @@ class TestTranslation:
         # Create RuleResult using from_rule
         rule_result = RuleResult.from_rule(rule, True, [])
 
-        # Check that the fields are translated (should default to English)
-        assert rule_result.rule_title == "English Title"
-        assert rule_result.rule_message == "English Message"
-        assert rule_result.rule_description == "English Description"
+        # Check that the fields store raw multilingual dictionaries (not translated)
+        assert rule_result.rule_title == {
+            "en": "English Title",
+            "sv": "Swedish Title",
+            "de": "German Title",
+        }
+        assert rule_result.rule_message == {
+            "en": "English Message",
+            "sv": "Swedish Message",
+            "de": "German Message",
+        }
+        assert rule_result.rule_description == {
+            "en": "English Description",
+            "sv": "Swedish Description",
+            "de": "German Description",
+        }
 
     def test_rule_result_mixed_translation(self):
-        """Test RuleResult with mixed string/dict fields (backward compatibility)."""
+        """Test RuleResult with mixed string/dict fields stores raw values (display-time translation)."""
         # Create a rule with mixed field types
         rule = Rule(
             id="test-mixed",
@@ -585,30 +597,33 @@ class TestTranslation:
 
         rule_result = RuleResult.from_rule(rule, True, [])
 
-        # Check that strings pass through and dicts are translated
+        # Check that both strings and multilingual dicts are stored raw
         assert rule_result.rule_title == "Simple String Title"
-        assert rule_result.rule_message == "English Message"
+        assert rule_result.rule_message == {
+            "en": "English Message",
+            "sv": "Swedish Message",
+        }
         assert rule_result.rule_description == "Simple String Description"
 
     def test_translate_field_unsupported_type(self):
         """Test that unsupported field types raise ValueError."""
         # Test with a number
         with pytest.raises(ValueError) as excinfo:
-            _translate_field(123)
+            translate_field(123)
 
         assert "Unsupported field type for translation" in str(excinfo.value)
         assert "123" in str(excinfo.value)
 
         # Test with a list
         with pytest.raises(ValueError) as excinfo:
-            _translate_field([1, 2, 3])
+            translate_field([1, 2, 3])
 
         assert "Unsupported field type for translation" in str(excinfo.value)
         assert "[1, 2, 3]" in str(excinfo.value)
 
         # Test with a boolean (True doesn't get caught by "not field_value")
         with pytest.raises(ValueError) as excinfo:
-            _translate_field(True)
+            translate_field(True)
 
         assert "Unsupported field type for translation" in str(excinfo.value)
         assert "True" in str(excinfo.value)
@@ -629,26 +644,39 @@ class TestTranslation:
         assert len(rule.checks) == 1
 
     def test_multilingual_rule_translation(self, example_rules_config):
-        """Test that multilingual rules are properly translated."""
+        """Test that multilingual rules store raw dictionaries for display-time translation."""
         rule_config = next(
             r for r in example_rules_config["rules"] if r["id"] == "funding:eu"
         )
         rule = RuleParser.parse(rule_config)
         result = RuleResult.from_rule(rule, True, [])
 
-        # Should default to English
-        assert result.rule_title == "EU Funding Required"
-        assert "EU-funded project" in result.rule_message
+        # Should store raw multilingual dictionaries
+        assert result.rule_title == {
+            "en": "EU Funding Required",
+            "sv": "EU-finansiering krävs",
+            "de": "EU-Finanzierung erforderlich",
+        }
+        expected_message = {
+            "en": "Records must have at least one EU-funded project",
+            "sv": "Poster måste ha minst ett EU-finansierat projekt",
+            "de": "Datensätze müssen mindestens ein EU-finanziertes Projekt haben",
+        }
+        assert result.rule_message == expected_message
 
     def test_mixed_multilingual_backward_compatibility(self, example_rules_config):
-        """Test backward compatibility with mixed string/multilingual fields."""
+        """Test backward compatibility with mixed string/multilingual fields stores raw values."""
         rule_config = next(
             r for r in example_rules_config["rules"] if r["id"] == "mixed_example"
         )
         rule = RuleParser.parse(rule_config)
         result = RuleResult.from_rule(rule, True, [])
 
-        # String fields pass through, multilingual gets translated
+        # String fields stored as-is, multilingual stored as raw dict
         assert result.rule_title == "Mixed Example (Backward Compatible)"
         assert result.rule_description == "Simple string description still works"
-        assert "backward compatibility" in result.rule_message
+        expected_message = {
+            "en": "This shows backward compatibility with mixed string/dict",
+            "sv": "Detta visar bakåtkompatibilitet med blandad sträng/dict",
+        }
+        assert result.rule_message == expected_message

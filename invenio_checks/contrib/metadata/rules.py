@@ -8,11 +8,7 @@
 """Metadata check rules."""
 
 from dataclasses import dataclass
-from typing import List
-
-from flask import current_app
-from invenio_i18n.ext import current_i18n
-from marshmallow_utils.fields.babel import gettext_from_dict
+from typing import Dict, List, Union
 
 from .expressions import (
     ComparisonExpression,
@@ -21,47 +17,6 @@ from .expressions import (
     ListExpression,
     LogicalExpression,
 )
-
-
-def _translate_field(field_value):
-    """Translate a field that can be string or multilingual dict.
-
-    Args:
-        field_value: String or dict with language keys like {"en": "text", "sv": "text"}
-
-    Returns:
-        Translated string based on current locale
-    """
-    if not field_value:
-        return ""
-
-    if isinstance(field_value, str):
-        return field_value
-
-    if isinstance(field_value, dict):
-        try:
-            locale = getattr(current_i18n, "locale", "en") if current_i18n else "en"
-            default_locale = (
-                current_app.config.get("BABEL_DEFAULT_LOCALE", "en")
-                if current_app
-                else "en"
-            )
-            return gettext_from_dict(field_value, locale, default_locale)
-        except (ImportError, AttributeError, RuntimeError, KeyError, TypeError):
-            # fallback: current locale -> en -> any available language -> empty
-            locale = getattr(current_i18n, "locale", "en") if current_i18n else "en"
-            return (
-                field_value.get(locale)
-                or field_value.get("en")
-                or next(
-                    iter(field_value.values()), ""
-                )  # Show any available translation rather than empty
-            )
-
-    # This shouldn't happen for rule text fields. Indicates a configuration error
-    raise ValueError(
-        f"Unsupported field type for translation: {type(field_value)} with value: {field_value}"
-    )
 
 
 class Rule:
@@ -109,9 +64,10 @@ class RuleResult:
     """Class representing the result of evaluating a rule."""
 
     rule_id: str
-    rule_title: str
-    rule_message: str
-    rule_description: str
+    # Can be string or multilingual dict for backward compatibility
+    rule_title: Union[str, Dict[str, str]]
+    rule_message: Union[str, Dict[str, str]]
+    rule_description: Union[str, Dict[str, str]]
     level: str
     success: bool
     check_results: List[ExpressionResult]
@@ -121,9 +77,9 @@ class RuleResult:
         """Alternative constructor to create a RuleResult from a rule object."""
         return cls(
             rule_id=rule.id,
-            rule_title=_translate_field(rule.title),
-            rule_message=_translate_field(rule.message),
-            rule_description=_translate_field(rule.description),
+            rule_title=rule.title,
+            rule_message=rule.message,
+            rule_description=rule.description,
             level=rule.level,
             success=success,
             check_results=check_results,
