@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 KTH Royal Institute of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,6 +10,7 @@
 
 from . import config
 from .base import ChecksRegistry
+from .utils import translate_field
 
 
 class InvenioChecks(object):
@@ -25,6 +27,8 @@ class InvenioChecks(object):
         app.extensions["invenio-checks"] = self
         self.checks_registry = ChecksRegistry()
         self.checks_registry.load_from_entry_points(app, "invenio_checks.check_types")
+        # Register Jinja filters
+        app.jinja_env.filters["translate_field"] = translate_field
 
     def init_config(self, app):
         """Initialize configuration."""
