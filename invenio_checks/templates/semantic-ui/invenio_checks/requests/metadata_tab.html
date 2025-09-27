@@ -2,6 +2,7 @@
 
 This file is part of Invenio.
 Copyright (C) 2025 CERN.
+Copyright (C) 2025 KTH Royal Institute of Technology.
 
 Invenio is free software; you can redistribute it and/or modify it
 under the terms of the MIT License; see LICENSE file for more details.
@@ -31,12 +32,12 @@ under the terms of the MIT License; see LICENSE file for more details.
         <div class="item">
           <i class="{{ severity_level_icons_tpl.severity_level_icons[rule_severity_level] }}"></i>
           <div class="content">
-            <div class="header">{{ rule_result.rule_message }}</div>
+            <div class="header">{{ rule_result.rule_message | translate_field }}</div>
             {#
             Rule descriptions can contain HTML to link to a page with more details about the rule.
             This field is sanitized in the backend with SanitizedHTML.
             #}
-            <div class="pt-5 text-muted">{{ rule_result.rule_description | safe }}</div>
+            <div class="pt-5 text-muted">{{ rule_result.rule_description | translate_field | safe }}</div>
           </div>
         </div>
         {% endfor %}

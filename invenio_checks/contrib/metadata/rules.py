@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 KTH Royal Institute of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 """Metadata check rules."""
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from .expressions import (
     ComparisonExpression,
@@ -63,9 +64,10 @@ class RuleResult:
     """Class representing the result of evaluating a rule."""
 
     rule_id: str
-    rule_title: str
-    rule_message: str
-    rule_description: str
+    # Can be string or multilingual dict for backward compatibility
+    rule_title: Union[str, dict[str, str]]
+    rule_message: Union[str, dict[str, str]]
+    rule_description: Union[str, dict[str, str]]
     level: str
     success: bool
     check_results: List[ExpressionResult]

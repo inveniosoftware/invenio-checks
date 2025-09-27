@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 KTH Royal Institute of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -14,6 +15,7 @@ from pathlib import Path
 
 import yaml
 from flask import current_app
+from invenio_i18n import lazy_gettext as _l
 
 from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
@@ -91,8 +93,8 @@ class FileFormatsCheck(Check):
     """
 
     id = "file_formats"
-    title = "File formats check"
-    description = (
+    title = _l("File formats check")
+    description = _l(
         "Validates that record files are in open and scientific formats, "
         "optionally suggesting alternatives."
     )
@@ -101,9 +103,13 @@ class FileFormatsCheck(Check):
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 
     default_messages = {
-        "closed_format_message": ".{ext} is not a known open or scientific file format.",
-        "closed_format_description": "Using closed or proprietary formats hinders reusability and preservation of published files.",
-        "title": "All files should be in open or scientific formats",
+        "closed_format_message": _l(
+            ".{ext} is not a known open or scientific file format."
+        ),
+        "closed_format_description": _l(
+            "Using closed or proprietary formats hinders reusability and preservation of published files."
+        ),
+        "title": _l("All files should be in open or scientific formats"),
     }
 
     @classproperty

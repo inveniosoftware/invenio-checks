@@ -2,6 +2,7 @@
 
 This file is part of Invenio.
 Copyright (C) 2025 CERN.
+Copyright (C) 2025 KTH Royal Institute of Technology.
 
 Invenio is free software; you can redistribute it and/or modify it
 under the terms of the MIT License; see LICENSE file for more details.
@@ -25,7 +26,7 @@ under the terms of the MIT License; see LICENSE file for more details.
             <div class="pt-5 text-muted">
               <p>{{ check.result.description | safe }}</p>
               {% if has_errors %}
-              <p>The following files are not using open or scientific formats:</p>
+              <p>{{ _('The following files are not using open or scientific formats:') }}</p>
               <ul>
                 {# NOTE: We just care about listing filenames #}
                 {% for error in check.result.errors %}

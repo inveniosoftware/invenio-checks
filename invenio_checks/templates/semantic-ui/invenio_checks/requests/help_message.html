@@ -2,6 +2,7 @@
 
 This file is part of Invenio.
 Copyright (C) 2025 CERN.
+Copyright (C) 2025 KTH Royal Institute of Technology.
 
 Invenio is free software; you can redistribute it and/or modify it
 under the terms of the MIT License; see LICENSE file for more details.
@@ -9,18 +10,17 @@ under the terms of the MIT License; see LICENSE file for more details.
 
 {% if has_draft %}
 <div class="ui warning message">
-    <div class="header"><i class="attention icon"></i> Editing in progress</div>
-    <p>You're viewing checks and feedback results for unpublished changes.</p>
+    <div class="header"><i class="attention icon"></i> {{ _('Editing in progress') }}</div>
+    <p>{{ _("You're viewing checks and feedback results for unpublished changes.") }}</p>
     {% if is_published %}
-    <p>The published version available to users may differ from what's shown here.</p>
+    <p>{{ _('The published version available to users may differ from what\'s shown here.') }}</p>
     {% endif %}
 </div>
 {% endif %}
 
 <div class="ui info message">
-    <div class="header">What is this about?</div>
-    <p>These checks help ensure that your submission is compliant with this community's guidelines.</p>
-    <h5 class="ui header">How do I fix warnings/errors?</h5>
-    <p>Go to the "Record" tab and click the orange "Edit" button. All errors and recommendations are displayed inline in
-        the upload form.</p>
+    <div class="header">{{ _('What is this about?') }}</div>
+    <p>{{ _('These checks help ensure that your submission is compliant with this community\'s guidelines.') }}</p>
+    <h5 class="ui header">{{ _('How do I fix warnings/errors?') }}</h5>
+    <p>{{ _('Go to the "Record" tab and click the orange "Edit" button. All errors and recommendations are displayed inline in the upload form.') }}</p>
 </div>
