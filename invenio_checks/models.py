@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -14,7 +15,6 @@ from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_db import db
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import validates
-from sqlalchemy_utils import Timestamp
 from sqlalchemy_utils.types import ChoiceType, JSONType, UUIDType
 
 from .proxies import current_checks_registry
@@ -45,7 +45,7 @@ class Severity(enum.Enum):
             return "error"
 
 
-class CheckConfig(db.Model, Timestamp):
+class CheckConfig(db.Model, db.Timestamp):
     """Configuration for a check in a community."""
 
     __tablename__ = "checks_config"
@@ -83,7 +83,7 @@ class CheckRunStatus(enum.Enum):
     ERROR = "E"
 
 
-class CheckRun(db.Model, Timestamp):
+class CheckRun(db.Model, db.Timestamp):
     """Check run state."""
 
     __tablename__ = "checks_run"
@@ -95,8 +95,8 @@ class CheckRun(db.Model, Timestamp):
     is_draft = db.Column(db.Boolean, nullable=False, default=False)
     revision_id = db.Column(db.Integer, nullable=False)
 
-    start_time = db.Column(db.DateTime, nullable=True)
-    end_time = db.Column(db.DateTime, nullable=True)
+    start_time = db.Column(db.UTCDateTime, nullable=True)
+    end_time = db.Column(db.UTCDateTime, nullable=True)
     status = db.Column(ChoiceType(CheckRunStatus, impl=db.CHAR(1)), nullable=False)
     state = db.Column(JSON, nullable=False)
     result = db.Column(JSON, nullable=False)

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 Graz University of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 """Metadata check implementation."""
 
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from invenio_checks.base import Check
@@ -23,7 +24,7 @@ class CheckResult:
     check_id: str
     success: bool = True
     rule_results: List[RuleResult] = field(default_factory=list)
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     sync: bool = True  # Default to synchronous
     errors: List[Dict] = field(default_factory=list)
 
