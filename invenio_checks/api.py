@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 Graz University of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Checks API."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import current_app
 from invenio_db.uow import ModelCommitOp
@@ -51,9 +52,9 @@ class ChecksAPI:
         result_run = None
         try:
             check_cls = current_checks_registry.get(config.check_id)
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             res = check_cls().run(record, config)
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
 
             # Fetch the previous run
             previous_run = CheckRun.query.filter_by(
