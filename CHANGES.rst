@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v3.0.0 (released 2025-12-12)
+
+- chore(setup): bump invenio-communities to v22.0.0
+
 Version v2.0.0 (released 2025-09-22)
 
 - installation: bump invenio-communities
