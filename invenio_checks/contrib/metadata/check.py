@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
+# Copyright (C) 2025 KTH Royal Institute of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,6 +10,9 @@
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Dict, List
+
+from invenio_i18n import gettext as _
+from invenio_i18n import lazy_gettext as _l
 
 from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
@@ -48,8 +52,8 @@ class MetadataCheck(Check):
     """Check for validating record metadata against configured rules."""
 
     id = "metadata"
-    title = "Metadata validation"
-    description = "Validates record metadata against configured rules."
+    title = _l("Metadata validation")
+    description = _l("Validates record metadata against configured rules.")
     sort_order = 10
 
     def validate_config(self, config):
@@ -133,7 +137,7 @@ class MetadataCheckConfig:
     def from_dict(cls, config):
         """Create a check configuration from a dictionary."""
         check_id = config.get("id")
-        title = config.get("title", "Unnamed check")
+        title = config.get("title", _("Unnamed check"))
         description = config.get("description", "")
 
         # Parse rules
