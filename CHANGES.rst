@@ -1,11 +1,17 @@
 ..
     Copyright (C) 2025 CERN.
+    Copyright (C) 2026 Graz University of Technology.
 
     Invenio-Checks is free software; you can redistribute it and/or modify
     it under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version v4.0.0 (released 2026-02-01)
+
+- chore(setup): bump dependencies
+- fix(chore): DeprecationWarning stdlib
 
 Version v3.0.0 (released 2025-12-12)
 
