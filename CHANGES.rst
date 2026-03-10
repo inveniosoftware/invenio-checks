@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v5.0.0 (released 2026-03-10)
+
+- installation: bump invenio-communities
+
 Version v4.0.0 (released 2026-02-01)
 
 - chore(setup): bump dependencies
