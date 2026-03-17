@@ -52,7 +52,7 @@ class CheckConfig(db.Model, db.Timestamp):
 
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4)
     community_id = db.Column(
-        UUIDType, db.ForeignKey(CommunityMetadata.id), nullable=False
+        UUIDType, db.ForeignKey(CommunityMetadata.id), nullable=True
     )
     check_id = db.Column(db.String(255), nullable=False)
     params = db.Column(JSON, nullable=False)
