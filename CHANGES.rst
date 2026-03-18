@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v6.0.0 (released 2026-03-18)
+
+- installation: bump invenio-communities, invenio-jobs
+
 Version v5.0.0 (released 2026-03-10)
 
 - installation: bump invenio-communities
