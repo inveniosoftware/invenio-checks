@@ -14,7 +14,7 @@ from invenio_db.utils import (
 )
 
 # revision identifiers, used by Alembic.
-revision = ""
+revision = "c39b06b59667"
 down_revision = "1742549302"
 branch_labels = ()
 depends_on = None
