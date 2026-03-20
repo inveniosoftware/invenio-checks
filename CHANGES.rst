@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v7.0.0 (released 2026-03-20):
+
+- fix(alembic): add missing revision ID to datetime/UTC migration
+
 Version v6.0.0 (released 2026-03-18)
 
 - installation: bump invenio-communities, invenio-jobs
