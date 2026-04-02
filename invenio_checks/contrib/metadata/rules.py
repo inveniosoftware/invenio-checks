@@ -7,7 +7,7 @@
 """Metadata check rules."""
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from .expressions import (
     ComparisonExpression,
@@ -30,6 +30,7 @@ class Rule:
         description=None,
         condition=None,
         checks=None,
+        error_path=None,
     ):
         """Initialize the rule."""
         self.id = id
@@ -39,6 +40,7 @@ class Rule:
         self.level = level
         self.condition = condition
         self.checks = checks or []
+        self.error_path = error_path
 
     def evaluate(self, record):
         """Evaluate the rule against a record."""
@@ -69,6 +71,7 @@ class RuleResult:
     level: str
     success: bool
     check_results: List[ExpressionResult]
+    error_path: Optional[str] = None
 
     @classmethod
     def from_rule(cls, rule, success: bool, check_results: List[ExpressionResult]):
@@ -81,6 +84,7 @@ class RuleResult:
             level=rule.level,
             success=success,
             check_results=check_results,
+            error_path=rule.error_path,
         )
 
     def to_dict(self):
@@ -142,6 +146,7 @@ class RuleParser:
         message = config.get("message", "")
         description = config.get("description", "")
         level = config.get("level", "info")
+        error_path = config.get("error_path")
 
         # Parse condition if present
         condition = None
@@ -154,4 +159,13 @@ class RuleParser:
             check = ExpressionParser.parse(check_config)
             checks.append(check)
 
-        return Rule(rule_id, title, message, level, description, condition, checks)
+        return Rule(
+            rule_id,
+            title,
+            message,
+            level,
+            description,
+            condition,
+            checks,
+            error_path,
+        )
