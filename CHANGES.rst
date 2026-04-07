@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v8.0.0 (released 2026-04-07)
+
+- chore(setup): bump invenio-drafts-resources to v9.0.0
+
 Version v7.0.0 (released 2026-03-20):
 
 - fix(alembic): add missing revision ID to datetime/UTC migration
