@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2025 CERN.
-# Copyright (C) 2025 Graz University of Technology.
+# Copyright (C) 2025-2026 Graz University of Technology.
 #
 # Invenio-Checks is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 
 from flask import current_app
 from invenio_db.uow import ModelCommitOp
+from sqlalchemy import or_
 
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
@@ -29,14 +30,20 @@ class ChecksAPI:
 
     @classmethod
     def get_configs(cls, community_ids):
-        """Get all check configurations for a list of community IDs."""
-        if not community_ids:
-            return []
+        """Get all check configurations for a list of community IDs.
 
-        return CheckConfig.query.filter(
-            CheckConfig.community_id.in_(community_ids),
-            CheckConfig.enabled.is_(True),
+        Always include the global checks configs to the community checks.
+        """
+        conditions = [CheckConfig.community_id.is_(None)]
+
+        if community_ids:
+            conditions.append(CheckConfig.community_id.in_(community_ids))
+
+        all_configs = CheckConfig.query.filter(
+            CheckConfig.enabled.is_(True), or_(*conditions)
         ).all()
+
+        return all_configs
 
     @classmethod
     def run_check(cls, config, record, uow, is_draft=None):
