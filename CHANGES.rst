@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v8.0.1 (released 2026-04-08)
+
+- chore(setup): bump invenio-communities to v26.0.0
+
 Version v8.0.0 (released 2026-04-07)
 
 - chore(setup): bump invenio-drafts-resources to v9.0.0
