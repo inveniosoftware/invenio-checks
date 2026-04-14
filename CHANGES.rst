@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v8.1.0 (released 2026-04-14)
+
+- feat: support metadata check error paths
+
 Version v8.0.1 (released 2026-04-08)
 
 - chore(setup): bump invenio-communities to v26.0.0
