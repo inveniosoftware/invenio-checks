@@ -21,6 +21,12 @@ class Check:
     description: str
     """Description of the check's purpose."""
 
+    sync: bool
+    """Whether the check should run synchronously"""
+
+    target_type: str
+    """Type of item the check runs against (record, user, community, etc)."""
+
     def validate_config(self, config):
         """Validate the configuration for this check."""
         raise NotImplementedError()
