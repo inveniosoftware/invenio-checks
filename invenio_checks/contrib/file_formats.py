@@ -68,7 +68,6 @@ class CheckResult:
     title: str
     description: str
     errors: list[dict] = field(default_factory=list)
-    sync: bool = True
     success: bool = True
 
     def to_dict(self):
@@ -95,6 +94,7 @@ class FileFormatsCheck(Check):
         "optionally suggesting alternatives."
     )
     sort_order = 20
+    sync = True
 
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 
