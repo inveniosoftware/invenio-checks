@@ -690,6 +690,235 @@ class TestComparisonExpression:
 
         assert "Invalid operator" in str(excinfo.value)
 
+    def test_min_operator_text_success(self):
+        """Test min operator with text field - success case."""
+        record = {"title": "Hello World"}
+        expr = ComparisonExpression(FieldExpression("title"), "min", 5)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "title"
+        assert result.value == "Hello World"
+        assert result.message is None
+
+    def test_min_operator_text_failure(self):
+        """Test min operator with text field - failure case."""
+        record = {"title": "Hi"}
+        expr = ComparisonExpression(FieldExpression("title"), "min", 5)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "title"
+        assert result.value == "Hi"
+        assert result.message is not None
+        assert "expected" in result.message.lower() or "min" in result.message.lower()
+
+    def test_min_operator_list_success(self):
+        """Test min operator with list field - success case."""
+        record = {"keywords": ["fieldA", "fieldB", "Williams"]}
+        expr = ComparisonExpression(FieldExpression("keywords"), "min", 2)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "keywords"
+        assert result.value == ["fieldA", "fieldB", "Williams"]
+        assert result.message is None
+
+    def test_min_operator_list_failure(self):
+        """Test min operator with list field - failure case."""
+        record = {"keywords": ["fieldA"]}
+        expr = ComparisonExpression(FieldExpression("keywords"), "min", 2)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "keywords"
+        assert result.value == ["fieldA"]
+        assert result.message is not None
+
+    def test_min_operator_number_success(self):
+        """Test min operator with numeric field - success case."""
+        record = {"year": 2025}
+        expr = ComparisonExpression(FieldExpression("year"), "min", 2000)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "year"
+        assert result.value == 2025
+        assert result.message is None
+
+    def test_min_operator_number_failure(self):
+        """Test min operator with numeric field - failure case."""
+        record = {"year": 1999}
+        expr = ComparisonExpression(FieldExpression("year"), "min", 2000)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "year"
+        assert result.value == 1999
+        assert result.message is not None
+
+    def test_min_operator_empty_string(self):
+        """Test min operator with empty string."""
+        record = {"title": ""}
+        expr = ComparisonExpression(FieldExpression("title"), "min", 1)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "title"
+        assert result.value == ""
+
+    def test_min_operator_empty_list(self):
+        """Test min operator with empty list."""
+        record = {"authors": []}
+        expr = ComparisonExpression(FieldExpression("authors"), "min", 1)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "authors"
+        assert result.value == []
+
+    def test_min_operator_invalid_type(self):
+        """Test min operator with invalid type."""
+        record = {"flag": True}
+        expr = ComparisonExpression(FieldExpression("flag"), "min", 1)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "flag"
+        assert result.message is not None
+        assert "cannot check min" in result.message.lower()
+
+    def test_min_operator_equal_value(self):
+        """Test min operator with equal value (should pass)."""
+        record = {"title": "Test"}
+        expr = ComparisonExpression(FieldExpression("title"), "min", 4)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "title"
+
+    # Tests for max operator
+    def test_max_operator_text_success(self):
+        """Test max operator with text field - success case."""
+        record = {"title": "Hi"}
+        expr = ComparisonExpression(FieldExpression("title"), "max", 10)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "title"
+        assert result.value == "Hi"
+        assert result.message is None
+
+    def test_max_operator_text_failure(self):
+        """Test max operator with text field - failure case."""
+        record = {"title": "Hello World"}
+        expr = ComparisonExpression(FieldExpression("title"), "max", 5)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "title"
+        assert result.value == "Hello World"
+        assert result.message is not None
+        assert "expected" in result.message.lower() or "max" in result.message.lower()
+
+    def test_max_operator_list_success(self):
+        """Test max operator with list field - success case."""
+        record = {"authors": ["Smith", "Johnson"]}
+        expr = ComparisonExpression(FieldExpression("authors"), "max", 5)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "authors"
+        assert result.value == ["Smith", "Johnson"]
+        assert result.message is None
+
+    def test_max_operator_list_failure(self):
+        """Test max operator with list field - failure case."""
+        record = {"authors": ["Smith", "Johnson", "Williams"]}
+        expr = ComparisonExpression(FieldExpression("authors"), "max", 2)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "authors"
+        assert result.value == ["Smith", "Johnson", "Williams"]
+        assert result.message is not None
+
+    def test_max_operator_number_success(self):
+        """Test max operator with numeric field - success case."""
+        record = {"year": 2000}
+        expr = ComparisonExpression(FieldExpression("year"), "max", 2025)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "year"
+        assert result.value == 2000
+        assert result.message is None
+
+    def test_max_operator_number_failure(self):
+        """Test max operator with numeric field - failure case."""
+        record = {"year": 2050}
+        expr = ComparisonExpression(FieldExpression("year"), "max", 2025)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "year"
+        assert result.value == 2050
+        assert result.message is not None
+
+    def test_max_operator_empty_string(self):
+        """Test max operator with empty string."""
+        record = {"title": ""}
+        expr = ComparisonExpression(FieldExpression("title"), "max", 0)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "title"
+        assert result.value == ""
+
+    def test_max_operator_empty_list(self):
+        """Test max operator with empty list."""
+        record = {"authors": []}
+        expr = ComparisonExpression(FieldExpression("authors"), "max", 0)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "authors"
+        assert result.value == []
+
+    def test_max_operator_invalid_type(self):
+        """Test max operator with invalid type."""
+        record = {"flag": True}
+        expr = ComparisonExpression(FieldExpression("flag"), "max", 1)
+        result = expr.evaluate(record)
+
+        assert result.success is False
+        assert result.path == "flag"
+        assert result.message is not None
+        assert "cannot check max" in result.message.lower()
+
+    def test_max_operator_equal_value(self):
+        """Test max operator with equal value (should pass)."""
+        record = {"title": "Test"}
+        expr = ComparisonExpression(FieldExpression("title"), "max", 4)
+        result = expr.evaluate(record)
+
+        assert result.success is True
+        assert result.path == "title"
+
+    def test_min_max_with_missing_field(self):
+        """Test min/max operators when field is missing."""
+        record = {"title": "Test Record"}
+        min_expr = ComparisonExpression(FieldExpression("abstract"), "min", 10)
+        max_expr = ComparisonExpression(FieldExpression("abstract"), "max", 100)
+
+        min_result = min_expr.evaluate(record)
+        max_result = max_expr.evaluate(record)
+
+        assert min_result.success is False
+        assert "missing" in min_result.message.lower()
+        assert max_result.success is False
+        assert "missing" in max_result.message.lower()
+
 
 class TestLogicalExpression:
     """Tests for LogicalExpression class."""
