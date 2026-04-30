@@ -192,3 +192,47 @@ class SubcommunityChecksComponent(ServiceComponent):
             for config in configs:
                 if config.params.get("sync", True):
                     ChecksAPI.run_check(config, record, self.uow)
+
+
+@toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
+class CommunityMemberChecksComponent(ServiceComponent):
+    """Reruns membership checks when community members change."""
+
+    def _rerun_membership_checks(self, member, uow):
+        community_id = member.community_id
+        if not community_id:
+            return
+
+        open_requests = RequestMetadata.query.filter(
+            RequestMetadata.json.op('->>')('type') == "subcommunity",
+            RequestMetadata.json.op('->>')('status') == "submitted",
+            RequestMetadata.json['topic'].op('->>')('community') == str(community_id),
+        ).all()
+        if not open_requests:
+            return
+
+        for req_model in open_requests:
+            request = Request.get_record(req_model.id)
+            parent = request.receiver.resolve()
+            subcommunity = request.topic.resolve()
+
+            config = CheckConfig.query.filter(
+                CheckConfig.community_id == parent.id,
+                CheckConfig.enabled.is_(True),
+                CheckConfig.check_id == "subcommunity_member",
+                CheckConfig.params["scope"].as_string() == "community",
+            ).one_or_none()
+
+            ChecksAPI.run_check(config, subcommunity, uow)
+
+    def accept_invite(self, identity, record=None, **kwargs):
+        """Rerun on invitation accepted."""
+        self._rerun_membership_checks(record, self.uow)
+
+    def members_update(self, identity, record=None, **kwargs):
+        """Rerun on role change."""
+        self._rerun_membership_checks(record, self.uow)
+
+    def members_delete(self, identity, record=None, **kwargs):
+        """Rerun on member removal."""
+        self._rerun_membership_checks(record, self.uow)
