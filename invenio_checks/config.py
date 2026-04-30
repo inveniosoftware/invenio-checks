@@ -8,4 +8,5 @@
 """Invenio checks config."""
 
 CHECKS_ENABLED = False
+CHECKS_SUBCOMMUNITY_ENABLED = False
 """Enable checks."""
