@@ -94,6 +94,8 @@ class ComparisonExpression(Expression):
     CONTAINS = "Expected {path} not to contain {unexpected}, but got {actual}"
     NOT_IN = "Expected {expected} in {path}, but got {actual}"
     IN = "Expected {unexpected} to not be in {path}, but got {actual}"
+    BELOW_MIN = "Expected {path} to have at least {expected} {unit}, but got {actual}"
+    ABOVE_MAX = "Expected {path} to have at most {expected} {unit}, but got {actual}"
 
     VALID_OPERATORS = [
         "==",
@@ -106,6 +108,8 @@ class ComparisonExpression(Expression):
         "!$=",
         "in",
         "not in",
+        "min",
+        "max",
     ]
 
     def __init__(self, left, operator, right):
@@ -243,11 +247,85 @@ class ComparisonExpression(Expression):
             else:
                 success = False
                 message = f"Cannot check if {type(left_value)} doesn't end with a value"
+        elif self.operator == "min":
+            success, message = self._check_min(left_value, path)
+        elif self.operator == "max":
+            success, message = self._check_max(left_value, path)
         else:
             success = False
             message = f"Unknown operator: {self.operator}"
 
         return ExpressionResult(success, path, left_value, message)
+
+    def _get_comparable_value(self, value):
+        """Get the comparable value for min/max checks based on type.
+
+        For strings: returns length
+        For lists/tuples: returns count
+        For numbers: returns the value itself
+        Returns None for unsupported types (including booleans).
+        """
+        if isinstance(value, str):
+            return len(value), "characters"
+        elif isinstance(value, (list, tuple)):
+            return len(value), "items"
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            return value, "value"
+        return None, None
+
+    def _check_min(self, left_value, path):
+        """Check if value meets minimum requirement."""
+        comparable, unit = self._get_comparable_value(left_value)
+        if comparable is None:
+            return False, f"Cannot check min for {type(left_value).__name__}"
+
+        threshold = self.right
+        if not isinstance(threshold, (int, float)):
+            return (
+                False,
+                f"Min threshold must be a number, got {type(threshold).__name__}",
+            )
+
+        if comparable >= threshold:
+            return True, None
+        else:
+            actual_display = comparable
+            # For strings, show the actual string length, not the string itself
+            if isinstance(left_value, str):
+                actual_display = f"'{left_value}' ({comparable} {unit})"
+            elif isinstance(left_value, (list, tuple)):
+                actual_display = f"{comparable} {unit}"
+
+            return False, self.BELOW_MIN.format(
+                path=path, expected=threshold, unit=unit, actual=actual_display
+            )
+
+    def _check_max(self, left_value, path):
+        """Check if value meets maximum requirement."""
+        comparable, unit = self._get_comparable_value(left_value)
+        if comparable is None:
+            return False, f"Cannot check max for {type(left_value).__name__}"
+
+        threshold = self.right
+        if not isinstance(threshold, (int, float)):
+            return (
+                False,
+                f"Max threshold must be a number, got {type(threshold).__name__}",
+            )
+
+        if comparable <= threshold:
+            return True, None
+        else:
+            actual_display = comparable
+            # For strings, show the actual string length, not the string itself
+            if isinstance(left_value, str):
+                actual_display = f"'{left_value}' ({comparable} {unit})"
+            elif isinstance(left_value, (list, tuple)):
+                actual_display = f"{comparable} {unit}"
+
+            return False, self.ABOVE_MAX.format(
+                path=path, expected=threshold, unit=unit, actual=actual_display
+            )
 
 
 class LogicalExpression(Expression):
