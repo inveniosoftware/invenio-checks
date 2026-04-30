@@ -67,9 +67,12 @@ class FieldExpression(Expression):
                 obj = list(obj)
 
             if isinstance(obj, dict):
-                if part not in obj:
+                if part in obj:
+                    obj = obj[part]
+                elif hasattr(obj, part):
+                    obj = getattr(obj, part)
+                else:
                     raise KeyError(f"Key '{part}' not found")
-                obj = obj[part]
             elif hasattr(obj, part):
                 obj = getattr(obj, part)
             elif isinstance(obj, list):
