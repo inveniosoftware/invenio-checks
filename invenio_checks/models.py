@@ -92,8 +92,8 @@ class CheckRun(db.Model, db.Timestamp):
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
     config = db.relationship(CheckConfig)
     record_id = db.Column(UUIDType, nullable=False, index=True)
-    is_draft = db.Column(db.Boolean, nullable=False, default=False)
-    revision_id = db.Column(db.Integer, nullable=False)
+    is_draft = db.Column(db.Boolean)
+    revision_id = db.Column(db.Integer)
 
     start_time = db.Column(db.UTCDateTime, nullable=True)
     end_time = db.Column(db.UTCDateTime, nullable=True)
@@ -104,3 +104,20 @@ class CheckRun(db.Model, db.Timestamp):
     __table_args__ = (
         db.Index("idx_checks_run_config_id_record_id", config_id, record_id),
     )
+
+    @property
+    def overall_severity(self):
+        """Compute the overall severity level from the run's errors."""
+        if "errors" not in self.result:
+            return "success"
+
+        level = "success"
+        for error in self.result["errors"]:
+            severity = error["severity"]
+            if severity == "error":
+                return "error"
+            if severity == "warning":
+                level = "warning"
+            elif severity == "info" and level == "success":
+                level = "info"
+        return level
