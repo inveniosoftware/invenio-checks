@@ -40,7 +40,9 @@ class ChecksAPI:
         )
 
         if target_type is not None:
-            query = query.filter(CheckConfig.params["target_type"].as_string() == target_type)
+            query = query.filter(
+                CheckConfig.params["target_type"].as_string() == target_type
+            )
 
         return query.all()
 
@@ -80,10 +82,12 @@ class ChecksAPI:
                     "result": res.to_dict(),
                 }
                 if config.params["target_type"] == "record":
-                    check_run.update({
-                        "is_draft": is_draft,
-                        "revision_id": record.revision_id,
-                    })
+                    check_run.update(
+                        {
+                            "is_draft": is_draft,
+                            "revision_id": record.revision_id,
+                        }
+                    )
                 result_run = CheckRun(**check_run)
             else:
                 result_run = previous_run
@@ -124,4 +128,3 @@ class ChecksAPI:
                 )
 
         return errors
-
