@@ -13,32 +13,37 @@ from flask import current_app
 from invenio_db.uow import ModelCommitOp, ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.errors import ValidationErrorGroup
+from invenio_requests.records.api import Request
+from invenio_requests.records.models import RequestMetadata
 
 from .api import ChecksAPI
-from .models import CheckRun
+from .models import CheckConfig, CheckRun
 
 
-def toggle_on_feature_flag(cls):
+def toggle_on_feature_flag(config_key):
     """Class decorator to apply to all direct public methods."""
 
-    def _decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if not current_app.config.get("CHECKS_ENABLED", False):
-                return
-            return func(*args, **kwargs)
+    def decorator(cls):
+        def _wrap(func):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                if not current_app.config.get(config_key, False):
+                    return
+                return func(*args, **kwargs)
 
-        return wrapper
+            return wrapper
 
-    # Using `vars` instead of `dir` to get direct methods from this class only (and not the base class ones).
-    for attr_name in vars(cls):
-        attr_value = getattr(cls, attr_name)
-        if callable(attr_value) and not attr_name.startswith("_"):
-            setattr(cls, attr_name, _decorator(attr_value))
-    return cls
+        # Using `vars` instead of `dir` to get direct methods from this class only (and not the base class ones).
+        for attr_name in vars(cls):
+            attr_value = getattr(cls, attr_name)
+            if callable(attr_value) and not attr_name.startswith("_"):
+                setattr(cls, attr_name, _wrap(attr_value))
+        return cls
+
+    return decorator
 
 
-@toggle_on_feature_flag
+@toggle_on_feature_flag("CHECKS_ENABLED")
 class ChecksComponent(ServiceComponent):
     """Checks component."""
 
@@ -46,7 +51,7 @@ class ChecksComponent(ServiceComponent):
         """Fetch checks on draft read."""
         errors = errors or []
         runs = ChecksAPI.get_runs(draft)
-        errors.extend(self._extract_run_errors(runs))
+        errors.extend(ChecksAPI.extract_run_errors(runs))
 
     def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
         """Run checks on draft update."""
@@ -61,13 +66,13 @@ class ChecksComponent(ServiceComponent):
             community_ids.add(str(run.config.community_id))
 
         updated_runs = []
-        configs = ChecksAPI.get_configs(community_ids)
+        configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
             run = ChecksAPI.run_check(config, draft, self.uow)
             if run:
                 updated_runs.append(run)
 
-        errors.extend(self._extract_run_errors(updated_runs))
+        errors.extend(ChecksAPI.extract_run_errors(updated_runs))
 
     def new_version(self, identity, draft=None, record=None, **kwargs):
         """Initialize checks on new version creation."""
@@ -80,7 +85,7 @@ class ChecksComponent(ServiceComponent):
         for run in record_runs:
             community_ids.add(str(run.config.community_id))
 
-        configs = ChecksAPI.get_configs(community_ids)
+        configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
             # Run checks on the new version draft
             ChecksAPI.run_check(config, draft, self.uow)
@@ -98,7 +103,7 @@ class ChecksComponent(ServiceComponent):
             community_ids.add(str(run.config.community_id))
 
         # Run checks for all relevant communities
-        configs = ChecksAPI.get_configs(community_ids)
+        configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
             # Run checks on the draft
             ChecksAPI.run_check(config, draft, self.uow)
@@ -108,7 +113,7 @@ class ChecksComponent(ServiceComponent):
         draft_runs = ChecksAPI.get_runs(draft)
 
         # Check if there are any check runs with errors
-        run_errors = self._extract_run_errors(draft_runs)
+        run_errors = ChecksAPI.extract_run_errors(draft_runs)
         error_severity_errors = [e for e in run_errors if e.get("severity") == "error"]
         if error_severity_errors:
             raise ValidationErrorGroup(errors=error_severity_errors)
@@ -149,7 +154,7 @@ class ChecksComponent(ServiceComponent):
         draft = record  # rename for clarity
 
         draft_runs = ChecksAPI.get_runs(draft)
-        run_errors = self._extract_run_errors(draft_runs)
+        run_errors = ChecksAPI.extract_run_errors(draft_runs)
         error_severity_errors = [e for e in run_errors if e.get("severity") == "error"]
         if error_severity_errors:
             raise ValidationErrorGroup(errors=error_severity_errors)
@@ -163,19 +168,71 @@ class ChecksComponent(ServiceComponent):
                 community_ids.add(str(community.parent.id))
         return community_ids
 
-    def _extract_run_errors(self, runs):
-        """Build errors list from a list of check runs."""
-        errors = []
-        for run in runs:
-            if not run.result or not run.result.get("errors"):
-                continue
 
-            for error in run.result.get("errors", []):
-                errors.append(
-                    {
-                        **error,
-                        "context": {"community": str(run.config.community_id)},
-                    }
-                )
+@toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
+class CommunityChecksComponent(ServiceComponent):
+    """Subcommunity checks component."""
 
-        return errors
+    def update(self, identity, data=None, record=None, **kwargs):
+        """Rerun checks if this community is a subcommunity."""
+        open_requests = RequestMetadata.query.filter(
+            RequestMetadata.json.op('->>')('type') == "subcommunity",
+            RequestMetadata.json.op('->>')('status') == "submitted",
+            RequestMetadata.json['topic'].op('->>')('community') == str(record.id),
+        ).all()
+        if not open_requests:
+            return
+
+        for req_model in open_requests:
+            request = Request.get_record(req_model.id)
+            parent = request.receiver.resolve()
+
+            configs = ChecksAPI.get_configs([parent.id], "community")
+
+            for config in configs:
+                if config.params.get("sync", True):
+                    ChecksAPI.run_check(config, record, self.uow)
+
+
+@toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
+class CommunityMemberChecksComponent(ServiceComponent):
+    """Reruns membership checks when community members change."""
+
+    def _rerun_membership_checks(self, member, uow):
+        community_id = member.community_id
+        if not community_id:
+            return
+
+        open_requests = RequestMetadata.query.filter(
+            RequestMetadata.json.op('->>')('type') == "subcommunity",
+            RequestMetadata.json.op('->>')('status') == "submitted",
+            RequestMetadata.json['topic'].op('->>')('community') == str(community_id),
+        ).all()
+        if not open_requests:
+            return
+
+        for req_model in open_requests:
+            request = Request.get_record(req_model.id)
+            parent = request.receiver.resolve()
+            subcommunity = request.topic.resolve()
+
+            config = CheckConfig.query.filter(
+                CheckConfig.community_id == parent.id,
+                CheckConfig.enabled.is_(True),
+                CheckConfig.check_id == "subcommunity_member",
+                CheckConfig.params["target_type"].as_string() == "community",
+            ).one_or_none()
+
+            ChecksAPI.run_check(config, subcommunity, uow)
+
+    def accept_invite(self, identity, record=None, **kwargs):
+        """Rerun on invitation accepted."""
+        self._rerun_membership_checks(record, self.uow)
+
+    def members_update(self, identity, record=None, **kwargs):
+        """Rerun on role change."""
+        self._rerun_membership_checks(record, self.uow)
+
+    def members_delete(self, identity, record=None, **kwargs):
+        """Rerun on member removal."""
+        self._rerun_membership_checks(record, self.uow)

@@ -21,6 +21,10 @@ class Check:
     description: str
     """Description of the check's purpose."""
 
+    sync: bool
+
+    target_type: str
+
     def validate_config(self, config):
         """Validate the configuration for this check."""
         raise NotImplementedError()

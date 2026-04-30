@@ -1,0 +1,31 @@
+{# -*- coding: utf-8 -*-
+
+This file is part of Invenio.
+Copyright (C) 2026 CERN.
+
+Invenio is free software; you can redistribute it and/or modify it
+under the terms of the MIT License; see LICENSE file for more details.
+#}
+
+{#
+  Set the rule severity level to allow getting the icon class for the rule result
+  of one rule result. This code depends on 2 fields of each `rule_result` :
+  `success` and `level`.  If the boolean `success` field is true, it means that
+  the check was successful. Otherwise, it means that the check failed, and we
+  display the severity `level` of the check.so the correct icon is displayed.
+#}
+
+{% macro rule_severity_level(rule_result) %}
+  {% if rule_result.success %}
+    {% set level = "success" %}
+  {% elif rule_result.level == "info" %}
+    {% set level = "info" %}
+  {% elif rule_result.level == "warning" %}
+    {% set level = "warning" %}
+  {% elif rule_result.level == "error" %}
+    {% set level = "error" %}
+  {% else %}
+    {% set level = "unknown" %}
+  {% endif %}
+  {{- level -}}
+{% endmacro %}

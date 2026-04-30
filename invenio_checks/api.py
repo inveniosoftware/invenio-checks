@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 
 from flask import current_app
 from invenio_db.uow import ModelCommitOp
+from sqlalchemy import or_
 
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
@@ -23,20 +24,25 @@ class ChecksAPI:
     @classmethod
     def get_runs(cls, record, is_draft=None):
         """Get all check runs for a record or draft."""
-        if is_draft is None:
+        if is_draft is None and getattr(record, "is_draft", False):
             is_draft = record.is_draft
         return CheckRun.query.filter_by(record_id=record.id, is_draft=is_draft).all()
 
     @classmethod
-    def get_configs(cls, community_ids):
+    def get_configs(cls, community_ids, target_type=None):
         """Get all check configurations for a list of community IDs."""
         if not community_ids:
             return []
 
-        return CheckConfig.query.filter(
+        query = CheckConfig.query.filter(
             CheckConfig.community_id.in_(community_ids),
             CheckConfig.enabled.is_(True),
-        ).all()
+        )
+
+        if target_type is not None:
+            query = query.filter(CheckConfig.params["target_type"].as_string() == target_type)
+
+        return query.all()
 
     @classmethod
     def run_check(cls, config, record, uow, is_draft=None):
@@ -46,7 +52,7 @@ class ChecksAPI:
         updates the run with the new results. If no run exists, it will create it.
         If the operation fails, an error is logged and `None` is returned.
         """
-        if is_draft is None:
+        if is_draft is None and config.params["target_type"] == "record":
             is_draft = record.is_draft
 
         result_run = None
@@ -64,24 +70,30 @@ class ChecksAPI:
             ).one_or_none()
 
             if not previous_run:
-                result_run = CheckRun(
-                    config=config,
-                    record_id=record.id,
-                    is_draft=is_draft,
-                    revision_id=record.revision_id,
-                    start_time=start_time,
-                    end_time=end_time,
-                    status=CheckRunStatus.COMPLETED,
-                    state="",
-                    result=res.to_dict(),
-                )
+                check_run = {
+                    "config": config,
+                    "record_id": record.id,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "status": CheckRunStatus.COMPLETED,
+                    "state": "",
+                    "result": res.to_dict(),
+                }
+                if config.params["target_type"] == "record":
+                    check_run.update({
+                        "is_draft": is_draft,
+                        "revision_id": record.revision_id,
+                    })
+                result_run = CheckRun(**check_run)
             else:
                 result_run = previous_run
-                result_run.is_draft = is_draft
-                result_run.revision_id = record.revision_id
                 result_run.start_time = start_time
                 result_run.end_time = end_time
                 result_run.result = res.to_dict()
+
+                if config.params["target_type"] == "record":
+                    result_run.is_draft = is_draft
+                    result_run.revision_id = record.revision_id
 
             uow.register(ModelCommitOp(result_run))
         except Exception:
@@ -94,3 +106,22 @@ class ChecksAPI:
             )
 
         return result_run
+
+    @classmethod
+    def extract_run_errors(cls, runs):
+        """Build errors list from a list of check runs."""
+        errors = []
+        for run in runs:
+            if not run.result or not run.result.get("errors"):
+                continue
+
+            for error in run.result.get("errors", []):
+                errors.append(
+                    {
+                        **error,
+                        "context": {"community": str(run.config.community_id)},
+                    }
+                )
+
+        return errors
+
