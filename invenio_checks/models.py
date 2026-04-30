@@ -56,6 +56,7 @@ class CheckConfig(db.Model, db.Timestamp):
         ChoiceType(Severity, impl=db.CHAR(1)), nullable=False, default=Severity.INFO
     )
     enabled = db.Column(db.Boolean, nullable=False, default=True)
+    target_type = db.Column(db.String(15), nullable=False, default="")
 
     @property
     def check_cls(self):
