@@ -19,8 +19,8 @@ class ChecksAPI:
 
     @classmethod
     def get_runs(cls, record, is_draft=None):
-        """Get all check runs for a record or draft."""
-        if is_draft is None and getattr(record, "is_draft", False):
+        """Get all check runs for an object."""
+        if is_draft is None and getattr(record, "is_draft", None) is not None:
             is_draft = record.is_draft
         return CheckRun.query.filter_by(record_id=record.id, is_draft=is_draft).all()
 
@@ -40,7 +40,7 @@ class ChecksAPI:
         )
 
         if target_type is not None:
-            query = query.filter(CheckConfig.params["target_type"].as_string() == target_type)
+            query = query.filter(CheckConfig.target_type == target_type)
 
         return query.all()
 
@@ -52,7 +52,7 @@ class ChecksAPI:
         updates the run with the new results. If no run exists, it will create it.
         If the operation fails, an error is logged and `None` is returned.
         """
-        if is_draft is None and config.params["target_type"] == "record":
+        if is_draft is None and config.target_type == "record":
             is_draft = record.is_draft
 
         result_run = None
@@ -79,11 +79,13 @@ class ChecksAPI:
                     "state": "",
                     "result": res.to_dict(),
                 }
-                if config.params["target_type"] == "record":
-                    check_run.update({
-                        "is_draft": is_draft,
-                        "revision_id": record.revision_id,
-                    })
+                if config.target_type == "record":
+                    check_run.update(
+                        {
+                            "is_draft": is_draft,
+                            "revision_id": record.revision_id,
+                        }
+                    )
                 result_run = CheckRun(**check_run)
             else:
                 result_run = previous_run
@@ -91,7 +93,7 @@ class ChecksAPI:
                 result_run.end_time = end_time
                 result_run.result = res.to_dict()
 
-                if config.params["target_type"] == "record":
+                if config.target_type == "record":
                     result_run.is_draft = is_draft
                     result_run.revision_id = record.revision_id
 
@@ -124,4 +126,3 @@ class ChecksAPI:
                 )
 
         return errors
-
