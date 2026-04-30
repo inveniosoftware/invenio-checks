@@ -169,15 +169,15 @@ class ChecksComponent(ServiceComponent):
 
 
 @toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
-class SubcommunityChecksComponent(ServiceComponent):
+class CommunityChecksComponent(ServiceComponent):
     """Subcommunity checks component."""
 
     def update(self, identity, data=None, record=None, **kwargs):
         """Rerun checks if this community is a subcommunity."""
         open_requests = RequestMetadata.query.filter(
-            RequestMetadata.json.op('->>')('type') == "subcommunity",
-            RequestMetadata.json.op('->>')('status') == "submitted",
-            RequestMetadata.json['topic'].op('->>')('community') == str(record.id),
+            RequestMetadata.json.op("->>")("type") == "subcommunity",
+            RequestMetadata.json.op("->>")("status") == "submitted",
+            RequestMetadata.json["topic"].op("->>")("community") == str(record.id),
         ).all()
         if not open_requests:
             return
@@ -203,9 +203,9 @@ class CommunityMemberChecksComponent(ServiceComponent):
             return
 
         open_requests = RequestMetadata.query.filter(
-            RequestMetadata.json.op('->>')('type') == "subcommunity",
-            RequestMetadata.json.op('->>')('status') == "submitted",
-            RequestMetadata.json['topic'].op('->>')('community') == str(community_id),
+            RequestMetadata.json.op("->>")("type") == "subcommunity",
+            RequestMetadata.json.op("->>")("status") == "submitted",
+            RequestMetadata.json["topic"].op("->>")("community") == str(community_id),
         ).all()
         if not open_requests:
             return
@@ -219,7 +219,7 @@ class CommunityMemberChecksComponent(ServiceComponent):
                 CheckConfig.community_id == parent.id,
                 CheckConfig.enabled.is_(True),
                 CheckConfig.check_id == "subcommunity_member",
-                CheckConfig.params["scope"].as_string() == "community",
+                CheckConfig.target_type == "community",
             ).one_or_none()
 
             ChecksAPI.run_check(config, subcommunity, uow)

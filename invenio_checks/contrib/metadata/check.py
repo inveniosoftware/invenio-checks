@@ -26,7 +26,6 @@ class CheckResult:
     success: bool = True
     rule_results: List[RuleResult] = field(default_factory=list)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    sync: bool = True  # Default to synchronous
     errors: List[Dict] = field(default_factory=list)
 
     def add_rule_result(self, rule_result: RuleResult):
@@ -53,6 +52,7 @@ class MetadataCheck(Check):
     title = _l("Metadata validation")
     description = _l("Validates record metadata against configured rules.")
     sort_order = 10
+    sync = True
 
     def validate_config(self, config):
         """Validate the configuration for this metadata check."""
