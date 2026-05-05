@@ -1,5 +1,5 @@
 ..
-    Copyright (C) 2025 CERN.
+    Copyright (C) 2025-2026 CERN.
     Copyright (C) 2026 Graz University of Technology.
 
     Invenio-Checks is free software; you can redistribute it and/or modify
@@ -7,6 +7,10 @@
 
 Changes
 =======
+
+Version v8.2.0 (released 2026-05-05)
+
+- feat(rules): add min/max operators
 
 Version v8.1.0 (released 2026-04-14)
 
