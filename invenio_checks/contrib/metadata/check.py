@@ -11,26 +11,23 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, List
 
-from invenio_checks.base import Check
+from invenio_checks.base import Check, CheckResult
 from invenio_checks.models import CheckConfig
 
 from .rules import RuleParser, RuleResult
 
 
 @dataclass
-class CheckResult:
+class MetadataCheckResult(CheckResult):
     """Result of running a check."""
 
-    check_id: str
-    success: bool = True
     rule_results: List[RuleResult] = field(default_factory=list)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    errors: List[Dict] = field(default_factory=list)
 
     def add_rule_result(self, rule_result: RuleResult):
         """Add a rule result and update the overall success."""
         self.rule_results.append(rule_result)
-        if not rule_result.success and rule_result.level == "failure":
+        if rule_result.success and rule_result.level == "failure":
             self.success = False
 
     def add_errors(self, errors: List[Dict]):
@@ -74,7 +71,9 @@ class MetadataCheck(Check):
     def run(self, record, config: CheckConfig):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
-        result = CheckResult(self.id)
+        result = MetadataCheckResult(
+            self.id, title=self.title, description=self.description
+        )
 
         # Parse the rules from the configuration
         rules = []
@@ -148,7 +147,9 @@ class MetadataCheckConfig:
     def evaluate(self, record):
         """Evaluate the check against a record."""
         # Create a check result
-        result = CheckResult(self.id)
+        result = MetadataCheckResult(
+            self.id, title=self.title, description=self.description
+        )
 
         # Evaluate each rule
         for rule in self.rules:
