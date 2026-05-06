@@ -16,7 +16,7 @@ under the terms of the MIT License; see LICENSE file for more details.
     <div class="ten wide column">
       <div class="ui very relaxed list rel-pl-2">
         {% set has_errors = check.result.errors %}
-        {% set icon = has_errors and severity_level_icons_tpl.severity_level_icons['warning'] or severity_level_icons_tpl.severity_level_icons['success'] %}
+        {% set icon = has_errors and severity_tpl.severity_icon['warning'] or severity_tpl.severity_icon['success'] %}
 
         <div class="item">
           <i class="{{ icon }}"></i>

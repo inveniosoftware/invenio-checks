@@ -29,7 +29,7 @@ under the terms of the MIT License; see LICENSE file for more details.
         {% endif %}
 
         <div class="item">
-          <i class="{{ severity_level_icons_tpl.severity_level_icons[rule_severity_level] }}"></i>
+          <i class="{{ severity_tpl.severity_icon[rule_severity_level] }}"></i>
           <div class="content">
             <div class="header">{{ rule_result.rule_message }}</div>
             {#
