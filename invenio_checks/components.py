@@ -220,7 +220,7 @@ class CommunityMemberChecksComponent(ServiceComponent):
                 CheckConfig.community_id == parent.id,
                 CheckConfig.enabled.is_(True),
                 CheckConfig.check_id == "subcommunity_member",
-                CheckConfig.params["target_type"].as_string() == "community",
+                CheckConfig.target_type == "community",
             ).one_or_none()
 
             ChecksAPI.run_check(config, subcommunity, uow)

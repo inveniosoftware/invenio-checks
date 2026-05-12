@@ -8,12 +8,8 @@
 """add target_type record."""
 
 import sqlalchemy as sa
-import sqlalchemy_utils
 from alembic import op
-from sqlalchemy.dialects import postgresql
-from sqlalchemy_utils import JSONType
-
-from invenio_checks.models import CheckRunStatus, Severity
+from sqlalchemy.sql import text
 
 # revision identifiers, used by Alembic.
 revision = "9d47b33c7b74"
@@ -24,18 +20,15 @@ depends_on = None
 
 def upgrade():
     """Upgrade database."""
-    op.execute("""
-        UPDATE checks_config
-        SET params = params || '{"target_type": "record"}'::jsonb
-        WHERE params->>'target_type' IS NULL
-    """)
-    op.alter_column("checks_run", "revision_id", nullable=True)
+    op.add_column(
+        "checks_config",
+        sa.Column("target_type", sa.String(15), nullable=False, server_default=""),
+    )
+    op.execute(text("""UPDATE checks_config SET target_type = 'record' WHERE
+                check_id = 'metadata' or check_id = 'file_formats';"""))
 
 
 def downgrade():
     """Downgrade database."""
-    op.execute("""
-        UPDATE checks_config
-        SET params = params - 'target_type'
-    """)
+    op.drop_column("checks_config", "target_type")
     # ### end Alembic commands ###
