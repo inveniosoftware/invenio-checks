@@ -18,7 +18,9 @@ under the terms of the MIT License; see LICENSE file for more details.
       {% for check_class in check_classes|sort(attribute="sort_order") %}
       <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
         {% set check_class_id = check_class.id %}
-        <i class="{% include 'invenio_checks/requests/overall_severity_level.html' %}"></i>
+        {% for check in checks if check.config.check_cls.id == check_class.id %}
+          <i class="{{ severity_level_icons_tpl.severity_level_icons[check.overall_severity] }}"></i>
+        {%  endfor %}
         {{ check_class.title }}</a>
       {% endfor %}
     </div>
