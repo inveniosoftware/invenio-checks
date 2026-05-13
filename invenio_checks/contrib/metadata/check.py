@@ -27,7 +27,7 @@ class MetadataCheckResult(CheckResult):
     def add_rule_result(self, rule_result: RuleResult):
         """Add a rule result and update the overall success."""
         self.rule_results.append(rule_result)
-        if rule_result.success and rule_result.level == "failure":
+        if not rule_result.success and rule_result.level == "error":
             self.success = False
 
     def add_errors(self, errors: List[Dict]):

@@ -47,8 +47,8 @@ class ChecksAPI:
         record,
         is_draft: bool,
         status: CheckRunStatus,
-        state={},
-        result={},
+        state=None,
+        result=None,
         start_time=None,
         end_time=None,
     ):
@@ -68,8 +68,8 @@ class ChecksAPI:
                 start_time=start_time,
                 end_time=end_time,
                 status=status,
-                state=state,
-                result=result,
+                state=state or {},
+                result=result or {},
             )
         else:
             result_run = previous_run
@@ -78,8 +78,8 @@ class ChecksAPI:
             result_run.start_time = start_time
             result_run.end_time = end_time
             result_run.status = status
-            result_run.state = state
-            result_run.result = result
+            result_run.state = state or {}
+            result_run.result = result or {}
 
         return result_run
 
@@ -149,13 +149,20 @@ class ChecksAPI:
                 },
             )
             if not result_run:
+                current_app.logger.exception(
+                    "No corresponding CheckRun",
+                    extra={
+                        "record_id": str(record.id),
+                        "check_config_id": str(config.id),
+                    },
+                )
                 return
 
             try:
                 result_run.status = CheckRunStatus.ERROR
                 result_run.state = {"error": str(e)}
                 db.session.commit()
-            except:
+            except Exception:
                 current_app.logger.exception(
                     "Failed to mark check run as ERROR",
                     extra={"check_run_id": getattr(result_run, "id", None)},
