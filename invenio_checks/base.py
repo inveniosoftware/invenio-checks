@@ -6,6 +6,9 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 """Check implementations and registry."""
 
+from dataclasses import asdict, dataclass, field
+from typing import Dict, List
+
 from invenio_base.utils import entry_points
 
 
@@ -20,6 +23,12 @@ class Check:
 
     description: str
     """Description of the check's purpose."""
+
+    sync: bool
+    """Whether the check should run synchronously"""
+
+    target_type: str
+    """Type of item the check runs against (record, user, community, etc)."""
 
     def validate_config(self, config):
         """Validate the configuration for this check."""
@@ -70,3 +79,18 @@ class ChecksRegistry:
             check_cls = check_cls_or_func
 
             self.register(check_cls)
+
+
+@dataclass
+class CheckResult:
+    """Result of running a check."""
+
+    id: str
+    title: str
+    description: str
+    success: bool = True
+    errors: List[Dict] = field(default_factory=list)
+
+    def to_dict(self):
+        """Convert the result to a dictionary."""
+        return asdict(self)
