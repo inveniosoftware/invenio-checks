@@ -29,7 +29,7 @@
     {% endfor %}
 
     {% set status = check.status.name %}
-    {% if ns.overall_severity_level == "success" and (status == "PENDING" or status == "RUNNING") %} %}
+    {% if ns.overall_severity_level == "success" and (status == "PENDING" or status == "RUNNING") %}
         {% set ns.overall_severity_level = "running" %}
     {% endif %}
   {% endif %}

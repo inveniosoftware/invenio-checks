@@ -7,12 +7,10 @@
 
 """Checks Tasks."""
 from datetime import datetime, timezone
-from time import sleep
 
 from celery import shared_task
 from flask import current_app
 from invenio_db import db
-from invenio_rdm_records.proxies import current_rdm_records_service as service
 from invenio_records_resources.services.uow import UnitOfWork
 
 from .models import CheckRun, CheckRunStatus
@@ -37,6 +35,10 @@ def run_check_async(self, check_run_id):
         config = check_run.config
         target_type = getattr(check_run.config.check_cls, "target_type", None)
         if target_type == "record":
+            from invenio_rdm_records.proxies import (
+                current_rdm_records_service as service,
+            )
+
             record = service.record_cls.get_record(check_run.record_id)
         else:
             current_app.logger.error(
@@ -75,6 +77,9 @@ def run_check_async(self, check_run_id):
                 check_run.status = CheckRunStatus.ERROR
                 check_run.state = str(e)
                 db.session.commit()
-        except:
-            pass
+        except Exception:
+            current_app.logger.exception(
+                "Failed to mark check run as ERROR",
+                extra={"check_run_id": check_run_id},
+            )
         raise self.retry(exc=e, countdown=30)
