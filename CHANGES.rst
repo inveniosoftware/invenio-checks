@@ -1,9 +1,7 @@
 ..
-    Copyright (C) 2025-2026 CERN.
-    Copyright (C) 2026 Graz University of Technology.
-
-    Invenio-Checks is free software; you can redistribute it and/or modify
-    it under the terms of the MIT License; see LICENSE file for more details.
+    SPDX-FileCopyrightText: 2025-2026 CERN.
+    SPDX-FileCopyrightText: 2026 Graz University of Technology.
+    SPDX-License-Identifier: MIT
 
 Changes
 =======
