@@ -8,6 +8,12 @@
 Changes
 =======
 
+Version v9.0.0 (released 2026-05-29)
+
+- chore(setup): bump dependencies
+- fix: migrations for choices
+- feat: allow empty community_id for check config
+
 Version v8.2.0 (released 2026-05-05)
 
 - feat(rules): add min/max operators
