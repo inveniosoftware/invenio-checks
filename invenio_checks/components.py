@@ -54,7 +54,8 @@ class ChecksComponent(ServiceComponent):
         # Take into account configs from past check runs (could be inclusion requests)
         past_runs = ChecksAPI.get_runs(draft)
         for run in past_runs:
-            community_ids.add(str(run.config.community_id))
+            if run.config.community_id is not None:
+                community_ids.add(str(run.config.community_id))
 
         updated_runs = []
         configs = ChecksAPI.get_configs(community_ids)
@@ -74,7 +75,8 @@ class ChecksComponent(ServiceComponent):
         # from the latest published record version
         record_runs = ChecksAPI.get_runs(record)
         for run in record_runs:
-            community_ids.add(str(run.config.community_id))
+            if run.config.community_id is not None:
+                community_ids.add(str(run.config.community_id))
 
         configs = ChecksAPI.get_configs(community_ids)
         for config in configs:
@@ -91,7 +93,8 @@ class ChecksComponent(ServiceComponent):
         # getting all the involved community IDs.
         past_runs = CheckRun.query.filter_by(record_id=record.id).all()
         for run in past_runs:
-            community_ids.add(str(run.config.community_id))
+            if run.config.community_id is not None:
+                community_ids.add(str(run.config.community_id))
 
         # Run checks for all relevant communities
         configs = ChecksAPI.get_configs(community_ids)
