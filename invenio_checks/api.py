@@ -45,7 +45,7 @@ class ChecksAPI:
         return query.all()
 
     @classmethod
-    def run_check(cls, config, record, uow, is_draft=None):
+    def run_check(cls, config, record, uow, is_draft=None, **kwargs):
         """Run a check for a given configuration on a record or draft.
 
         If a check run already exists for the given configuration and record/draft, it
@@ -59,7 +59,7 @@ class ChecksAPI:
         try:
             check_cls = current_checks_registry.get(config.check_id)
             start_time = datetime.now(timezone.utc)
-            res = check_cls().run(record, config)
+            res = check_cls().run(record, config, **kwargs)
             end_time = datetime.now(timezone.utc)
 
             # Fetch the previous run
