@@ -197,7 +197,7 @@ class CommunityChecksComponent(ServiceComponent):
 class CommunityMemberChecksComponent(ServiceComponent):
     """Reruns membership checks when community members change."""
 
-    def _rerun_membership_checks(self, member, uow):
+    def _rerun_membership_checks(self, member, uow, deleted_member_id=None):
         community_id = member.community_id
         if not community_id:
             return
@@ -222,9 +222,11 @@ class CommunityMemberChecksComponent(ServiceComponent):
                 CheckConfig.target_type == "community",
             ).one_or_none()
 
-            ChecksAPI.run_check(config, subcommunity, uow)
+            ChecksAPI.run_check(
+                config, subcommunity, uow, deleted_member_id=deleted_member_id
+            )
 
-    def accept_invite(self, identity, record=None, **kwargs):
+    def accept_member_request(self, identity, record=None, **kwargs):
         """Rerun on invitation accepted."""
         self._rerun_membership_checks(record, self.uow)
 
@@ -234,4 +236,6 @@ class CommunityMemberChecksComponent(ServiceComponent):
 
     def members_delete(self, identity, record=None, **kwargs):
         """Rerun on member removal."""
-        self._rerun_membership_checks(record, self.uow)
+        self._rerun_membership_checks(
+            record, self.uow, deleted_member_id=record.user_id
+        )
