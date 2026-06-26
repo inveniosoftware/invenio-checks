@@ -71,7 +71,9 @@ def run_check_async(self, check_run_id):
 
         with UnitOfWork() as uow:
             # Run synchronously inside the worker.
-            ChecksAPI.run_check(config, target, uow, sync=True)
+            ChecksAPI.run_check(
+                config, target, uow, sync=True, is_draft=check_run.is_draft
+            )
             uow.commit()
 
         return str(check_run.id)
