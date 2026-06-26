@@ -4,7 +4,7 @@
   SPDX-License-Identifier: MIT
 #}
 
-{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_tpl %}
 {% import "invenio_checks/requests/_rule_severity.html" as rule_severity_tpl %}
 
 <div class="ui column stackable grid">
@@ -15,7 +15,7 @@
         {% set rule_severity_level = rule_severity_tpl.rule_severity_level(rule_result) | trim %}
 
         <div class="item">
-          <i class="{{ severity_level_icons_tpl.severity_level_icons[rule_severity_level] }}"></i>
+          <i class="{{ severity_tpl.severity_level_icons[rule_severity_level] }}"></i>
           <div class="content">
             <div class="header">{{ rule_result.rule_message | translate_field }}</div>
             {#

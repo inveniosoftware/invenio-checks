@@ -3,7 +3,7 @@
   SPDX-License-Identifier: MIT
 #}
 
-{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_tpl %}
 
 {% set first_check = (checks | map(attribute='config.check_cls') | sort(attribute='sort_order') | first).id %}
 {% set check_classes = checks | map(attribute="config.check_cls") | unique(attribute="id") %}
@@ -13,10 +13,16 @@
     <div class="ui fluid secondary vertical menu ml-0 mr-0 rdm-tab-menu">
       {% for check_class in check_classes|sort(attribute="sort_order") %}
       <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
-        {% set check_class_id = check_class.id %}
+        {% set ns = namespace(severity='success') %}
         {% for check in checks if check.config.check_cls.id == check_class.id %}
-          <i class="{{ severity_level_icons_tpl.severity_level_icons[check.overall_severity] }}"></i>
-        {%  endfor %}
+          {# Allows handling cases with more than one run per check_id, displaying only one icon #}
+          {% if check.status.value in ('P', 'R') %}{% set ns.severity = 'running' %}
+          {% elif check.overall_severity == 'error' %}{% set ns.severity = 'error' %}
+          {% elif check.overall_severity == 'warning' and ns.severity != 'error' %}{% set ns.severity = 'warning' %}
+          {% elif check.overall_severity == 'info' and ns.severity == 'success' %}{% set ns.severity = 'info' %}
+          {% endif %}
+        {% endfor %}
+        <i class="{{ severity_tpl.severity_level_icons[ns.severity] }}"></i>
         {{ check_class.title }}</a>
       {% endfor %}
     </div>
