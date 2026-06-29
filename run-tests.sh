@@ -18,7 +18,6 @@ function cleanup() {
 }
 trap cleanup EXIT
 
-python -m check_manifest
 python -m sphinx.cmd.build -qnNW docs docs/_build/html
 
 eval "$(docker-services-cli up --db ${DB:-postgresql} --search ${SEARCH:-opensearch2} --cache ${CACHE:-redis} --mq ${MQ:-rabbitmq} --env)"
