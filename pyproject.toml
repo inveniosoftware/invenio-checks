@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2026 Graz University of Technology.
+# SPDX-FileCopyrightText: 2026 TU Wien.
+# SPDX-License-Identifier: MIT
+
+[project]
+name = "invenio-checks"
+description = "Invenio module to automated curation checks on records."
+readme = "README.rst"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+  { name = "CERN", email = "info@inveniosoftware.org" },
+]
+keywords = [
+  "checks",
+  "invenio",
+  "rdm",
+]
+classifiers = [
+  "Development Status :: 1 - Planning",
+]
+dependencies = [
+  "invenio-base>=2.3.0,<3.0.0",
+  "invenio-communities>=29.0.0,<30.0.0",
+  "invenio-drafts-resources>=11.0.0,<12.0.0",
+  "invenio-i18n>=4.0.0,<5.0.0",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/inveniosoftware/invenio-checks"
+
+[project.entry-points."invenio_base.api_apps"]
+invenio_checks = "invenio_checks:InvenioChecks"
+
+[project.entry-points."invenio_base.apps"]
+invenio_checks = "invenio_checks:InvenioChecks"
+
+[project.entry-points."invenio_base.blueprints"]
+invenio_checks = "invenio_checks.views:create_ui_blueprint"
+
+[project.entry-points."invenio_checks.check_types"]
+file_formats = "invenio_checks.contrib.file_formats:FileFormatsCheck"
+metadata = "invenio_checks.contrib.metadata.check:MetadataCheck"
+
+[project.entry-points."invenio_db.alembic"]
+invenio_checks = "invenio_checks:alembic"
+
+[project.entry-points."invenio_db.models"]
+invenio_checks = "invenio_checks.models"
+
+[project.optional-dependencies]
+opensearch1 = [
+  "invenio-search[opensearch1]>=3.0.0,<4.0.0",
+]
+opensearch2 = [
+  "invenio-search[opensearch2]>=3.0.0,<4.0.0",
+]
+tests = [
+  "invenio-app>=3.0.0,<4.0.0",
+  "invenio-db[postgresql,mysql]>=2.2.0,<3.0.0",
+  "pytest-black>=0.6.0",
+  "pytest-invenio>=4.0.0,<5.0.0",
+  "sphinx>=4.5.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "invenio_checks/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/invenio_checks",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.pydocstyle]
+add_ignore = "D401,D403"
+
+[tool.pytest.ini_options]
+addopts = '--black --isort --pydocstyle --doctest-glob="*.rst" --doctest-modules --cov=invenio_checks --cov-report=term-missing'
+testpaths = "tests invenio_checks"
+live_server_scope = "module"
+
+# UV needs to be told explicitly which extras are conflicting:
+# https://docs.astral.sh/uv/concepts/projects/config/#conflicting-dependencies
+[tool.uv]
+conflicts = [
+  [
+    { extra = "opensearch1" },
+    { extra = "opensearch2" },
+    { extra = "elasticsearch7" },
+  ]
+]
