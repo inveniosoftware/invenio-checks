@@ -1,10 +1,19 @@
 ..
     SPDX-FileCopyrightText: 2025-2026 CERN.
     SPDX-FileCopyrightText: 2026 Graz University of Technology.
+    SPDX-FileCopyrightText: 2026 KTH Royal Institute of Technology.
     SPDX-License-Identifier: MIT
 
 Changes
 =======
+
+Version v10.1.0 (released 2026-07-02)
+
+- I18n add translation support for invenio-checks (#49)
+- fix: don't add None community_id from global check runs to community_ids set
+- chore(packaging): exclude .git-blame-ignore-revs from distribution
+- chore(git-blame): ignore SPDX license header commit
+- chore(licenses): update license headers to use SPDX
 
 Version v10.0.0 (released 2026-06-05)
 
