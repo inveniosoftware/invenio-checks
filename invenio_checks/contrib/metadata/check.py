@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2025-2026 CERN.
 # SPDX-FileCopyrightText: 2025 Graz University of Technology.
+# SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 """Metadata check implementation."""
 
@@ -7,8 +8,12 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, List
 
+from invenio_i18n import gettext as _
+from invenio_i18n import lazy_gettext as _l
+
 from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
+from invenio_checks.utils import translate_field
 
 from .rules import RuleParser, RuleResult
 
@@ -45,8 +50,8 @@ class MetadataCheck(Check):
     """Check for validating record metadata against configured rules."""
 
     id = "metadata"
-    title = "Metadata validation"
-    description = "Validates record metadata against configured rules."
+    title = _l("Metadata validation")
+    description = _l("Validates record metadata against configured rules.")
     sort_order = 10
 
     def validate_config(self, config):
@@ -106,8 +111,8 @@ class MetadataCheck(Check):
         output = [
             {
                 "field": rule_result.error_path or check.path,
-                "messages": [rule_result.rule_message],
-                "description": rule_result.rule_description,
+                "messages": [translate_field(rule_result.rule_message)],
+                "description": translate_field(rule_result.rule_description),
                 "severity": rule_result.level,
             }
             for check in rule_result.check_results
@@ -130,7 +135,7 @@ class MetadataCheckConfig:
     def from_dict(cls, config):
         """Create a check configuration from a dictionary."""
         check_id = config.get("id")
-        title = config.get("title", "Unnamed check")
+        title = config.get("title", _("Unnamed check"))
         description = config.get("description", "")
 
         # Parse rules

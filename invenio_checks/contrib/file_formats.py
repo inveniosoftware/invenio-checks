@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 """File formats check."""
 
@@ -10,10 +11,11 @@ from pathlib import Path
 
 import yaml
 from flask import current_app
+from invenio_i18n import lazy_gettext as _l
 
 from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
-from invenio_checks.utils import classproperty
+from invenio_checks.utils import classproperty, translate_field
 
 
 @dataclass
@@ -87,8 +89,8 @@ class FileFormatsCheck(Check):
     """
 
     id = "file_formats"
-    title = "File formats check"
-    description = (
+    title = _l("File formats check")
+    description = _l(
         "Validates that record files are in open and scientific formats, "
         "optionally suggesting alternatives."
     )
@@ -97,9 +99,13 @@ class FileFormatsCheck(Check):
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 
     default_messages = {
-        "closed_format_message": ".{ext} is not a known open or scientific file format.",
-        "closed_format_description": "Using closed or proprietary formats hinders reusability and preservation of published files.",
-        "title": "All files should be in open or scientific formats",
+        "closed_format_message": _l(
+            ".{ext} is not a known open or scientific file format."
+        ),
+        "closed_format_description": _l(
+            "Using closed or proprietary formats hinders reusability and preservation of published files."
+        ),
+        "title": _l("All files should be in open or scientific formats"),
     }
 
     @classproperty
@@ -144,9 +150,9 @@ class FileFormatsCheck(Check):
 
         result = CheckResult(
             id=self.id,
-            title=title,
+            title=translate_field(title),
             # NOTE: We default to this description for now
-            description=closed_format_description,
+            description=translate_field(closed_format_description),
         )
         for file in record.files.values():
             file_ext = Path(file.key).suffix[1:]
@@ -163,8 +169,10 @@ class FileFormatsCheck(Check):
                 result.errors.append(
                     {
                         "field": f"files.entries.{file.key}",
-                        "messages": [closed_format_msg.format(ext=file_ext)],
-                        "description": closed_format_description,
+                        "messages": [
+                            translate_field(closed_format_msg).format(ext=file_ext)
+                        ],
+                        "description": translate_field(closed_format_description),
                         "severity": config.severity.error_value,
                     }
                 )
