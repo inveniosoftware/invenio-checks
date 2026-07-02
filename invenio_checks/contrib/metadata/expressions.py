@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 
 """Metadata check expression engine."""
@@ -7,6 +8,8 @@ from dataclasses import dataclass, field
 from types import GeneratorType
 from typing import Optional
 
+from invenio_i18n import gettext as _
+from invenio_i18n import lazy_gettext as _l
 from invenio_records.systemfields.relations.results import (
     RelationResult,
 )
@@ -34,7 +37,7 @@ class FieldExpression(Expression):
     """Expression for accessing a field in the record."""
 
     # Error message templates
-    FIELD_MISSING = "Field {path} is required but missing"
+    FIELD_MISSING = _l("Field {path} is required but missing")
 
     def __init__(self, field_path):
         """Initialize the expression."""
@@ -84,14 +87,18 @@ class ComparisonExpression(Expression):
     """Expression for comparing values."""
 
     # Error message templates
-    NOT_EQUAL = "Expected {path} to be {expected}, but got {actual}"
-    EQUAL = "Expected {path} not to be {unexpected}, but got {actual}"
-    NOT_CONTAINS = "Expected {path} to contain {expected}, but got {actual}"
-    CONTAINS = "Expected {path} not to contain {unexpected}, but got {actual}"
-    NOT_IN = "Expected {expected} in {path}, but got {actual}"
-    IN = "Expected {unexpected} to not be in {path}, but got {actual}"
-    BELOW_MIN = "Expected {path} to have at least {expected} {unit}, but got {actual}"
-    ABOVE_MAX = "Expected {path} to have at most {expected} {unit}, but got {actual}"
+    NOT_EQUAL = _l("Expected {path} to be {expected}, but got {actual}")
+    EQUAL = _l("Expected {path} not to be {unexpected}, but got {actual}")
+    NOT_CONTAINS = _l("Expected {path} to contain {expected}, but got {actual}")
+    CONTAINS = _l("Expected {path} not to contain {unexpected}, but got {actual}")
+    NOT_IN = _l("Expected {expected} in {path}, but got {actual}")
+    IN = _l("Expected {unexpected} to not be in {path}, but got {actual}")
+    BELOW_MIN = _l(
+        "Expected {path} to have at least {expected} {unit}, but got {actual}"
+    )
+    ABOVE_MAX = _l(
+        "Expected {path} to have at most {expected} {unit}, but got {actual}"
+    )
 
     VALID_OPERATORS = [
         "==",
@@ -162,7 +169,9 @@ class ComparisonExpression(Expression):
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(left_value)} contains a value"
+                message = _("Cannot check if {type} contains a value").format(
+                    type=type(left_value)
+                )
         elif self.operator == "!~=":
             if isinstance(left_value, (list, dict, str)):
                 success = self.right not in left_value
@@ -175,7 +184,9 @@ class ComparisonExpression(Expression):
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(left_value)} does not contain a value"
+                message = _("Cannot check if {type} does not contain a value").format(
+                    type=type(left_value)
+                )
         elif self.operator == "in":
             if isinstance(self.right, (list, dict, str)):
                 success = left_value in self.right
@@ -188,7 +199,9 @@ class ComparisonExpression(Expression):
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(self.right)} contains a value"
+                message = _("Cannot check if {type} contains a value").format(
+                    type=type(self.right)
+                )
         elif self.operator == "not in":
             if isinstance(self.right, (list, dict, str)):
                 success = left_value not in self.right
@@ -201,55 +214,77 @@ class ComparisonExpression(Expression):
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(self.right)} does not contain a value"
+                message = _("Cannot check if {type} does not contain a value").format(
+                    type=type(self.right)
+                )
         # Implement other operators as needed
         elif self.operator == "^=":
             if isinstance(left_value, str):
                 success = left_value.startswith(self.right)
                 message = (
-                    None if success else f"Expected {path} to start with {self.right}"
+                    None
+                    if success
+                    else _("Expected {path} to start with {expected}").format(
+                        path=path, expected=self.right
+                    )
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(left_value)} starts with a value"
+                message = _("Cannot check if {type} starts with a value").format(
+                    type=type(left_value)
+                )
         elif self.operator == "!^=":
             if isinstance(left_value, str):
                 success = not left_value.startswith(self.right)
                 message = (
                     None
                     if success
-                    else f"Expected {path} not to start with {self.right}"
+                    else _("Expected {path} not to start with {unexpected}").format(
+                        path=path, unexpected=self.right
+                    )
                 )
             else:
                 success = False
-                message = (
-                    f"Cannot check if {type(left_value)} doesn't start with a value"
+                message = _("Cannot check if {type} doesn't start with a value").format(
+                    type=type(left_value)
                 )
         elif self.operator == "$=":
             if isinstance(left_value, str):
                 success = left_value.endswith(self.right)
                 message = (
-                    None if success else f"Expected {path} to end with {self.right}"
+                    None
+                    if success
+                    else _("Expected {path} to end with {expected}").format(
+                        path=path, expected=self.right
+                    )
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(left_value)} ends with a value"
+                message = _("Cannot check if {type} ends with a value").format(
+                    type=type(left_value)
+                )
         elif self.operator == "!$=":
             if isinstance(left_value, str):
                 success = not left_value.endswith(self.right)
                 message = (
-                    None if success else f"Expected {path} not to end with {self.right}"
+                    None
+                    if success
+                    else _("Expected {path} not to end with {unexpected}").format(
+                        path=path, unexpected=self.right
+                    )
                 )
             else:
                 success = False
-                message = f"Cannot check if {type(left_value)} doesn't end with a value"
+                message = _("Cannot check if {type} doesn't end with a value").format(
+                    type=type(left_value)
+                )
         elif self.operator == "min":
             success, message = self._check_min(left_value, path)
         elif self.operator == "max":
             success, message = self._check_max(left_value, path)
         else:
             success = False
-            message = f"Unknown operator: {self.operator}"
+            message = _("Unknown operator: {operator}").format(operator=self.operator)
 
         return ExpressionResult(success, path, left_value, message)
 
@@ -262,24 +297,28 @@ class ComparisonExpression(Expression):
         Returns None for unsupported types (including booleans).
         """
         if isinstance(value, str):
-            return len(value), "characters"
+            return len(value), _("characters")
         elif isinstance(value, (list, tuple)):
-            return len(value), "items"
+            return len(value), _("items")
         elif isinstance(value, (int, float)) and not isinstance(value, bool):
-            return value, "value"
+            return value, _("value")
         return None, None
 
     def _check_min(self, left_value, path):
         """Check if value meets minimum requirement."""
         comparable, unit = self._get_comparable_value(left_value)
         if comparable is None:
-            return False, f"Cannot check min for {type(left_value).__name__}"
+            return False, _("Cannot check min for {type}").format(
+                type=type(left_value).__name__
+            )
 
         threshold = self.right
         if not isinstance(threshold, (int, float)):
             return (
                 False,
-                f"Min threshold must be a number, got {type(threshold).__name__}",
+                _("Min threshold must be a number, got {type}").format(
+                    type=type(threshold).__name__
+                ),
             )
 
         if comparable >= threshold:
@@ -300,13 +339,17 @@ class ComparisonExpression(Expression):
         """Check if value meets maximum requirement."""
         comparable, unit = self._get_comparable_value(left_value)
         if comparable is None:
-            return False, f"Cannot check max for {type(left_value).__name__}"
+            return False, _("Cannot check max for {type}").format(
+                type=type(left_value).__name__
+            )
 
         threshold = self.right
         if not isinstance(threshold, (int, float)):
             return (
                 False,
-                f"Max threshold must be a number, got {type(threshold).__name__}",
+                _("Max threshold must be a number, got {type}").format(
+                    type=type(threshold).__name__
+                ),
             )
 
         if comparable <= threshold:
@@ -360,7 +403,10 @@ class LogicalExpression(Expression):
 
             return ExpressionResult(False)
         return ExpressionResult(
-            False, message=f"Unknown logical operator: {self.operator}"
+            False,
+            message=_("Unknown logical operator: {operator}").format(
+                operator=self.operator
+            ),
         )
 
 
@@ -368,11 +414,11 @@ class ListExpression(Expression):
     """Expression for handling list fields."""
 
     # Error message templates
-    LIST_MISSING = "List field {path} is missing"
-    NOT_A_LIST = "Field {path} is not a list"
-    NO_ITEMS = "No items in list {path}"
-    NO_ITEMS_MATCH = "No items in {path} match the required criteria"
-    NOT_ALL_ITEMS_MATCH = "Not all items in {path} match the required criteria"
+    LIST_MISSING = _l("List field {path} is missing")
+    NOT_A_LIST = _l("Field {path} is not a list")
+    NO_ITEMS = _l("No items in list {path}")
+    NO_ITEMS_MATCH = _l("No items in {path} match the required criteria")
+    NOT_ALL_ITEMS_MATCH = _l("Not all items in {path} match the required criteria")
 
     VALID_OPERATORS = ["any", "all", "exists"]
 

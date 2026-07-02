@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 
 """Invenio checks application."""
 
 from . import config
 from .base import ChecksRegistry
+from .utils import translate_field
 
 
 class InvenioChecks(object):
@@ -21,6 +23,8 @@ class InvenioChecks(object):
         app.extensions["invenio-checks"] = self
         self.checks_registry = ChecksRegistry()
         self.checks_registry.load_from_entry_points(app, "invenio_checks.check_types")
+        # Register Jinja filters
+        app.jinja_env.filters["translate_field"] = translate_field
 
     def init_config(self, app):
         """Initialize configuration."""
