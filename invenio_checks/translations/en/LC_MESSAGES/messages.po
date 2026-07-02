@@ -1,0 +1,270 @@
+# English translations for invenio-checks.
+# Copyright (C) 2025 CERN
+# This file is distributed under the same license as the invenio-checks
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-checks 1.0.0\n"
+"Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
+"POT-Creation-Date: 2026-06-26 14:33+0200\n"
+"PO-Revision-Date: 2025-08-28 23:18+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: invenio_checks/contrib/file_formats.py:92
+msgid "File formats check"
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:94
+msgid ""
+"Validates that record files are in open and scientific formats, optionally "
+"suggesting alternatives."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:103
+#, python-brace-format
+msgid ".{ext} is not a known open or scientific file format."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:106
+msgid ""
+"Using closed or proprietary formats hinders reusability and preservation of "
+"published files."
+msgstr ""
+
+#: invenio_checks/contrib/file_formats.py:108
+msgid "All files should be in open or scientific formats"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:52
+msgid "Metadata validation"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:53
+msgid "Validates record metadata against configured rules."
+msgstr ""
+
+#: invenio_checks/contrib/metadata/check.py:137
+msgid "Unnamed check"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:39
+#, python-brace-format
+msgid "Field {path} is required but missing"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:89
+#, python-brace-format
+msgid "Expected {path} to be {expected}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:90
+#, python-brace-format
+msgid "Expected {path} not to be {unexpected}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:91
+#, python-brace-format
+msgid "Expected {path} to contain {expected}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:92
+#, python-brace-format
+msgid "Expected {path} not to contain {unexpected}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:93
+#, python-brace-format
+msgid "Expected {expected} in {path}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:94
+#, python-brace-format
+msgid "Expected {unexpected} to not be in {path}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:96
+#, python-brace-format
+msgid "Expected {path} to have at least {expected} {unit}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:99
+#, python-brace-format
+msgid "Expected {path} to have at most {expected} {unit}, but got {actual}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:171
+#: invenio_checks/contrib/metadata/expressions.py:201
+#, python-brace-format
+msgid "Cannot check if {type} contains a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:186
+#: invenio_checks/contrib/metadata/expressions.py:216
+#, python-brace-format
+msgid "Cannot check if {type} does not contain a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:226
+#, python-brace-format
+msgid "Expected {path} to start with {expected}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:232
+#, python-brace-format
+msgid "Cannot check if {type} starts with a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:241
+#, python-brace-format
+msgid "Expected {path} not to start with {unexpected}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:247
+#, python-brace-format
+msgid "Cannot check if {type} doesn't start with a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:256
+#, python-brace-format
+msgid "Expected {path} to end with {expected}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:262
+#, python-brace-format
+msgid "Cannot check if {type} ends with a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:271
+#, python-brace-format
+msgid "Expected {path} not to end with {unexpected}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:277
+#, python-brace-format
+msgid "Cannot check if {type} doesn't end with a value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:286
+#, python-brace-format
+msgid "Unknown operator: {operator}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:299
+msgid "characters"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:301
+msgid "items"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:303
+msgid "value"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:310
+#, python-brace-format
+msgid "Cannot check min for {type}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:318
+#, python-brace-format
+msgid "Min threshold must be a number, got {type}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:341
+#, python-brace-format
+msgid "Cannot check max for {type}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:349
+#, python-brace-format
+msgid "Max threshold must be a number, got {type}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:406
+#, python-brace-format
+msgid "Unknown logical operator: {operator}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:416
+#, python-brace-format
+msgid "List field {path} is missing"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:417
+#, python-brace-format
+msgid "Field {path} is not a list"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:418
+#, python-brace-format
+msgid "No items in list {path}"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:419
+#, python-brace-format
+msgid "No items in {path} match the required criteria"
+msgstr ""
+
+#: invenio_checks/contrib/metadata/expressions.py:420
+#, python-brace-format
+msgid "Not all items in {path} match the required criteria"
+msgstr ""
+
+#: invenio_checks/services/config.py:26
+msgid "Ascending"
+msgstr ""
+
+#: invenio_checks/services/config.py:27
+msgid "Descending"
+msgstr ""
+
+#: invenio_checks/services/config.py:29
+msgid "Title"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/file_formats_tab.html:25
+msgid "The following files are not using open or scientific formats:"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:9
+msgid "Editing in progress"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:10
+msgid "You're viewing checks and feedback results for unpublished changes."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:12
+msgid ""
+"The published version available to users may differ from what's shown here."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:18
+msgid "What is this about?"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:19
+msgid ""
+"These checks help ensure that your submission is compliant with this "
+"community's guidelines."
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:20
+msgid "How do I fix warnings/errors?"
+msgstr ""
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:21
+msgid ""
+"Go to the \"Record\" tab and click the orange \"Edit\" button. All errors "
+"and recommendations are displayed inline in the upload form."
+msgstr ""
