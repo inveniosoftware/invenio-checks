@@ -90,3 +90,15 @@ class CheckResult:
     def to_dict(self):
         """Convert the result to a dictionary."""
         return asdict(self)
+
+    def add_errors(self, errors: List[Dict]):
+        """Add error messages for the UI."""
+        self.errors.extend(errors)
+
+    def pending_result(self, params):
+        """Return the initial result dict stored while the check is pending."""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+        }

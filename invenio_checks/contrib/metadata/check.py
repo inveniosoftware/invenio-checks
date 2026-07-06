@@ -31,10 +31,6 @@ class MetadataCheckResult(CheckResult):
         if not rule_result.success and rule_result.level == "error":
             self.success = False
 
-    def add_errors(self, errors: List[Dict]):
-        """Add error messages for the UI."""
-        self.errors.extend(errors)
-
     def to_dict(self):
         """Convert the result to a dictionary."""
         result = asdict(self)

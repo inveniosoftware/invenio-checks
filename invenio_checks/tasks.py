@@ -39,7 +39,10 @@ def run_check_async(self, check_run_id):
                 current_rdm_records_service as service,
             )
 
-            record = service.record_cls.get_record(check_run.record_id)
+            if check_run.is_draft:
+                record = service.draft_cls.get_record(check_run.record_id)
+            else:
+                record = service.record_cls.get_record(check_run.record_id)
         else:
             current_app.logger.error(
                 "Invalid target_type for config",
