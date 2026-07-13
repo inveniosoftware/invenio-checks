@@ -69,7 +69,9 @@ class MetadataCheck(Check):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = MetadataCheckResult(
-            self.id, title=self.title, description=self.description
+            self.id,
+            title=translate_field(self.title),
+            description=translate_field(self.description),
         )
 
         # Parse the rules from the configuration
