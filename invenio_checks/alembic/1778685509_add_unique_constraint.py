@@ -21,7 +21,7 @@ def upgrade():
     op.create_unique_constraint(
         "uq_checks_run_config_record_draft",
         "checks_run",
-        ['config_id', 'record_id', 'is_draft'],
+        ["config_id", "record_id", "is_draft"],
     )
 
 

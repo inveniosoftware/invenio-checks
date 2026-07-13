@@ -6,6 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Checks Tasks."""
+
 from datetime import datetime, timezone
 
 from celery import shared_task

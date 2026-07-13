@@ -130,7 +130,7 @@ class ChecksAPI:
                     record,
                     is_draft,
                     CheckRunStatus.PENDING,
-                    result=check_instance.pending_result(config.params)
+                    result=check_instance.pending_result(config.params),
                 )
 
                 uow.register(ModelCommitOp(result_run))
