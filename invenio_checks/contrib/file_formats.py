@@ -13,7 +13,7 @@ import yaml
 from flask import current_app
 from invenio_i18n import lazy_gettext as _l
 
-from invenio_checks.base import Check
+from invenio_checks.base import Check, CheckResult
 from invenio_checks.models import CheckConfig
 from invenio_checks.utils import classproperty, translate_field
 
@@ -60,22 +60,6 @@ class FileFormatDatabase(dict):
         return res
 
 
-@dataclass
-class CheckResult:
-    """Result of a check."""
-
-    id: str
-    title: str
-    description: str
-    errors: list[dict] = field(default_factory=list)
-    sync: bool = True
-    success: bool = True
-
-    def to_dict(self):
-        """Convert the result to a dictionary."""
-        return asdict(self)
-
-
 class FileFormatsCheck(Check):
     """Check for open and scientific file formats.
 
@@ -95,6 +79,7 @@ class FileFormatsCheck(Check):
         "optionally suggesting alternatives."
     )
     sort_order = 20
+    sync = True
 
     _known_formats_cfg = "CHECKS_FILE_FORMATS_KNOWN_FORMATS_PATH"
 

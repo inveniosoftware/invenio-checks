@@ -10,7 +10,7 @@
   This code depends on the `severity` field of the each `errors`.
 #}
 
-{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_tpl %}
 
 {# A namespaced variable is used so that the variable is still defined after the loop #}
 {% set ns = namespace(overall_severity_level="success") %}
@@ -27,7 +27,12 @@
         {% set ns.overall_severity_level = "error" %}
       {% endif %}
     {% endfor %}
+
+    {% set status = check.status.name %}
+    {% if ns.overall_severity_level == "success" and (status == "PENDING" or status == "RUNNING") %}
+        {% set ns.overall_severity_level = "running" %}
+    {% endif %}
   {% endif %}
 {% endfor %}
 
-{{ severity_level_icons_tpl.severity_level_icons[ns.overall_severity_level] }}
+{{ severity_tpl.severity_icon[ns.overall_severity_level] }}

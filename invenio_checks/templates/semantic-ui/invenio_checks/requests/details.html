@@ -3,7 +3,7 @@
   SPDX-License-Identifier: MIT
 #}
 
-{% import "invenio_checks/requests/severity_level_icons.html" as severity_level_icons_tpl %}
+{% import "invenio_checks/requests/severity_level_icons.html" as severity_tpl %}
 
 {% set first_check = (checks | map(attribute='config.check_cls') | sort(attribute='sort_order') | first).id %}
 {% set check_classes = checks | map(attribute="config.check_cls") | unique(attribute="id") %}
