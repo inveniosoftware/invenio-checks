@@ -7,6 +7,11 @@
 Changes
 =======
 
+Version v10.1.1 (released 2026-07-21)
+
+- chore(setup): migrate from setuptools to hatchling
+- chore(licenses): fix some SPDX license headers
+
 Version v10.1.0 (released 2026-07-02)
 
 - I18n add translation support for invenio-checks (#49)
