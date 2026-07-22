@@ -52,7 +52,6 @@ class ChecksComponent(ServiceComponent):
     def update_draft(self, identity, data=None, record=None, errors=None, **kwargs):
         """Run checks on draft update."""
         draft = record  # rename for clarity
-
         # Take into account already included communities
         community_ids = self._get_record_communities(draft)
 
@@ -187,10 +186,8 @@ class CommunityChecksComponent(ServiceComponent):
             parent = request.receiver.resolve()
 
             configs = ChecksAPI.get_configs([parent.id], "community")
-
             for config in configs:
-                if config.params.get("sync", True):
-                    ChecksAPI.run_check(config, record, self.uow)
+                ChecksAPI.run_check(config, record, self.uow)
 
 
 @toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")

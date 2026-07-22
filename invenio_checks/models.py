@@ -100,6 +100,12 @@ class CheckRun(db.Model, db.Timestamp):
 
     __table_args__ = (
         db.Index("idx_checks_run_config_id_record_id", config_id, record_id),
+        db.UniqueConstraint(
+            "config_id",
+            "record_id",
+            "is_draft",
+            name="uq_checks_run_config_record_draft",
+        ),
     )
 
     @property
