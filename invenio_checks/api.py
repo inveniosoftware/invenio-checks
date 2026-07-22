@@ -7,11 +7,13 @@
 from datetime import datetime, timezone
 
 from flask import current_app
+from invenio_db import db
 from invenio_db.uow import ModelCommitOp
 from sqlalchemy import or_
 
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
+from .tasks import run_check_async
 
 
 class ChecksAPI:
@@ -19,6 +21,8 @@ class ChecksAPI:
 
     @classmethod
     def get_runs(cls, record, is_draft=None):
+        """Get all check runs for a record or draft."""
+
         """Get all check runs for an object."""
         if is_draft is None and getattr(record, "is_draft", None) is not None:
             is_draft = record.is_draft
@@ -45,7 +49,50 @@ class ChecksAPI:
         return query.all()
 
     @classmethod
-    def run_check(cls, config, record, uow, is_draft=None, **kwargs):
+    def _create_or_update_check_run(
+        cls,
+        config,
+        record,
+        is_draft: bool,
+        status: CheckRunStatus,
+        state=None,
+        result=None,
+        start_time=None,
+        end_time=None,
+    ):
+        """Create or update check run if already exists."""
+        previous_run = CheckRun.query.filter_by(
+            config_id=config.id,
+            record_id=record.id,
+            is_draft=is_draft,
+        ).one_or_none()
+
+        if not previous_run:
+            result_run = CheckRun(
+                config=config,
+                record_id=record.id,
+                is_draft=is_draft,
+                revision_id=record.revision_id,
+                start_time=start_time,
+                end_time=end_time,
+                status=status,
+                state=state or {},
+                result=result or {},
+            )
+        else:
+            result_run = previous_run
+            result_run.is_draft = is_draft
+            result_run.revision_id = record.revision_id
+            result_run.start_time = start_time
+            result_run.end_time = end_time
+            result_run.status = status
+            result_run.state = state or {}
+            result_run.result = result or {}
+
+        return result_run
+
+    @classmethod
+    def run_check(cls, config, record, uow, is_draft=None, sync=False, **kwargs):
         """Run a check for a given configuration on a record or draft.
 
         If a check run already exists for the given configuration and record/draft, it
@@ -58,47 +105,49 @@ class ChecksAPI:
         result_run = None
         try:
             check_cls = current_checks_registry.get(config.check_id)
-            start_time = datetime.now(timezone.utc)
-            res = check_cls().run(record, config, **kwargs)
-            end_time = datetime.now(timezone.utc)
+            if not check_cls:
+                raise ValueError(
+                    f"Check class not found for check_id: {config.check_id}"
+                )
 
-            # Fetch the previous run
-            previous_run = CheckRun.query.filter_by(
-                config_id=config.id,
-                record_id=record.id,
-                is_draft=is_draft,
-            ).one_or_none()
+            should_run_sync = getattr(check_cls, "sync", True)
+            check_instance = check_cls()
+            if should_run_sync or sync:
+                start_time = datetime.now(timezone.utc)
+                res = check_instance.run(record, config)
+                end_time = datetime.now(timezone.utc)
 
-            if not previous_run:
-                check_run = {
-                    "config": config,
-                    "record_id": record.id,
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "status": CheckRunStatus.COMPLETED,
-                    "state": "",
-                    "result": res.to_dict(),
-                }
-                if config.target_type == "record":
-                    check_run.update(
-                        {
-                            "is_draft": is_draft,
-                            "revision_id": record.revision_id,
-                        }
-                    )
-                result_run = CheckRun(**check_run)
+                result_run = cls._create_or_update_check_run(
+                    config,
+                    record,
+                    is_draft,
+                    CheckRunStatus.COMPLETED,
+                    result=res.to_dict(),
+                    start_time=start_time,
+                    end_time=end_time,
+                )
+
+                uow.register(ModelCommitOp(result_run))
             else:
-                result_run = previous_run
-                result_run.start_time = start_time
-                result_run.end_time = end_time
-                result_run.result = res.to_dict()
+                result_run = cls._create_or_update_check_run(
+                    config,
+                    record,
+                    is_draft,
+                    CheckRunStatus.PENDING,
+                    result={
+                        "id": check_instance.id,
+                        "title": check_instance.title,
+                        "description": check_instance.description,
+                    },
+                )
 
-                if config.target_type == "record":
-                    result_run.is_draft = is_draft
-                    result_run.revision_id = record.revision_id
+                uow.register(ModelCommitOp(result_run))
+                db.session.commit()
 
-            uow.register(ModelCommitOp(result_run))
-        except Exception:
+                run_check_async.delay(
+                    check_run_id=str(result_run.id),
+                )
+        except Exception as e:
             current_app.logger.exception(
                 "Error running check on record",
                 extra={
@@ -106,6 +155,25 @@ class ChecksAPI:
                     "check_config_id": str(config.id),
                 },
             )
+            if not result_run:
+                current_app.logger.exception(
+                    "No corresponding CheckRun",
+                    extra={
+                        "record_id": str(record.id),
+                        "check_config_id": str(config.id),
+                    },
+                )
+                return
+
+            try:
+                result_run.status = CheckRunStatus.ERROR
+                result_run.state = {"error": str(e)}
+                db.session.commit()
+            except Exception:
+                current_app.logger.exception(
+                    "Failed to mark check run as ERROR",
+                    extra={"check_run_id": getattr(result_run, "id", None)},
+                )
 
         return result_run
 
