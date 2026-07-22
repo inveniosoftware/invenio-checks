@@ -43,6 +43,7 @@ invenio_checks = "invenio_checks.views:create_ui_blueprint"
 [project.entry-points."invenio_checks.check_types"]
 file_formats = "invenio_checks.contrib.file_formats:FileFormatsCheck"
 metadata = "invenio_checks.contrib.metadata.check:MetadataCheck"
+async_check = "invenio_checks.contrib.async_check:AsyncCheck"
 
 [project.entry-points."invenio_db.alembic"]
 invenio_checks = "invenio_checks:alembic"
