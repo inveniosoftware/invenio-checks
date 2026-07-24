@@ -11,7 +11,7 @@ from typing import Dict, List
 from invenio_i18n import gettext as _
 from invenio_i18n import lazy_gettext as _l
 
-from invenio_checks.base import Check
+from invenio_checks.base import Check, CheckResult
 from invenio_checks.models import CheckConfig
 from invenio_checks.utils import translate_field
 
@@ -19,25 +19,17 @@ from .rules import RuleParser, RuleResult
 
 
 @dataclass
-class CheckResult:
+class MetadataCheckResult(CheckResult):
     """Result of running a check."""
 
-    check_id: str
-    success: bool = True
     rule_results: List[RuleResult] = field(default_factory=list)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    sync: bool = True  # Default to synchronous
-    errors: List[Dict] = field(default_factory=list)
 
     def add_rule_result(self, rule_result: RuleResult):
         """Add a rule result and update the overall success."""
         self.rule_results.append(rule_result)
-        if not rule_result.success and rule_result.level == "failure":
+        if not rule_result.success and rule_result.level == "error":
             self.success = False
-
-    def add_errors(self, errors: List[Dict]):
-        """Add error messages for the UI."""
-        self.errors.extend(errors)
 
     def to_dict(self):
         """Convert the result to a dictionary."""
@@ -53,6 +45,7 @@ class MetadataCheck(Check):
     title = _l("Metadata validation")
     description = _l("Validates record metadata against configured rules.")
     sort_order = 10
+    sync = True
 
     def validate_config(self, config):
         """Validate the configuration for this metadata check."""
@@ -75,7 +68,11 @@ class MetadataCheck(Check):
     def run(self, record, config: CheckConfig):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
-        result = CheckResult(self.id)
+        result = MetadataCheckResult(
+            self.id,
+            title=translate_field(self.title),
+            description=translate_field(self.description),
+        )
 
         # Parse the rules from the configuration
         rules = []
@@ -149,7 +146,9 @@ class MetadataCheckConfig:
     def evaluate(self, record):
         """Evaluate the check against a record."""
         # Create a check result
-        result = CheckResult(self.id)
+        result = MetadataCheckResult(
+            self.id, title=self.title, description=self.description
+        )
 
         # Evaluate each rule
         for rule in self.rules:
