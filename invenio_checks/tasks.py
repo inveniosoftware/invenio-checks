@@ -16,6 +16,7 @@ from invenio_db import db
 from invenio_records_resources.services.uow import UnitOfWork
 
 from .models import CheckRun, CheckRunStatus
+from .utils import get_check_target
 
 
 @shared_task(bind=True, max_retries=3)
@@ -33,33 +34,8 @@ def run_check_async(self, check_run_id):
             return None
 
         config = check_run.config
-        target_type = getattr(config.check_cls, "target_type", None)
 
-        if target_type == "record":
-            from invenio_rdm_records.proxies import (
-                current_rdm_records_service as service,
-            )
-
-            if check_run.is_draft:
-                target = service.draft_cls.get_record(check_run.record_id)
-            else:
-                target = service.record_cls.get_record(check_run.record_id)
-
-        elif target_type == "community":
-            from invenio_communities.proxies import (
-                current_communities,
-            )
-
-            target = current_communities.service.record_cls.get_record(
-                check_run.record_id
-            )
-
-        else:
-            current_app.logger.error(
-                "Invalid target_type for config",
-                extra={"target_type": target_type},
-            )
-            return None
+        target = get_check_target(check_run)
 
         if not config or not target:
             current_app.logger.error("Config or target not found")

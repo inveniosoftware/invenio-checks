@@ -25,6 +25,35 @@ def _get_locale_settings():
     return locale, default_locale
 
 
+def get_check_target(check_run):
+    """Get the target object for a check run."""
+
+    target_type = getattr(check_run.config, "target_type", None)
+
+    if target_type == "record":
+        from invenio_rdm_records.proxies import current_rdm_records_service as service
+
+        if check_run.is_draft:
+            return service.draft_cls.get_record(check_run.record_id)
+
+        return service.record_cls.get_record(check_run.record_id)
+
+    if target_type == "community":
+        from invenio_communities.proxies import current_communities
+
+        return current_communities.service.record_cls.get_record(check_run.record_id)
+
+    current_app.logger.error(
+        "Invalid target_type for check config",
+        extra={
+            "target_type": target_type,
+            "check_run_id": str(check_runconfig.check_id),
+        },
+    )
+
+    return None
+
+
 def translate_field(field_value):
     """Translate a field that can be string or multilingual dict.
 
