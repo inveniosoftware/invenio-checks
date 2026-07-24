@@ -27,7 +27,6 @@ def _get_locale_settings():
 
 def get_check_target(check_run):
     """Get the target object for a check run."""
-
     target_type = getattr(check_run.config, "target_type", None)
 
     if target_type == "record":

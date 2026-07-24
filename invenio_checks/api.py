@@ -37,11 +37,24 @@ class ChecksAPI:
     """API for managing checks."""
 
     @classmethod
-    def get_runs(cls, record, is_draft=None):
+    def get_runs(cls, record, is_draft=None, community_id=None):
         """Get all check runs for an object."""
         if is_draft is None and getattr(record, "is_draft", None) is not None:
             is_draft = record.is_draft
-        return CheckRun.query.filter_by(record_id=record.id, is_draft=is_draft).all()
+
+        query = CheckRun.query.filter_by(record_id=record.id, is_draft=is_draft)
+
+        if community_id is not None:
+            from invenio_communities.proxies import current_communities
+
+            community = current_communities.service.record_cls.get_record(community_id)
+            community_ids = [str(community.id)]
+            if community.parent:
+                community_ids.append(str(community.parent.id))
+            configs = cls.get_configs(community_ids=community_ids)
+            query = query.filter(CheckRun.config_id.in_([c.id for c in configs]))
+
+        return query.all()
 
     @classmethod
     def get_configs(cls, community_ids, target_type=None):
@@ -210,7 +223,6 @@ class ChecksAPI:
     @classmethod
     def rerun_check(cls, check_run_id, identity):
         """Rerun an existing check."""
-
         check_run = CheckRun.query.get(check_run_id)
 
         if not check_run:
