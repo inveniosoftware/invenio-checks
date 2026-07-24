@@ -23,6 +23,9 @@ class Check:
     sync: bool
     """Whether the check should run synchronously"""
 
+    allow_rerun: bool = False
+    """Whether the check can be manually re-run by the user."""
+
     target_type: str
     """Type of item the check runs against (record, user, community, etc)."""
 

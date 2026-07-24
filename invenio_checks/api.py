@@ -9,11 +9,16 @@ from datetime import datetime, timezone
 from flask import current_app
 from invenio_db import db
 from invenio_db.uow import ModelCommitOp, Operation
+from invenio_records_resources.services.errors import PermissionDeniedError
+from invenio_records_resources.services.uow import UnitOfWork
 from sqlalchemy import or_
+
+from invenio_checks.services.permissions import CheckRunPermissionPolicy
 
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
 from .tasks import run_check_async
+from .utils import get_check_target
 
 
 class _CeleryTaskOp(Operation):
@@ -201,3 +206,79 @@ class ChecksAPI:
                 )
 
         return errors
+
+    @classmethod
+    def rerun_check(cls, check_run_id, identity):
+        """Rerun an existing check."""
+
+        check_run = CheckRun.query.get(check_run_id)
+
+        if not check_run:
+            current_app.logger.warning(
+                "Cannot rerun check: check run not found",
+                extra={"check_run_id": str(check_run_id)},
+            )
+            return None
+        # TODO: Add permission check for rerun based on target type and identity
+        if check_run.config.target_type == "community":
+            permission = CheckRunPermissionPolicy(
+                action="rerun",
+                community_id=check_run.record_id,
+            )
+            if not permission.allows(identity):
+                current_app.logger.warning(
+                    "User does not have permission to rerun check",
+                    extra={
+                        "check_run_id": str(check_run_id),
+                        "record_id": str(check_run.record_id),
+                        "identity": str(identity),
+                    },
+                )
+                raise PermissionDeniedError()
+
+        target = get_check_target(check_run)
+
+        if not target:
+            current_app.logger.warning(
+                "Cannot rerun check: target not found",
+                extra={
+                    "check_run_id": str(check_run_id),
+                    "record_id": str(check_run.record_id),
+                    "target_type": check_run.config.target_type,
+                },
+            )
+            return None
+
+        check_cls = current_checks_registry.get(check_run.config.check_id)
+
+        if not getattr(check_cls, "allow_rerun", False):
+            current_app.logger.warning(
+                "Manual rerun is not allowed for check",
+                extra={
+                    "check_run_id": str(check_run_id),
+                    "check_id": check_run.config.check_id,
+                },
+            )
+            raise PermissionDeniedError()
+
+        try:
+            with UnitOfWork() as uow:
+                result = cls.run_check(
+                    check_run.config,
+                    target,
+                    uow,
+                    is_draft=check_run.is_draft,
+                )
+                uow.commit()
+
+            return result
+
+        except Exception:
+            current_app.logger.exception(
+                "Failed to rerun check",
+                extra={
+                    "check_run_id": str(check_run_id),
+                    "check_id": check_run.config.check_id,
+                },
+            )
+            return None
