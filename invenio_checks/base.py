@@ -37,6 +37,18 @@ class Check:
         """Run the check on a record with the given configuration."""
         raise NotImplementedError()
 
+    def get_input_hash(self, record, config):
+        """Return a hash of the inputs used for change detection, or None to always re-run."""
+        return None
+
+    def pending_result(self, params):
+        """Return the initial result dict stored while the check is pending."""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+        }
+
 
 class ChecksRegistry:
     """Registry for check classes."""
@@ -97,11 +109,3 @@ class CheckResult:
     def add_errors(self, errors: List[Dict]):
         """Add error messages for the UI."""
         self.errors.extend(errors)
-
-    def pending_result(self, params):
-        """Return the initial result dict stored while the check is pending."""
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-        }
