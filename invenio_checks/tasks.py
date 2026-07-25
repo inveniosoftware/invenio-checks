@@ -10,7 +10,7 @@
 from datetime import datetime, timezone
 
 from celery import shared_task
-from celery.exceptions import MaxRetriesExceededError, SoftTimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded
 from flask import current_app
 from invenio_db import db
 from invenio_records_resources.services.uow import UnitOfWork
@@ -68,31 +68,27 @@ def run_check_async(self, check_run_id):
             },
         )
 
-        try:
+        if self.request.retries < self.max_retries:
             # Retry after 10s, 20s, then 30s.
-            raise self.retry(
-                exc=e,
-                countdown=(self.request.retries + 1) * 10,
+            raise self.retry(exc=e, countdown=(self.request.retries + 1) * 10)
+
+        try:
+            check_run = CheckRun.query.filter_by(id=check_run_id).one_or_none()
+
+            # Don't overwrite a run that may have completed meanwhile.
+            if check_run and check_run.status in (
+                CheckRunStatus.PENDING,
+                CheckRunStatus.RUNNING,
+            ):
+                check_run.status = CheckRunStatus.ERROR
+                check_run.end_time = datetime.now(timezone.utc)
+                check_run.state = {"error": error_message}
+                db.session.commit()
+
+        except Exception:
+            current_app.logger.exception(
+                "Failed to mark check run as ERROR",
+                extra={"check_run_id": check_run_id},
             )
 
-        except MaxRetriesExceededError:
-            try:
-                check_run = CheckRun.query.filter_by(id=check_run_id).one_or_none()
-
-                # Don't overwrite a run that may have completed meanwhile.
-                if check_run and check_run.status in (
-                    CheckRunStatus.PENDING,
-                    CheckRunStatus.RUNNING,
-                ):
-                    check_run.status = CheckRunStatus.ERROR
-                    check_run.end_time = datetime.now(timezone.utc)
-                    check_run.state = {"error": error_message}
-                    db.session.commit()
-
-            except Exception:
-                current_app.logger.exception(
-                    "Failed to mark check run as ERROR",
-                    extra={"check_run_id": check_run_id},
-                )
-
-            return None
+        return None

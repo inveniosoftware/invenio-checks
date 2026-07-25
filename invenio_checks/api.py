@@ -7,8 +7,7 @@
 from datetime import datetime, timezone
 
 from flask import current_app
-from invenio_db import db
-from invenio_db.uow import ModelCommitOp, Operation
+from invenio_db.uow import ModelCommitOp
 from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import UnitOfWork
 from sqlalchemy import or_
@@ -18,19 +17,8 @@ from invenio_checks.services.permissions import CheckRunPermissionPolicy
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
 from .tasks import run_check_async
+from .uow import _CeleryTaskOp
 from .utils import get_check_target
-
-
-class _CeleryTaskOp(Operation):
-    """Dispatch a Celery task after the UoW commits."""
-
-    def __init__(self, task, check_run):
-        self._task = task
-        self._check_run = check_run
-
-    def on_commit(self, uow):
-        """Dispatch the task after the DB transaction is committed."""
-        self._task.delay(check_run_id=str(self._check_run.id))
 
 
 class ChecksAPI:
@@ -81,6 +69,7 @@ class ChecksAPI:
         cls,
         config,
         record,
+        previous_run,
         is_draft: bool,
         status: CheckRunStatus,
         state=None,
@@ -89,12 +78,6 @@ class ChecksAPI:
         end_time=None,
     ):
         """Create or update check run if already exists."""
-        previous_run = CheckRun.query.filter_by(
-            config_id=config.id,
-            record_id=record.id,
-            is_draft=is_draft,
-        ).one_or_none()
-
         if not previous_run:
             result_run = CheckRun(
                 config=config,
@@ -120,6 +103,16 @@ class ChecksAPI:
         return result_run
 
     @classmethod
+    def _should_skip_rerun(cls, inputs_hash, previous_run):
+        """Return True if inputs are unchanged and the last run can be reused."""
+        if not previous_run or previous_run.status != CheckRunStatus.COMPLETED:
+            return False
+        return (
+            inputs_hash is not None
+            and previous_run.state.get("inputs_hash") == inputs_hash
+        )
+
+    @classmethod
     def run_check(cls, config, record, uow, is_draft=None, sync=False, **kwargs):
         """Run a check for a given configuration on a record or draft.
 
@@ -130,77 +123,80 @@ class ChecksAPI:
         if is_draft is None and config.target_type == "record":
             is_draft = record.is_draft
 
-        result_run = None
-        try:
-            check_cls = current_checks_registry.get(config.check_id)
-            if not check_cls:
-                raise ValueError(
-                    f"Check class not found for check_id: {config.check_id}"
-                )
-
-            should_run_sync = getattr(check_cls, "sync", True)
-            check_instance = check_cls()
-            if should_run_sync or sync:
-                start_time = datetime.now(timezone.utc)
-                res = check_instance.run(record, config)
-                end_time = datetime.now(timezone.utc)
-
-                result_run = cls._create_or_update_check_run(
-                    config,
-                    record,
-                    is_draft,
-                    CheckRunStatus.COMPLETED,
-                    result=res.to_dict(),
-                    start_time=start_time,
-                    end_time=end_time,
-                )
-
-                uow.register(ModelCommitOp(result_run))
-            else:
-                result_run = cls._create_or_update_check_run(
-                    config,
-                    record,
-                    is_draft,
-                    CheckRunStatus.PENDING,
-                    result={
-                        "id": check_instance.id,
-                        "title": check_instance.title,
-                        "description": check_instance.description,
-                    },
-                )
-
-                uow.register(ModelCommitOp(result_run))
-                # Ensures that the task is dispatched after record is commited
-                uow.register(_CeleryTaskOp(run_check_async, result_run))
-        except Exception as e:
-            current_app.logger.exception(
-                "Error running check on record",
-                extra={
-                    "record_id": str(record.id),
-                    "check_config_id": str(config.id),
-                },
+        check_cls = current_checks_registry.get(config.check_id)
+        if not check_cls:
+            current_app.logger.warning(
+                "Check class not found",
+                extra={"check_id": config.check_id},
             )
-            if not result_run:
-                current_app.logger.exception(
-                    "No corresponding CheckRun",
-                    extra={
-                        "record_id": str(record.id),
-                        "check_config_id": str(config.id),
-                    },
-                )
-                return
+            return None
 
-            try:
-                result_run.status = CheckRunStatus.ERROR
-                result_run.state = {"error": str(e)}
-                db.session.commit()
-            except Exception:
-                current_app.logger.exception(
-                    "Failed to mark check run as ERROR",
-                    extra={"check_run_id": getattr(result_run, "id", None)},
-                )
+        check_instance = check_cls()
+        previous_run = CheckRun.query.filter_by(
+            config_id=config.id,
+            record_id=record.id,
+            is_draft=is_draft,
+        ).one_or_none()
+        inputs_hash = check_instance.get_input_hash(record, config)
 
+        if getattr(check_cls, "sync", True) or sync:
+            start_time = datetime.now(timezone.utc)
+            res = check_instance.run(record, config)
+            end_time = datetime.now(timezone.utc)
+
+            result_run = cls._create_or_update_check_run(
+                config,
+                record,
+                previous_run,
+                is_draft,
+                CheckRunStatus.COMPLETED,
+                state={"inputs_hash": inputs_hash} if inputs_hash is not None else {},
+                result=res.to_dict(),
+                start_time=start_time,
+                end_time=end_time,
+            )
+            uow.register(ModelCommitOp(result_run))
+            return result_run
+
+        if cls._should_skip_rerun(inputs_hash, previous_run):
+            previous_run.revision_id = record.revision_id
+            uow.register(ModelCommitOp(previous_run))
+            return previous_run
+
+        result_run = cls._create_or_update_check_run(
+            config,
+            record,
+            previous_run,
+            is_draft,
+            CheckRunStatus.PENDING,
+            result=check_instance.pending_result(config.params),
+        )
+        uow.register(ModelCommitOp(result_run))
+        uow.register(_CeleryTaskOp(run_check_async, result_run))
         return result_run
+
+    @classmethod
+    def copy_record_run_to_draft(cls, config, draft, uow):
+        """Copy a completed record-level run to a draft run."""
+        record_run = CheckRun.query.filter_by(
+            config_id=config.id,
+            record_id=draft.id,
+            is_draft=False,
+        ).one_or_none()
+
+        if record_run and record_run.status == CheckRunStatus.COMPLETED:
+            draft_run = cls._create_or_update_check_run(
+                config=config,
+                record=draft,
+                previous_run=None,
+                is_draft=True,
+                status=CheckRunStatus.COMPLETED,
+                state=record_run.state or {},
+                result=record_run.result or {},
+                start_time=record_run.start_time,
+                end_time=record_run.end_time,
+            )
+            uow.register(ModelCommitOp(draft_run))
 
     @classmethod
     def extract_run_errors(cls, runs):

@@ -46,7 +46,7 @@ def get_check_target(check_run):
         "Invalid target_type for check config",
         extra={
             "target_type": target_type,
-            "check_run_id": str(check_runconfig.check_id),
+            "check_run_id": str(check_run.check_id),
         },
     )
 
