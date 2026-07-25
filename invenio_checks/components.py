@@ -13,7 +13,9 @@ from invenio_requests.records.api import Request
 from invenio_requests.records.models import RequestMetadata
 
 from .api import ChecksAPI
-from .models import CheckConfig, CheckRun
+from .models import CheckConfig, CheckRun, CheckRunStatus
+from .proxies import current_checks_registry
+from .uow import _ConvertDraftToRecordCheckRunOp
 
 
 def toggle_on_feature_flag(config_key):
@@ -64,7 +66,17 @@ class ChecksComponent(ServiceComponent):
         updated_runs = []
         configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
-            run = ChecksAPI.run_check(config, draft, self.uow)
+            try:
+                run = ChecksAPI.run_check(config, draft, self.uow)
+            except Exception:
+                current_app.logger.exception(
+                    "Error running check on draft",
+                    extra={
+                        "check_config_id": str(config.id),
+                        "record_id": str(draft.id),
+                    },
+                )
+                continue
             if run:
                 updated_runs.append(run)
 
@@ -84,8 +96,16 @@ class ChecksComponent(ServiceComponent):
 
         configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
-            # Run checks on the new version draft
-            ChecksAPI.run_check(config, draft, self.uow)
+            try:
+                ChecksAPI.run_check(config, draft, self.uow)
+            except Exception:
+                current_app.logger.exception(
+                    "Error running check on new version draft",
+                    extra={
+                        "check_config_id": str(config.id),
+                        "record_id": str(draft.id),
+                    },
+                )
 
     def edit(self, identity, draft=None, record=None, **kwargs):
         """Run checks on draft edit."""
@@ -103,8 +123,23 @@ class ChecksComponent(ServiceComponent):
         # Run checks for all relevant communities
         configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
-            # Run checks on the draft
-            ChecksAPI.run_check(config, draft, self.uow)
+            check_cls = current_checks_registry.get(config.check_id)
+            is_async = not getattr(check_cls, "sync", True)
+            if is_async:
+                # Copy the existing completed record run to the draft run to avoid an
+                # expensive task when no metadata changed. The run will be re-triggered
+                # by update_draft() if input for check changes.
+                ChecksAPI.copy_record_run_to_draft(config, draft, self.uow)
+            try:
+                ChecksAPI.run_check(config, draft, self.uow)
+            except Exception:
+                current_app.logger.exception(
+                    "Error running check on draft edit",
+                    extra={
+                        "check_config_id": str(config.id),
+                        "record_id": str(draft.id),
+                    },
+                )
 
     def publish(self, identity, draft=None, record=None, **kwargs):
         """Create or update record runs based on draft runs."""
@@ -124,22 +159,23 @@ class ChecksComponent(ServiceComponent):
                 is_draft=False,
             ).one_or_none()
 
-            if record_run:  # If the run already exists, update it
+            if record_run and draft_run.status == CheckRunStatus.COMPLETED:
+                # Draft is complete: copy its result into the existing record run.
                 record_run.start_time = draft_run.start_time
                 record_run.end_time = draft_run.end_time
 
                 record_run.status = draft_run.status
                 record_run.state = draft_run.state
                 record_run.result = draft_run.result
-
+                record_run.revision_id = record.revision_id
                 # Delete the draft run
                 self.uow.register(ModelDeleteOp(draft_run))
-            else:  # Otherwise, "convert" the draft run to a record run
-                draft_run.is_draft = False
-                record_run = draft_run
-
-            record_run.revision_id = record.revision_id
-            self.uow.register(ModelCommitOp(record_run))
+                self.uow.register(ModelCommitOp(record_run))
+            else:
+                # Draft is pending/running (or no record run exists): convert it in-place.
+                self.uow.register(
+                    _ConvertDraftToRecordCheckRunOp(draft_run, record_run, record)
+                )
 
     def delete_draft(self, identity, draft=None, record=None, force=False, **kwargs):
         """Delete all draft runs."""
@@ -187,7 +223,16 @@ class CommunityChecksComponent(ServiceComponent):
 
             configs = ChecksAPI.get_configs([parent.id], "community")
             for config in configs:
-                ChecksAPI.run_check(config, record, self.uow)
+                try:
+                    ChecksAPI.run_check(config, record, self.uow)
+                except Exception:
+                    current_app.logger.exception(
+                        "Error running community check",
+                        extra={
+                            "check_config_id": str(config.id),
+                            "record_id": str(record.id),
+                        },
+                    )
 
 
 @toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
@@ -219,9 +264,18 @@ class CommunityMemberChecksComponent(ServiceComponent):
                 CheckConfig.target_type == "community",
             ).one_or_none()
 
-            ChecksAPI.run_check(
-                config, subcommunity, uow, deleted_member_id=deleted_member_id
-            )
+            try:
+                ChecksAPI.run_check(
+                    config, subcommunity, uow, deleted_member_id=deleted_member_id
+                )
+            except Exception:
+                current_app.logger.exception(
+                    "Error running membership check",
+                    extra={
+                        "check_config_id": str(config.id) if config else None,
+                        "community_id": str(community_id),
+                    },
+                )
 
     def accept_member_request(self, identity, record=None, **kwargs):
         """Rerun on invitation accepted."""
