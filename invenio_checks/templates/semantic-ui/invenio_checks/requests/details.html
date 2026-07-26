@@ -16,10 +16,11 @@
         {% set ns = namespace(severity='success') %}
         {% for check in checks if check.config.check_cls.id == check_class.id %}
           {# Allows handling cases with more than one run per check_id, displaying only one icon #}
+          {% set check_severity = check.config.severity.error_value if check.status.value == 'E' else check.overall_severity %}
           {% if check.status.value in ('P', 'R') %}{% set ns.severity = 'running' %}
-          {% elif check.overall_severity == 'error' %}{% set ns.severity = 'error' %}
-          {% elif check.overall_severity == 'warning' and ns.severity != 'error' %}{% set ns.severity = 'warning' %}
-          {% elif check.overall_severity == 'info' and ns.severity == 'success' %}{% set ns.severity = 'info' %}
+          {% elif check_severity == 'error' %}{% set ns.severity = 'error' %}
+          {% elif check_severity == 'warning' and ns.severity != 'error' %}{% set ns.severity = 'warning' %}
+          {% elif check_severity == 'info' and ns.severity == 'success' %}{% set ns.severity = 'info' %}
           {% endif %}
         {% endfor %}
         <i class="{{ severity_tpl.severity_level_icons[ns.severity] }}"></i>
