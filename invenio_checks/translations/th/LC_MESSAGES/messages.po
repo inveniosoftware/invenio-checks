@@ -1,0 +1,280 @@
+# Translations template for invenio-checks.
+# Copyright (C) 2026 CERN
+# This file is distributed under the same license as the invenio-checks
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+# 
+# Translators:
+# Suthep Yonphimai <tomztt@gmail.com>, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-checks 10.1.0\n"
+"Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
+"POT-Creation-Date: 2026-07-02 12:36+0000\n"
+"PO-Revision-Date: 2026-07-02 11:19+0000\n"
+"Last-Translator: Suthep Yonphimai <tomztt@gmail.com>, 2026\n"
+"Language-Team: Thai (https://app.transifex.com/inveniosoftware/teams/23537/th/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+"Language: th\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: invenio_checks/contrib/file_formats.py:92
+msgid "File formats check"
+msgstr "การตรวจสอบรูปแบบไฟล์"
+
+#: invenio_checks/contrib/file_formats.py:94
+msgid ""
+"Validates that record files are in open and scientific formats, optionally "
+"suggesting alternatives."
+msgstr ""
+"ตรวจสอบว่าไฟล์ระเบียนอยู่ในรูปแบบเปิดและรูปแบบทางวิทยาศาสตร์ "
+"พร้อมแนะนำทางเลือกหากจำเป็น"
+
+#: invenio_checks/contrib/file_formats.py:103
+#, python-brace-format
+msgid ".{ext} is not a known open or scientific file format."
+msgstr ".{ext} ไม่ใช่รูปแบบไฟล์เปิดหรือรูปแบบทางวิทยาศาสตร์ที่รู้จัก"
+
+#: invenio_checks/contrib/file_formats.py:106
+msgid ""
+"Using closed or proprietary formats hinders reusability and preservation of "
+"published files."
+msgstr ""
+"การใช้รูปแบบปิดหรือรูปแบบที่เป็นกรรมสิทธิ์ขัดขวางการนำกลับมาใช้ใหม่และการเก็บรักษาไฟล์ที่เผยแพร่"
+
+#: invenio_checks/contrib/file_formats.py:108
+msgid "All files should be in open or scientific formats"
+msgstr "ไฟล์ทั้งหมดควรอยู่ในรูปแบบเปิดหรือรูปแบบทางวิทยาศาสตร์"
+
+#: invenio_checks/contrib/metadata/check.py:53
+msgid "Metadata validation"
+msgstr "การตรวจสอบข้อมูลเมตา"
+
+#: invenio_checks/contrib/metadata/check.py:54
+msgid "Validates record metadata against configured rules."
+msgstr "ตรวจสอบข้อมูลเมตาของระเบียนตามกฎที่กำหนดไว้"
+
+#: invenio_checks/contrib/metadata/check.py:138
+msgid "Unnamed check"
+msgstr "การตรวจสอบที่ไม่มีชื่อ"
+
+#: invenio_checks/contrib/metadata/expressions.py:40
+#, python-brace-format
+msgid "Field {path} is required but missing"
+msgstr "ฟิลด์ {path} จำเป็นแต่ขาดหายไป"
+
+#: invenio_checks/contrib/metadata/expressions.py:90
+#, python-brace-format
+msgid "Expected {path} to be {expected}, but got {actual}"
+msgstr "คาดว่า {path} จะเป็น {expected} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:91
+#, python-brace-format
+msgid "Expected {path} not to be {unexpected}, but got {actual}"
+msgstr "คาดว่า {path} จะไม่เป็น {unexpected} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:92
+#, python-brace-format
+msgid "Expected {path} to contain {expected}, but got {actual}"
+msgstr "คาดว่า {path} จะมี {expected} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:93
+#, python-brace-format
+msgid "Expected {path} not to contain {unexpected}, but got {actual}"
+msgstr "คาดว่า {path} จะไม่มี {unexpected} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:94
+#, python-brace-format
+msgid "Expected {expected} in {path}, but got {actual}"
+msgstr "คาดว่า {expected} จะอยู่ใน {path} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:95
+#, python-brace-format
+msgid "Expected {unexpected} to not be in {path}, but got {actual}"
+msgstr "คาดว่า {unexpected} จะไม่อยู่ใน {path} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:97
+#, python-brace-format
+msgid "Expected {path} to have at least {expected} {unit}, but got {actual}"
+msgstr "คาดว่า {path} จะมีอย่างน้อย {expected} {unit} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:100
+#, python-brace-format
+msgid "Expected {path} to have at most {expected} {unit}, but got {actual}"
+msgstr "คาดว่า {path} จะมีไม่เกิน {expected} {unit} แต่ได้ {actual}"
+
+#: invenio_checks/contrib/metadata/expressions.py:172
+#: invenio_checks/contrib/metadata/expressions.py:202
+#, python-brace-format
+msgid "Cannot check if {type} contains a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} มีค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:187
+#: invenio_checks/contrib/metadata/expressions.py:217
+#, python-brace-format
+msgid "Cannot check if {type} does not contain a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} ไม่มีค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:227
+#, python-brace-format
+msgid "Expected {path} to start with {expected}"
+msgstr "คาดว่า {path} จะขึ้นต้นด้วย {expected}"
+
+#: invenio_checks/contrib/metadata/expressions.py:233
+#, python-brace-format
+msgid "Cannot check if {type} starts with a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} ขึ้นต้นด้วยค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:242
+#, python-brace-format
+msgid "Expected {path} not to start with {unexpected}"
+msgstr "คาดว่า {path} จะไม่ขึ้นต้นด้วย {unexpected}"
+
+#: invenio_checks/contrib/metadata/expressions.py:248
+#, python-brace-format
+msgid "Cannot check if {type} doesn't start with a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} ไม่ขึ้นต้นด้วยค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:257
+#, python-brace-format
+msgid "Expected {path} to end with {expected}"
+msgstr "คาดว่า {path} จะลงท้ายด้วย {expected}"
+
+#: invenio_checks/contrib/metadata/expressions.py:263
+#, python-brace-format
+msgid "Cannot check if {type} ends with a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} ลงท้ายด้วยค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:272
+#, python-brace-format
+msgid "Expected {path} not to end with {unexpected}"
+msgstr "คาดว่า {path} จะไม่ลงท้ายด้วย {unexpected}"
+
+#: invenio_checks/contrib/metadata/expressions.py:278
+#, python-brace-format
+msgid "Cannot check if {type} doesn't end with a value"
+msgstr "ไม่สามารถตรวจสอบว่า {type} ไม่ลงท้ายด้วยค่าได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:287
+#, python-brace-format
+msgid "Unknown operator: {operator}"
+msgstr "ตัวดำเนินการไม่รู้จัก: {operator}"
+
+#: invenio_checks/contrib/metadata/expressions.py:300
+msgid "characters"
+msgstr "ตัวอักษร"
+
+#: invenio_checks/contrib/metadata/expressions.py:302
+msgid "items"
+msgstr "รายการ"
+
+#: invenio_checks/contrib/metadata/expressions.py:304
+msgid "value"
+msgstr "ค่า"
+
+#: invenio_checks/contrib/metadata/expressions.py:311
+#, python-brace-format
+msgid "Cannot check min for {type}"
+msgstr "ไม่สามารถตรวจสอบค่าต่ำสุดสำหรับ {type} ได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:319
+#, python-brace-format
+msgid "Min threshold must be a number, got {type}"
+msgstr "ค่าขีดต่ำสุดต้องเป็นตัวเลข แต่ได้ {type}"
+
+#: invenio_checks/contrib/metadata/expressions.py:342
+#, python-brace-format
+msgid "Cannot check max for {type}"
+msgstr "ไม่สามารถตรวจสอบค่าสูงสุดสำหรับ {type} ได้"
+
+#: invenio_checks/contrib/metadata/expressions.py:350
+#, python-brace-format
+msgid "Max threshold must be a number, got {type}"
+msgstr "ค่าขีดสูงสุดต้องเป็นตัวเลข แต่ได้ {type}"
+
+#: invenio_checks/contrib/metadata/expressions.py:407
+#, python-brace-format
+msgid "Unknown logical operator: {operator}"
+msgstr "ตัวดำเนินการตรรกะไม่รู้จัก: {operator}"
+
+#: invenio_checks/contrib/metadata/expressions.py:417
+#, python-brace-format
+msgid "List field {path} is missing"
+msgstr "ฟิลด์รายการ {path} ขาดหายไป"
+
+#: invenio_checks/contrib/metadata/expressions.py:418
+#, python-brace-format
+msgid "Field {path} is not a list"
+msgstr "ฟิลด์ {path} ไม่ใช่รายการ"
+
+#: invenio_checks/contrib/metadata/expressions.py:419
+#, python-brace-format
+msgid "No items in list {path}"
+msgstr "ไม่มีรายการใน {path}"
+
+#: invenio_checks/contrib/metadata/expressions.py:420
+#, python-brace-format
+msgid "No items in {path} match the required criteria"
+msgstr "ไม่มีรายการใน {path} ที่ตรงตามเกณฑ์ที่กำหนด"
+
+#: invenio_checks/contrib/metadata/expressions.py:421
+#, python-brace-format
+msgid "Not all items in {path} match the required criteria"
+msgstr "ไม่ใช่ทุกรายการใน {path} ที่ตรงตามเกณฑ์ที่กำหนด"
+
+#: invenio_checks/services/config.py:26
+msgid "Ascending"
+msgstr "จากน้อยไปมาก"
+
+#: invenio_checks/services/config.py:27
+msgid "Descending"
+msgstr "จากมากไปน้อย"
+
+#: invenio_checks/services/config.py:29
+msgid "Title"
+msgstr "ชื่อเรื่อง"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/file_formats_tab.html:25
+msgid "The following files are not using open or scientific formats:"
+msgstr "ไฟล์ต่อไปนี้ไม่ได้ใช้รูปแบบเปิดหรือรูปแบบทางวิทยาศาสตร์:"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:9
+msgid "Editing in progress"
+msgstr "กำลังแก้ไข"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:10
+msgid "You're viewing checks and feedback results for unpublished changes."
+msgstr ""
+"คุณกำลังดูผลการตรวจสอบและข้อเสนอแนะสำหรับการเปลี่ยนแปลงที่ยังไม่เผยแพร่"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:12
+msgid ""
+"The published version available to users may differ from what's shown here."
+msgstr "เวอร์ชันที่เผยแพร่ให้ผู้ใช้อาจแตกต่างจากที่แสดงที่นี่"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:18
+msgid "What is this about?"
+msgstr "นี่คืออะไร?"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:19
+msgid ""
+"These checks help ensure that your submission is compliant with this "
+"community's guidelines."
+msgstr "การตรวจสอบเหล่านี้ช่วยให้การส่งของคุณสอดคล้องกับแนวทางของชุมชน"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:20
+msgid "How do I fix warnings/errors?"
+msgstr "จะแก้ไขคำเตือน/ข้อผิดพลาดได้อย่างไร?"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:21
+msgid ""
+"Go to the \"Record\" tab and click the orange \"Edit\" button. All errors "
+"and recommendations are displayed inline in the upload form."
+msgstr ""
+"ไปที่แท็บ \"ระเบียน\" และคลิกปุ่ม \"แก้ไข\" สีส้ม "
+"ข้อผิดพลาดและคำแนะนำทั้งหมดจะแสดงในแบบฟอร์มอัปโหลด"
