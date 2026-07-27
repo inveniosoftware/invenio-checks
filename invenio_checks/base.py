@@ -3,9 +3,28 @@
 """Check implementations and registry."""
 
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from invenio_base.utils import entry_points
+
+
+@dataclass
+class CheckResult:
+    """Result of running a check."""
+
+    id: str
+    title: str
+    description: str
+    success: bool = True
+    errors: List[Dict] = field(default_factory=list)
+
+    def to_dict(self):
+        """Convert the result to a dictionary."""
+        return asdict(self)
+
+    def add_errors(self, errors: List[Dict]):
+        """Add error messages for the UI."""
+        self.errors.extend(errors)
 
 
 class Check:
@@ -33,13 +52,9 @@ class Check:
         """Validate the configuration for this check."""
         raise NotImplementedError()
 
-    def run(self, record, config):
+    def run(self, record, config, **kwargs) -> tuple[CheckResult, dict[str, Any]]:
         """Run the check on a record with the given configuration."""
         raise NotImplementedError()
-
-    def get_input_hash(self, record, config):
-        """Return a hash of the inputs used for change detection, or None to always re-run."""
-        return None
 
     def pending_result(self, params):
         """Return the initial result dict stored while the check is pending."""
@@ -53,6 +68,10 @@ class Check:
     def can_rerun(cls, identity, record_id):
         """Check the permissions to rerun the check."""
         raise NotImplementedError()
+
+    def should_rerun(self, record, config, previous_run, **kwargs):
+        """Allows a Check class to define whether to rerun a check. True by default."""
+        return True
 
 
 class ChecksRegistry:
@@ -95,22 +114,3 @@ class ChecksRegistry:
             check_cls = check_cls_or_func
 
             self.register(check_cls)
-
-
-@dataclass
-class CheckResult:
-    """Result of running a check."""
-
-    id: str
-    title: str
-    description: str
-    success: bool = True
-    errors: List[Dict] = field(default_factory=list)
-
-    def to_dict(self):
-        """Convert the result to a dictionary."""
-        return asdict(self)
-
-    def add_errors(self, errors: List[Dict]):
-        """Add error messages for the UI."""
-        self.errors.extend(errors)

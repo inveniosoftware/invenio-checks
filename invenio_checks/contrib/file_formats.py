@@ -136,7 +136,13 @@ class FileFormatsCheck(Check):
                 )
             return FileFormatDatabase.load(data)
 
-    def run(self, record, config: CheckConfig):
+    def run(
+        self,
+        record,
+        config: CheckConfig,
+        previous_run=None,
+        **kwargs,
+    ):
         """Run the check against the record's files."""
         params = config.params
         title = params.get("title", self.default_messages["title"])
@@ -179,4 +185,4 @@ class FileFormatsCheck(Check):
                 )
                 continue
 
-        return result
+        return result, {}
