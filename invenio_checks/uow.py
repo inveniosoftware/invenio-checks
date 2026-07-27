@@ -6,16 +6,16 @@
 from invenio_db.uow import Operation
 
 
-class _CeleryTaskOp(Operation):
+class AsyncRunTaskOp(Operation):
     """Dispatch a Celery task after the UoW commits."""
 
     def __init__(self, task, check_run):
         self._task = task
         self._check_run = check_run
 
-    def on_commit(self, uow):
+    def on_post_commit(self, uow):
         """Dispatch the task after the DB transaction is committed."""
-        self._task.delay(check_run_id=str(self._check_run.id))
+        self._task.apply_async(args=[str(self._check_run.id)])
 
 
 class _ConvertDraftToRecordCheckRunOp(Operation):
