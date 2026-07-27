@@ -1,0 +1,274 @@
+# Translations template for invenio-checks.
+# Copyright (C) 2026 CERN
+# This file is distributed under the same license as the invenio-checks
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+# 
+# Translators:
+# Minjae Kwon, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: invenio-checks 10.1.0\n"
+"Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
+"POT-Creation-Date: 2026-07-02 12:36+0000\n"
+"PO-Revision-Date: 2026-07-02 11:19+0000\n"
+"Last-Translator: Minjae Kwon, 2026\n"
+"Language-Team: Korean (https://app.transifex.com/inveniosoftware/teams/23537/ko/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+"Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: invenio_checks/contrib/file_formats.py:92
+msgid "File formats check"
+msgstr "파일 형식 검사"
+
+#: invenio_checks/contrib/file_formats.py:94
+msgid ""
+"Validates that record files are in open and scientific formats, optionally "
+"suggesting alternatives."
+msgstr "레코드 파일이 개방형·과학 형식인지 검증하고, 필요 시 대안을 제안합니다."
+
+#: invenio_checks/contrib/file_formats.py:103
+#, python-brace-format
+msgid ".{ext} is not a known open or scientific file format."
+msgstr ".{ext}은(는) 알려진 개방형 또는 과학 파일 형식이 아닙니다."
+
+#: invenio_checks/contrib/file_formats.py:106
+msgid ""
+"Using closed or proprietary formats hinders reusability and preservation of "
+"published files."
+msgstr "폐쇄형 또는 독점 형식을 사용하면 게시된 파일의 재사용성과 보존이 저해됩니다."
+
+#: invenio_checks/contrib/file_formats.py:108
+msgid "All files should be in open or scientific formats"
+msgstr "모든 파일은 개방형 또는 과학 형식이어야 합니다"
+
+#: invenio_checks/contrib/metadata/check.py:53
+msgid "Metadata validation"
+msgstr "메타데이터 검증"
+
+#: invenio_checks/contrib/metadata/check.py:54
+msgid "Validates record metadata against configured rules."
+msgstr "설정된 규칙에 따라 레코드 메타데이터를 검증합니다."
+
+#: invenio_checks/contrib/metadata/check.py:138
+msgid "Unnamed check"
+msgstr "이름 없는 검사"
+
+#: invenio_checks/contrib/metadata/expressions.py:40
+#, python-brace-format
+msgid "Field {path} is required but missing"
+msgstr "필드 {path}은(는) 필수이지만 누락되었습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:90
+#, python-brace-format
+msgid "Expected {path} to be {expected}, but got {actual}"
+msgstr "{path}이(가) {expected}일 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:91
+#, python-brace-format
+msgid "Expected {path} not to be {unexpected}, but got {actual}"
+msgstr "{path}이(가) {unexpected}이(가) 아닐 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:92
+#, python-brace-format
+msgid "Expected {path} to contain {expected}, but got {actual}"
+msgstr "{path}이(가) {expected}을(를) 포함할 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:93
+#, python-brace-format
+msgid "Expected {path} not to contain {unexpected}, but got {actual}"
+msgstr "{path}이(가) {unexpected}을(를) 포함하지 않을 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:94
+#, python-brace-format
+msgid "Expected {expected} in {path}, but got {actual}"
+msgstr "{path}에 {expected}을(를) 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:95
+#, python-brace-format
+msgid "Expected {unexpected} to not be in {path}, but got {actual}"
+msgstr "{path}에 {unexpected}이(가) 없을 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:97
+#, python-brace-format
+msgid "Expected {path} to have at least {expected} {unit}, but got {actual}"
+msgstr "{path}이(가) 최소 {expected} {unit}일 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:100
+#, python-brace-format
+msgid "Expected {path} to have at most {expected} {unit}, but got {actual}"
+msgstr "{path}이(가) 최대 {expected} {unit}일 것으로 예상했으나 {actual}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:172
+#: invenio_checks/contrib/metadata/expressions.py:202
+#, python-brace-format
+msgid "Cannot check if {type} contains a value"
+msgstr "{type}이(가) 값을 포함하는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:187
+#: invenio_checks/contrib/metadata/expressions.py:217
+#, python-brace-format
+msgid "Cannot check if {type} does not contain a value"
+msgstr "{type}이(가) 값을 포함하지 않는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:227
+#, python-brace-format
+msgid "Expected {path} to start with {expected}"
+msgstr "{path}이(가) {expected}(으)로 시작할 것으로 예상했습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:233
+#, python-brace-format
+msgid "Cannot check if {type} starts with a value"
+msgstr "{type}이(가) 값으로 시작하는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:242
+#, python-brace-format
+msgid "Expected {path} not to start with {unexpected}"
+msgstr "{path}이(가) {unexpected}(으)로 시작하지 않을 것으로 예상했습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:248
+#, python-brace-format
+msgid "Cannot check if {type} doesn't start with a value"
+msgstr "{type}이(가) 값으로 시작하지 않는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:257
+#, python-brace-format
+msgid "Expected {path} to end with {expected}"
+msgstr "{path}이(가) {expected}(으)로 끝날 것으로 예상했습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:263
+#, python-brace-format
+msgid "Cannot check if {type} ends with a value"
+msgstr "{type}이(가) 값으로 끝나는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:272
+#, python-brace-format
+msgid "Expected {path} not to end with {unexpected}"
+msgstr "{path}이(가) {unexpected}(으)로 끝나지 않을 것으로 예상했습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:278
+#, python-brace-format
+msgid "Cannot check if {type} doesn't end with a value"
+msgstr "{type}이(가) 값으로 끝나지 않는지 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:287
+#, python-brace-format
+msgid "Unknown operator: {operator}"
+msgstr "알 수 없는 연산자: {operator}"
+
+#: invenio_checks/contrib/metadata/expressions.py:300
+msgid "characters"
+msgstr "자"
+
+#: invenio_checks/contrib/metadata/expressions.py:302
+msgid "items"
+msgstr "개"
+
+#: invenio_checks/contrib/metadata/expressions.py:304
+msgid "value"
+msgstr "값"
+
+#: invenio_checks/contrib/metadata/expressions.py:311
+#, python-brace-format
+msgid "Cannot check min for {type}"
+msgstr "{type}의 최솟값을 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:319
+#, python-brace-format
+msgid "Min threshold must be a number, got {type}"
+msgstr "최소 임계값은 숫자여야 하지만 {type}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:342
+#, python-brace-format
+msgid "Cannot check max for {type}"
+msgstr "{type}의 최댓값을 확인할 수 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:350
+#, python-brace-format
+msgid "Max threshold must be a number, got {type}"
+msgstr "최대 임계값은 숫자여야 하지만 {type}입니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:407
+#, python-brace-format
+msgid "Unknown logical operator: {operator}"
+msgstr "알 수 없는 논리 연산자: {operator}"
+
+#: invenio_checks/contrib/metadata/expressions.py:417
+#, python-brace-format
+msgid "List field {path} is missing"
+msgstr "목록 필드 {path}이(가) 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:418
+#, python-brace-format
+msgid "Field {path} is not a list"
+msgstr "필드 {path}은(는) 목록이 아닙니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:419
+#, python-brace-format
+msgid "No items in list {path}"
+msgstr "목록 {path}에 항목이 없습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:420
+#, python-brace-format
+msgid "No items in {path} match the required criteria"
+msgstr "{path}의 어떤 항목도 필수 조건을 충족하지 않습니다"
+
+#: invenio_checks/contrib/metadata/expressions.py:421
+#, python-brace-format
+msgid "Not all items in {path} match the required criteria"
+msgstr "{path}의 일부 항목이 필수 조건을 충족하지 않습니다"
+
+#: invenio_checks/services/config.py:26
+msgid "Ascending"
+msgstr "오름차순"
+
+#: invenio_checks/services/config.py:27
+msgid "Descending"
+msgstr "내림차순"
+
+#: invenio_checks/services/config.py:29
+msgid "Title"
+msgstr "제목"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/file_formats_tab.html:25
+msgid "The following files are not using open or scientific formats:"
+msgstr "다음 파일은 개방형(open format) 또는 과학 형식(scientific formats)을 사용하지 않습니다:"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:9
+msgid "Editing in progress"
+msgstr "편집 진행 중"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:10
+msgid "You're viewing checks and feedback results for unpublished changes."
+msgstr "게시되지 않은 변경 사항에 대한 검사 및 피드백 결과를 보고 있습니다."
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:12
+msgid ""
+"The published version available to users may differ from what's shown here."
+msgstr "사용자에게 제공되는 게시된 버전은 여기에 표시된 것과 다를 수 있습니다."
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:18
+msgid "What is this about?"
+msgstr "이것은 무엇인가요?"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:19
+msgid ""
+"These checks help ensure that your submission is compliant with this "
+"community's guidelines."
+msgstr "이 검사는 제출물이 이 커뮤니티의 가이드라인을 준수하는지 확인하는 데 도움이 됩니다."
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:20
+msgid "How do I fix warnings/errors?"
+msgstr "경고/오류는 어떻게 해결하나요?"
+
+#: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:21
+msgid ""
+"Go to the \"Record\" tab and click the orange \"Edit\" button. All errors "
+"and recommendations are displayed inline in the upload form."
+msgstr "\"레코드\" 탭으로 이동하여 주황색 \"수정\" 버튼을 클릭하십시오. 모든 오류와 권장 사항이 업로드 양식에 인라인으로 표시됩니다."
