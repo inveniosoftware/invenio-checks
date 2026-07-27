@@ -17,7 +17,7 @@ from invenio_checks.services.permissions import CheckRunPermissionPolicy
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry
 from .tasks import run_check_async
-from .uow import _CeleryTaskOp
+from .uow import AsyncRunTaskOp
 from .utils import get_check_target
 
 
@@ -72,7 +72,7 @@ class ChecksAPI:
         previous_run,
         is_draft: bool,
         status: CheckRunStatus,
-        state=None,
+        state,
         result=None,
         start_time=None,
         end_time=None,
@@ -87,7 +87,7 @@ class ChecksAPI:
                 start_time=start_time,
                 end_time=end_time,
                 status=status,
-                state=state or {},
+                state=state,
                 result=result or {},
             )
         else:
@@ -97,20 +97,10 @@ class ChecksAPI:
             result_run.start_time = start_time
             result_run.end_time = end_time
             result_run.status = status
-            result_run.state = state or {}
+            result_run.state = state
             result_run.result = result or {}
 
         return result_run
-
-    @classmethod
-    def _should_skip_rerun(cls, inputs_hash, previous_run):
-        """Return True if inputs are unchanged and the last run can be reused."""
-        if not previous_run or previous_run.status != CheckRunStatus.COMPLETED:
-            return False
-        return (
-            inputs_hash is not None
-            and previous_run.state.get("inputs_hash") == inputs_hash
-        )
 
     @classmethod
     def run_check(cls, config, record, uow, is_draft=None, sync=False, **kwargs):
@@ -137,11 +127,17 @@ class ChecksAPI:
             record_id=record.id,
             is_draft=is_draft,
         ).one_or_none()
-        inputs_hash = check_instance.get_input_hash(record, config)
+
+        if previous_run and not check_instance.should_rerun(
+            record, config, previous_run, **kwargs
+        ):
+            previous_run.revision_id = record.revision_id
+            uow.register(ModelCommitOp(previous_run))
+            return previous_run
 
         if getattr(check_cls, "sync", True) or sync:
             start_time = datetime.now(timezone.utc)
-            res = check_instance.run(record, config)
+            res, state = check_instance.run(record, config, **kwargs)
             end_time = datetime.now(timezone.utc)
 
             result_run = cls._create_or_update_check_run(
@@ -150,7 +146,7 @@ class ChecksAPI:
                 previous_run,
                 is_draft,
                 CheckRunStatus.COMPLETED,
-                state={"inputs_hash": inputs_hash} if inputs_hash is not None else {},
+                state=state,
                 result=res.to_dict(),
                 start_time=start_time,
                 end_time=end_time,
@@ -158,21 +154,17 @@ class ChecksAPI:
             uow.register(ModelCommitOp(result_run))
             return result_run
 
-        if cls._should_skip_rerun(inputs_hash, previous_run):
-            previous_run.revision_id = record.revision_id
-            uow.register(ModelCommitOp(previous_run))
-            return previous_run
-
         result_run = cls._create_or_update_check_run(
             config,
             record,
             previous_run,
             is_draft,
             CheckRunStatus.PENDING,
+            state=previous_run.state if previous_run else {},
             result=check_instance.pending_result(config.params),
         )
         uow.register(ModelCommitOp(result_run))
-        uow.register(_CeleryTaskOp(run_check_async, result_run))
+        uow.register(AsyncRunTaskOp(run_check_async, result_run))
         return result_run
 
     @classmethod

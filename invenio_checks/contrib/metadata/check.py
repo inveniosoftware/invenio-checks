@@ -65,7 +65,13 @@ class MetadataCheck(Check):
 
         return True
 
-    def run(self, record, config: CheckConfig):
+    def run(
+        self,
+        record,
+        config: CheckConfig,
+        previous_run=None,
+        **kwargs,
+    ):
         """Run the metadata check on a record with the given configuration."""
         # Create a check result
         result = MetadataCheckResult(
@@ -98,7 +104,7 @@ class MetadataCheck(Check):
             except Exception:
                 pass
 
-        return result
+        return result, {}
 
     def to_service_errors(self, rule_result: RuleResult) -> List[Dict]:
         """Create error messages for the UI."""

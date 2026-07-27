@@ -41,7 +41,7 @@ def test_default_file_format_check(app, record_with_files):
         enabled=True,
     )
 
-    result = check.run(record_with_files, check_config)
+    result, state = check.run(record_with_files, check_config)
     assert result.errors == [
         {
             "field": "files.entries.file1.dwg",
