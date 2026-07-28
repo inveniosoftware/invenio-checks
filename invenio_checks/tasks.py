@@ -16,7 +16,6 @@ from invenio_db import db
 from invenio_records_resources.services.uow import UnitOfWork
 
 from .models import CheckRun, CheckRunStatus
-from .utils import get_check_target
 
 
 @shared_task(bind=True, max_retries=3)
@@ -35,7 +34,7 @@ def run_check_async(self, check_run_id):
 
         config = check_run.config
 
-        target = get_check_target(check_run)
+        target = ChecksAPI.get_target(check_run)
 
         if not config or not target:
             current_app.logger.error("Config or target not found")

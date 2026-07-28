@@ -8,3 +8,7 @@ from werkzeug.local import LocalProxy
 current_checks_registry = LocalProxy(
     lambda: current_app.extensions["invenio-checks"].checks_registry
 )
+
+current_targets_registry = LocalProxy(
+    lambda: current_app.extensions["invenio-checks"].targets_registry
+)
