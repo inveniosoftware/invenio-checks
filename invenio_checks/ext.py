@@ -5,7 +5,7 @@
 """Invenio checks application."""
 
 from . import config
-from .base import ChecksRegistry
+from .base import ChecksRegistry, CheckTargetsRegistry
 from .utils import translate_field
 
 
@@ -23,6 +23,10 @@ class InvenioChecks(object):
         app.extensions["invenio-checks"] = self
         self.checks_registry = ChecksRegistry()
         self.checks_registry.load_from_entry_points(app, "invenio_checks.check_types")
+        self.targets_registry = CheckTargetsRegistry()
+        self.targets_registry.load_from_entry_points(
+            app, "invenio_checks.check_targets"
+        )
         # Register Jinja filters
         app.jinja_env.filters["translate_field"] = translate_field
 

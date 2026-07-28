@@ -47,6 +47,9 @@ invenio_checks = "invenio_checks.tasks"
 file_formats = "invenio_checks.contrib.file_formats:FileFormatsCheck"
 metadata = "invenio_checks.contrib.metadata.check:MetadataCheck"
 
+[project.entry-points."invenio_checks.check_targets"]
+community = "invenio_checks.base:CommunityCheckTarget"
+
 [project.entry-points."invenio_db.alembic"]
 invenio_checks = "invenio_checks:alembic"
 

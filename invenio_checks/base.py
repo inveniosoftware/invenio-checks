@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List
 
 from invenio_base.utils import entry_points
+from invenio_communities.proxies import current_communities
 
 
 @dataclass
@@ -114,3 +115,66 @@ class ChecksRegistry:
             check_cls = check_cls_or_func
 
             self.register(check_cls)
+
+
+class CheckTarget:
+    """Base CheckTarget class for all curation check targers."""
+
+    id: str
+    """Unique identifier for the check target."""
+
+    def resolve(self, check_run):
+        """Get the target object for a check target."""
+        raise NotImplementedError()
+
+
+class CheckTargetsRegistry:
+    """Registry for CheckTarget classes."""
+
+    def __init__(self):
+        """Initialize the registry."""
+        self._targets = {}
+
+    def register(self, check_target_cls):
+        """Register a CheckTarget class."""
+        if not issubclass(check_target_cls, CheckTarget):
+            raise TypeError("Class must inherit from CheckTarget")
+
+        check_target_id = check_target_cls.id
+        if not check_target_id:
+            raise ValueError("CheckTarget class must define an id")
+
+        if check_target_id in self._targets:
+            raise ValueError(
+                f"CheckTarget with id '{check_target_id}' already registered"
+            )
+
+        self._targets[check_target_id] = check_target_cls
+        return check_target_cls
+
+    def get(self, check_target_id):
+        """Get a check target class by id."""
+        check_target_cls = self._targets.get(check_target_id)
+        if not check_target_cls:
+            raise ValueError(f"No CheckTarget registered with id '{check_target_id}'")
+        return check_target_cls
+
+    def get_all(self):
+        """Get all registered CheckTarget classes."""
+        return self._targets.copy()
+
+    def load_from_entry_points(self, app, ep_name):
+        """Load check targets from entry points."""
+        for ep in entry_points(group=ep_name):
+            check_target_cls = ep.load()
+            self.register(check_target_cls)
+
+
+class CommunityCheckTarget(CheckTarget):
+    """CheckTarget class for communities."""
+
+    id = "community"
+
+    def resolve(self, check_run):
+        """Get the target object for a community check target."""
+        return current_communities.service.record_cls.get_record(check_run.record_id)
