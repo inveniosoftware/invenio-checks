@@ -40,6 +40,9 @@ invenio_checks = "invenio_checks:InvenioChecks"
 [project.entry-points."invenio_base.blueprints"]
 invenio_checks = "invenio_checks.views:create_ui_blueprint"
 
+[project.entry-points."invenio_celery.tasks"]
+invenio_checks = "invenio_checks.tasks"
+
 [project.entry-points."invenio_checks.check_types"]
 file_formats = "invenio_checks.contrib.file_formats:FileFormatsCheck"
 metadata = "invenio_checks.contrib.metadata.check:MetadataCheck"
