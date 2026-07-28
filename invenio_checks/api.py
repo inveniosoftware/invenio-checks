@@ -227,23 +227,18 @@ class ChecksAPI:
                 extra={"check_run_id": str(check_run_id)},
             )
             return None
-        # TODO: Add permission check for rerun based on target type and identity
-        if check_run.config.target_type == "community":
-            permission = CheckRunPermissionPolicy(
-                action="rerun",
-                community_id=check_run.record_id,
-            )
-            if not permission.allows(identity):
-                current_app.logger.warning(
-                    "User does not have permission to rerun check",
-                    extra={
-                        "check_run_id": str(check_run_id),
-                        "record_id": str(check_run.record_id),
-                        "identity": str(identity),
-                    },
-                )
-                raise PermissionDeniedError()
 
+        check_cls = current_checks_registry.get(check_run.config.check_id)
+        if check_cls.can_rerun(identity, check_run.record_id) is False:
+            current_app.logger.warning(
+                "User does not have permission to rerun check",
+                extra={
+                    "check_run_id": str(check_run_id),
+                    "record_id": str(check_run.record_id),
+                    "identity": str(identity),
+                },
+            )
+            raise PermissionDeniedError()
         target = get_check_target(check_run)
 
         if not target:
@@ -256,8 +251,6 @@ class ChecksAPI:
                 },
             )
             return None
-
-        check_cls = current_checks_registry.get(check_run.config.check_id)
 
         if not getattr(check_cls, "allow_rerun", False):
             current_app.logger.warning(
