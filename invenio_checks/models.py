@@ -56,7 +56,7 @@ class CheckConfig(db.Model, db.Timestamp):
         ChoiceType(Severity, impl=db.CHAR(1)), nullable=False, default=Severity.INFO
     )
     enabled = db.Column(db.Boolean, nullable=False, default=True)
-    target_type = db.Column(db.String(15), nullable=False, default="")
+    target_type = db.Column(db.String(255), nullable=False)
 
     @property
     def check_cls(self):
@@ -89,7 +89,7 @@ class CheckRun(db.Model, db.Timestamp):
     config_id = db.Column(UUIDType, db.ForeignKey(CheckConfig.id), nullable=False)
     config = db.relationship(CheckConfig)
     record_id = db.Column(UUIDType, nullable=False, index=True)
-    is_draft = db.Column(db.Boolean)
+    is_draft = db.Column(db.Boolean, nullable=False, default=False)
     revision_id = db.Column(db.Integer)
 
     start_time = db.Column(db.UTCDateTime, nullable=True)

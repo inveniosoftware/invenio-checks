@@ -9,7 +9,6 @@
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.sql import text
 
 # revision identifiers, used by Alembic.
 revision = "1784902219"
@@ -20,17 +19,17 @@ depends_on = None
 
 def upgrade():
     """Upgrade database."""
-    op.alter_column("checks_run", "is_draft", nullable=True)
     op.alter_column("checks_run", "revision_id", nullable=True)
-
+    # 1. add nullable, no default
     op.add_column(
-        "checks_config",
-        sa.Column("target_type", sa.String(15), nullable=False, server_default=""),
+        "checks_config", sa.Column("target_type", sa.String(255), nullable=True)
     )
-    op.execute(text("""UPDATE checks_config
-                       SET target_type = 'record'
-                       WHERE check_id = 'metadata'
-                          or check_id = 'file_formats';"""))
+    # 2. backfill values
+    op.execute(
+        "UPDATE checks_config SET target_type = 'record' WHERE target_type IS NULL"
+    )
+    # 3. make `nullable=False`
+    op.alter_column("checks_config", "target_type", nullable=False)
 
     op.create_unique_constraint(
         "uq_checks_run_config_record_draft",
