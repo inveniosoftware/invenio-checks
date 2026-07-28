@@ -4,7 +4,6 @@
 """Checks permissions."""
 
 from invenio_administration.generators import Administration
-from invenio_communities.generators import CommunityManagers, CommunityOwners
 from invenio_records_permissions.generators import SystemProcess
 from invenio_records_permissions.policies import BasePermissionPolicy
 
@@ -28,9 +27,3 @@ class CheckRunPermissionPolicy(BasePermissionPolicy):
     can_update = [Administration(), SystemProcess()]
     can_delete = [Administration(), SystemProcess()]
     can_stop = [Administration(), SystemProcess()]
-    can_rerun = [
-        Administration(),
-        SystemProcess(),
-        CommunityOwners(),
-        CommunityManagers(),
-    ]

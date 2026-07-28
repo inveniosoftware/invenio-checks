@@ -49,6 +49,11 @@ class Check:
             "description": self.description,
         }
 
+    @classmethod
+    def can_rerun(cls, identity, record_id):
+        """Check the permissions to rerun the check."""
+        raise NotImplementedError()
+
 
 class ChecksRegistry:
     """Registry for check classes."""
