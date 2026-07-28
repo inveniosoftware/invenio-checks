@@ -12,13 +12,10 @@ from invenio_records_resources.services.errors import PermissionDeniedError
 from invenio_records_resources.services.uow import UnitOfWork
 from sqlalchemy import or_
 
-from invenio_checks.services.permissions import CheckRunPermissionPolicy
-
 from .models import CheckConfig, CheckRun, CheckRunStatus
-from .proxies import current_checks_registry
+from .proxies import current_checks_registry, current_targets_registry
 from .tasks import run_check_async
 from .uow import AsyncRunTaskOp
-from .utils import get_check_target
 
 
 class ChecksAPI:
@@ -101,6 +98,26 @@ class ChecksAPI:
             result_run.result = result or {}
 
         return result_run
+
+    @classmethod
+    def get_target(cls, check_run):
+        """Get the target object for a check run."""
+        target_type = getattr(check_run.config, "target_type", None)
+
+        try:
+            target_cls = current_targets_registry.get(target_type)
+        except ValueError:
+            current_app.logger.error(
+                "Invalid target_type for check config",
+                extra={
+                    "target_type": target_type,
+                    "check_run_id": str(check_run.config.check_id),
+                },
+            )
+            raise
+
+        target_instance = target_cls()
+        return target_instance.resolve(check_run)
 
     @classmethod
     def run_check(cls, config, record, uow, is_draft=None, sync=False, **kwargs):
@@ -231,7 +248,7 @@ class ChecksAPI:
                 },
             )
             raise PermissionDeniedError()
-        target = get_check_target(check_run)
+        target = cls.get_target(check_run)
 
         if not target:
             current_app.logger.warning(
