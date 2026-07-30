@@ -6,16 +6,15 @@
 import functools
 
 from flask import current_app
-from invenio_db.uow import ModelCommitOp, ModelDeleteOp
+from invenio_db import db
+from invenio_db.uow import ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.errors import ValidationErrorGroup
 from invenio_requests.records.api import Request
 from invenio_requests.records.models import RequestMetadata
 
 from .api import ChecksAPI
-from .models import CheckConfig, CheckRun, CheckRunStatus
-from .proxies import current_checks_registry
-from .uow import _ConvertDraftToRecordCheckRunOp
+from .models import CheckConfig, CheckRun
 
 
 def toggle_on_feature_flag(config_key):
@@ -123,13 +122,6 @@ class ChecksComponent(ServiceComponent):
         # Run checks for all relevant communities
         configs = ChecksAPI.get_configs(community_ids, target_type="record")
         for config in configs:
-            check_cls = current_checks_registry.get(config.check_id)
-            is_async = not getattr(check_cls, "sync", True)
-            if is_async:
-                # Copy the existing completed record run to the draft run to avoid an
-                # expensive task when no metadata changed. The run will be re-triggered
-                # by update_draft() if input for check changes.
-                ChecksAPI.copy_record_run_to_draft(config, draft, self.uow)
             try:
                 ChecksAPI.run_check(config, draft, self.uow)
             except Exception:
@@ -142,7 +134,7 @@ class ChecksComponent(ServiceComponent):
                 )
 
     def publish(self, identity, draft=None, record=None, **kwargs):
-        """Create or update record runs based on draft runs."""
+        """Turn the draft runs into the published record's runs."""
         draft_runs = ChecksAPI.get_runs(draft)
 
         # Check if there are any check runs with errors
@@ -151,30 +143,29 @@ class ChecksComponent(ServiceComponent):
         if error_severity_errors:
             raise ValidationErrorGroup(errors=error_severity_errors)
 
-        # If no errors, we clean up and convert the draft runs to record runs.
         for draft_run in draft_runs:
-            record_run = CheckRun.query.filter_by(
-                config_id=draft_run.config_id,
-                record_id=record.id,
-                is_draft=False,
-            ).one_or_none()
-
-            if record_run and draft_run.status == CheckRunStatus.COMPLETED:
-                # Draft is complete: copy its result into the existing record run.
-                record_run.start_time = draft_run.start_time
-                record_run.end_time = draft_run.end_time
-
-                record_run.status = draft_run.status
-                record_run.state = draft_run.state
-                record_run.result = draft_run.result
-                record_run.revision_id = record.revision_id
-                # Delete the draft run
-                self.uow.register(ModelDeleteOp(draft_run))
-                self.uow.register(ModelCommitOp(record_run))
-            else:
-                # Draft is pending/running (or no record run exists): convert it in-place.
-                self.uow.register(
-                    _ConvertDraftToRecordCheckRunOp(draft_run, record_run, record)
+            try:
+                # The draft row takes over the record row's unique key, so the DELETE
+                # has to run first. A flush emits the UPDATE before the DELETE, and
+                # would also write out the other components' pending changes, hence
+                # `no_autoflush`.
+                with db.session.no_autoflush:
+                    CheckRun.query.filter_by(
+                        config_id=draft_run.config_id,
+                        record_id=record.id,
+                        is_draft=False,
+                    ).delete(synchronize_session=False)
+                    # `start_time` is untouched, so a worker still running this check
+                    # can write its result here.
+                    CheckRun.query.filter_by(id=draft_run.id).update(
+                        {"is_draft": False, "revision_id": record.revision_id},
+                        synchronize_session=False,
+                    )
+                db.session.expire(draft_run)
+            except Exception:
+                current_app.logger.exception(
+                    "Error moving check run to the published record",
+                    extra={"check_run_id": str(draft_run.id)},
                 )
 
     def delete_draft(self, identity, draft=None, record=None, force=False, **kwargs):
