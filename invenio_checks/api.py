@@ -7,15 +7,16 @@
 from datetime import datetime, timezone
 
 from flask import current_app
+from invenio_db import db
 from invenio_db.uow import ModelCommitOp
 from invenio_records_resources.services.errors import PermissionDeniedError
-from invenio_records_resources.services.uow import UnitOfWork
+from invenio_records_resources.services.uow import TaskOp, UnitOfWork
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from .models import CheckConfig, CheckRun, CheckRunStatus
 from .proxies import current_checks_registry, current_targets_registry
 from .tasks import run_check_async
-from .uow import AsyncRunTaskOp
 
 
 class ChecksAPI:
@@ -87,6 +88,29 @@ class ChecksAPI:
                 state=state,
                 result=result or {},
             )
+            try:
+                # In a nested transaction, so a duplicate row rolls back this INSERT
+                # alone and not the outer one.
+                with db.session.begin_nested():
+                    db.session.add(result_run)
+                    db.session.flush()
+            except IntegrityError:
+                # Another request created the run first; update theirs instead.
+                return cls._create_or_update_check_run(
+                    config,
+                    record,
+                    CheckRun.query.filter_by(
+                        config_id=config.id,
+                        record_id=record.id,
+                        is_draft=is_draft,
+                    ).one(),
+                    is_draft,
+                    status,
+                    state,
+                    result,
+                    start_time,
+                    end_time,
+                )
         else:
             result_run = previous_run
             result_run.is_draft = is_draft
@@ -120,15 +144,23 @@ class ChecksAPI:
         return target_instance.resolve(check_run)
 
     @classmethod
-    def run_check(cls, config, record, uow, is_draft=None, sync=False, **kwargs):
+    def run_check(
+        cls, config, record, uow, is_draft=None, sync=False, started=None, **kwargs
+    ):
         """Run a check for a given configuration on a record or draft.
 
         If a check run already exists for the given configuration and record/draft, it
         updates the run with the new results. If no run exists, it will create it.
         If the operation fails, an error is logged and `None` is returned.
+
+        ``started`` is the `start_time` a worker wrote on the run. Its result is
+        stored only while the row still has that value.
         """
-        if is_draft is None and config.target_type == "record":
-            is_draft = record.is_draft
+        if is_draft is None:
+            # Only records have drafts. Everything else is stored with is_draft=False
+            # (the column default), so leaving None here would make the lookup below
+            # `is_draft IS NULL`, which never matches and inserts a duplicate row.
+            is_draft = record.is_draft if config.target_type == "record" else False
 
         check_cls = current_checks_registry.get(config.check_id)
         if not check_cls:
@@ -145,6 +177,29 @@ class ChecksAPI:
             is_draft=is_draft,
         ).one_or_none()
 
+        if previous_run is None and is_draft:
+            # A new draft starts from the published record's result, instead of
+            # showing a pending run until the check has run again. should_rerun
+            # decides below whether to keep it.
+            record_run = CheckRun.query.filter_by(
+                config_id=config.id,
+                record_id=record.id,
+                is_draft=False,
+            ).one_or_none()
+            if record_run is not None and record_run.status == CheckRunStatus.COMPLETED:
+                previous_run = cls._create_or_update_check_run(
+                    config,
+                    record,
+                    None,
+                    True,
+                    CheckRunStatus.COMPLETED,
+                    state=record_run.state,
+                    result=record_run.result,
+                    start_time=record_run.start_time,
+                    end_time=record_run.end_time,
+                )
+                uow.register(ModelCommitOp(previous_run))
+
         if previous_run and not check_instance.should_rerun(
             record, config, previous_run, **kwargs
         ):
@@ -153,9 +208,53 @@ class ChecksAPI:
             return previous_run
 
         if getattr(check_cls, "sync", True) or sync:
-            start_time = datetime.now(timezone.utc)
+            run_id = None
+            if started is not None:
+                if previous_run is None:
+                    current_app.logger.info(
+                        "Check run vanished, skipping",
+                        extra={
+                            "check_config_id": str(config.id),
+                            "record_id": str(record.id),
+                        },
+                    )
+                    return None
+                if previous_run.start_time != started:
+                    current_app.logger.info(
+                        "Check run restarted elsewhere, skipping",
+                        extra={"check_run_id": str(previous_run.id)},
+                    )
+                    return None
+                # Read the id now, since the row can be deleted while the check runs.
+                run_id = previous_run.id
+
+            start_time = started or datetime.now(timezone.utc)
             res, state = check_instance.run(record, config, **kwargs)
             end_time = datetime.now(timezone.utc)
+
+            if started is not None:
+                # Write only while `start_time` is unchanged. `is_draft` is left out
+                # because publish may have changed it while the check ran.
+                written = CheckRun.query.filter(
+                    CheckRun.id == run_id,
+                    CheckRun.start_time == started,
+                ).update(
+                    {
+                        "status": CheckRunStatus.COMPLETED,
+                        "state": state,
+                        "result": res.to_dict(),
+                        "end_time": end_time,
+                        "revision_id": record.revision_id,
+                    },
+                    synchronize_session=False,
+                )
+                if not written:
+                    current_app.logger.info(
+                        "Check run restarted elsewhere, discarding result",
+                        extra={"check_run_id": str(run_id)},
+                    )
+                    return None
+                return previous_run
 
             result_run = cls._create_or_update_check_run(
                 config,
@@ -181,31 +280,8 @@ class ChecksAPI:
             result=check_instance.pending_result(config.params),
         )
         uow.register(ModelCommitOp(result_run))
-        uow.register(AsyncRunTaskOp(run_check_async, result_run))
+        uow.register(TaskOp(run_check_async, str(result_run.id)))
         return result_run
-
-    @classmethod
-    def copy_record_run_to_draft(cls, config, draft, uow):
-        """Copy a completed record-level run to a draft run."""
-        record_run = CheckRun.query.filter_by(
-            config_id=config.id,
-            record_id=draft.id,
-            is_draft=False,
-        ).one_or_none()
-
-        if record_run and record_run.status == CheckRunStatus.COMPLETED:
-            draft_run = cls._create_or_update_check_run(
-                config=config,
-                record=draft,
-                previous_run=None,
-                is_draft=True,
-                status=CheckRunStatus.COMPLETED,
-                state=record_run.state or {},
-                result=record_run.result or {},
-                start_time=record_run.start_time,
-                end_time=record_run.end_time,
-            )
-            uow.register(ModelCommitOp(draft_run))
 
     @classmethod
     def extract_run_errors(cls, runs):
