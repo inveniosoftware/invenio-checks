@@ -10,6 +10,7 @@ class AsyncRunTaskOp(Operation):
     """Dispatch a Celery task after the UoW commits."""
 
     def __init__(self, task, check_run):
+        """Initialize the operation."""
         self._task = task
         self._check_run = check_run
 
@@ -22,6 +23,7 @@ class _ConvertDraftToRecordCheckRunOp(Operation):
     """Convert a draft check run to a record run in-place."""
 
     def __init__(self, draft_run, existing_record_run, record):
+        """Initialize the operation."""
         self._draft_run = draft_run
         self._existing_record_run = existing_record_run
         self._record = record
