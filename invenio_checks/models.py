@@ -6,6 +6,8 @@
 
 import enum
 import uuid
+from abc import ABC
+from dataclasses import asdict, dataclass
 
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_db import db
@@ -100,3 +102,29 @@ class CheckRun(db.Model, db.Timestamp):
     __table_args__ = (
         db.Index("idx_checks_run_config_id_record_id", config_id, record_id),
     )
+
+
+@dataclass
+class CheckResult(ABC):
+    """Base class for the result of check run.
+
+    If the check result defines a list of ``errors``, they are raised as (schema)
+    validation errors in the provided service component and therefore reported back
+    to the user.
+    Each error is expected to have the following shape:
+
+        {
+            "field": "metadata.description"
+            "messages": ["There are typographic errors in the description."],
+            "description": "Spell check",
+            "severity": "error"
+        }
+    """
+
+    errors: list[dict] = field(default_factory=list)
+    sync: bool = True
+    success: bool = True
+
+    def to_dict(self) -> dict:
+        """Convert the result to a dictionary."""
+        return asdict(self)

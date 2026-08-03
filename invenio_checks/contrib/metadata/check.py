@@ -15,11 +15,12 @@ from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
 from invenio_checks.utils import translate_field
 
+from ...models import CheckResult as CheckResultBase
 from .rules import RuleParser, RuleResult
 
 
 @dataclass
-class CheckResult:
+class CheckResult(CheckResultBase):
     """Result of running a check."""
 
     check_id: str
