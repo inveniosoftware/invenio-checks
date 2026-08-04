@@ -7,6 +7,11 @@
 Changes
 =======
 
+Version v11.0.2 (released 2026-08-04)
+
+- ci: enable CI for feature branches
+- fix(build): include mo files
+
 Version v11.0.1 (released 2026-07-16)
 
 - chore(setup): migrate from setuptools to hatchling
