@@ -111,6 +111,7 @@ class TestRule:
         assert result.success is False  # Check fails, so rule fails
         assert len(result.check_results) == 1
         assert result.check_results[0].success is False
+        assert result.skipped is False
 
     def test_rule_with_condition_no_match(self):
         """Test rule with a condition that doesn't match."""
@@ -134,6 +135,7 @@ class TestRule:
             result.success is True
         )  # Rule is skipped due to condition, so successful by default
         assert len(result.check_results) == 0  # No checks were run
+        assert result.skipped is True
 
     def test_rule_with_complex_condition(self):
         """Test rule with a complex condition."""
@@ -466,6 +468,7 @@ class TestRuleResult:
                 {"success": True, "path": "field1", "message": None},
                 {"success": True, "path": "field2", "message": None},
             ],
+            True,
         )
 
         assert rule_result.rule_id == "test-rule"
@@ -473,6 +476,7 @@ class TestRuleResult:
         assert rule_result.rule_message == "A test rule"
         assert rule_result.level == "error"
         assert rule_result.success is True
+        assert rule_result.skipped is True
         assert len(rule_result.check_results) == 2
 
     def test_rule_result_to_dict(self):

@@ -46,7 +46,9 @@ class Rule:
             condition_result = self.condition.evaluate(record)
             if not condition_result.success:
                 # Condition failed, rule doesn't apply
-                return RuleResult.from_rule(self, True, [])
+                return RuleResult.from_rule(
+                    self, success=True, check_results=[], skipped=True
+                )
 
         # Evaluate all checks
         check_results = [check.evaluate(record) for check in self.checks]
@@ -70,9 +72,16 @@ class RuleResult:
     success: bool
     check_results: List[ExpressionResult]
     error_path: Optional[str] = None
+    skipped: bool = False
 
     @classmethod
-    def from_rule(cls, rule, success: bool, check_results: List[ExpressionResult]):
+    def from_rule(
+        cls,
+        rule,
+        success: bool,
+        check_results: List[ExpressionResult],
+        skipped: bool = False,
+    ):
         """Alternative constructor to create a RuleResult from a rule object."""
         return cls(
             rule_id=rule.id,
@@ -83,6 +92,7 @@ class RuleResult:
             success=success,
             check_results=check_results,
             error_path=rule.error_path,
+            skipped=skipped,
         )
 
     def to_dict(self):
