@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 CERN.
 # SPDX-License-Identifier: MIT
 """Check implementations and registry."""
 
@@ -48,6 +48,9 @@ class Check:
 
     target_type: str
     """Type of item the check runs against (record, user, community, etc)."""
+
+    hide_parent_checks: bool = False
+    """Whether to display only check runs of the exact community or also show parent's check runs."""
 
     def validate_config(self, config):
         """Validate the configuration for this check."""
