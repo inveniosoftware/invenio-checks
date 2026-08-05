@@ -15,6 +15,7 @@ from invenio_i18n import lazy_gettext as _l
 
 from invenio_checks.base import Check
 from invenio_checks.models import CheckConfig
+from invenio_checks.models import CheckResult as CheckResultBase
 from invenio_checks.utils import classproperty, translate_field
 
 
@@ -61,7 +62,7 @@ class FileFormatDatabase(dict):
 
 
 @dataclass
-class CheckResult:
+class CheckResult(CheckResultBase):
     """Result of a check."""
 
     id: str
