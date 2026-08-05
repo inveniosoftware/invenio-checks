@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 CERN.
 # SPDX-FileCopyrightText: 2025-2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 """Utilities."""
@@ -55,6 +55,31 @@ def translate_field(field_value):
     raise ValueError(
         f"Unsupported field type for translation: {type(field_value)} with value: {field_value}"
     )
+
+
+def aggregate_checks_severity(checks, check_class_id):
+    """Aggregate the worst severity across a set of checks.
+
+    Allows handling cases with more than one run per check_id, displaying only one icon.
+    """
+    severity = "success"
+    for check in checks:
+        if check.config.check_cls.id != check_class_id:
+            continue
+        if check.status.value in ("P", "R"):
+            return "running"
+        check_severity = (
+            check.config.severity.error_value
+            if check.status.value == "E"
+            else check.overall_severity
+        )
+        if check_severity == "error":
+            severity = "error"
+        elif check_severity == "warning" and severity != "error":
+            severity = "warning"
+        elif check_severity == "info" and severity == "success":
+            severity = "info"
+    return severity
 
 
 class classproperty:
