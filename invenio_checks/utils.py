@@ -82,6 +82,26 @@ def aggregate_checks_severity(checks, check_class_id):
     return severity
 
 
+def get_visible_checks(checks, receiver_community_id):
+    """Return (checks, check_classes) with only visible checks."""
+    classes_with_visible_checks = set()
+    visible_checks = []
+    for check in checks:
+        check_class = check.config.check_cls
+
+        receiver_community_matches_config = (
+            str(check.config.community_id) == receiver_community_id
+        )
+        if (
+            not check_class.hide_parent_checks
+            or receiver_community_matches_config
+            or check.config.community_id is None  # global checks
+        ):
+            classes_with_visible_checks.add(check_class)
+            visible_checks.append(check)
+    return visible_checks, classes_with_visible_checks
+
+
 class classproperty:
     """Decorator to define a class property."""
 
