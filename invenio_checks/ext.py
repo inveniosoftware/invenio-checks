@@ -6,7 +6,7 @@
 
 from . import config
 from .base import ChecksRegistry, CheckTargetsRegistry
-from .utils import aggregate_checks_severity, translate_field
+from .utils import aggregate_checks_severity, get_visible_checks, translate_field
 
 
 class InvenioChecks(object):
@@ -30,6 +30,7 @@ class InvenioChecks(object):
         # Register Jinja filters
         app.jinja_env.filters["translate_field"] = translate_field
         app.jinja_env.filters["aggregate_severity"] = aggregate_checks_severity
+        app.jinja_env.globals["get_visible_checks"] = get_visible_checks
 
     def init_config(self, app):
         """Initialize configuration."""
