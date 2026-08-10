@@ -5,17 +5,18 @@
 
 {% import "invenio_checks/requests/severity_level_icons.html" as severity_tpl %}
 
-{% set first_check = (checks | map(attribute='config.check_cls') | sort(attribute='sort_order') | first).id %}
-{% set check_classes = checks | map(attribute="config.check_cls") | unique(attribute="id") %}
+{% set checks, check_classes = get_visible_checks(checks, invenio_request.receiver.community) %}
+{% set check_classes = check_classes | sort(attribute="sort_order") %}
+{% set first_check = (check_classes | first).id %}
 
 <div class="ui column stackable divided grid">
   <div class="three wide column pr-0">
     <div class="ui fluid secondary vertical menu ml-0 mr-0 rdm-tab-menu">
-      {% for check_class in check_classes|sort(attribute="sort_order") %}
-      <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
-        {% set severity = checks|aggregate_severity(check_class.id) %}
-        <i class="{{ severity_tpl.severity_level_icons[severity] }}"></i>
-        {{ check_class.title }}</a>
+      {% for check_class in check_classes %}
+        <a class="item {% if loop.index == 1 %}active{% endif %}" data-tab="{{ check_class.id }}">
+          {% set severity = checks|aggregate_severity(check_class.id) %}
+          <i class="{{ severity_tpl.severity_level_icons[severity] }}"></i>
+          {{ check_class.title }}</a>
       {% endfor %}
     </div>
   </div>
