@@ -7,6 +7,7 @@
 import enum
 import uuid
 
+import sqlalchemy as sa
 from invenio_communities.communities.records.models import CommunityMetadata
 from invenio_db import db
 from sqlalchemy.dialects import postgresql
@@ -21,6 +22,11 @@ JSON = (
     .with_variant(JSONType(), "sqlite")
     .with_variant(JSONType(), "mysql")
 )
+
+
+def _dump_dict(model):
+    """Dump a model to a dictionary."""
+    return {c.key: getattr(model, c.key) for c in sa.inspect(model).mapper.column_attrs}
 
 
 class Severity(enum.Enum):
@@ -100,3 +106,7 @@ class CheckRun(db.Model, db.Timestamp):
     __table_args__ = (
         db.Index("idx_checks_run_config_id_record_id", config_id, record_id),
     )
+
+    def dump(self):
+        """Dump the check run as a dictionary."""
+        return _dump_dict(self)

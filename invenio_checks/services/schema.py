@@ -45,8 +45,10 @@ class CheckRunSchema(Schema, FieldPermissionsMixin):
     created = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
     updated = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
 
-    started_at = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
-    finished_at = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
+    start_time = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
+    end_time = TZDateTime(timezone=timezone.utc, format="iso", dump_only=True)
 
     status = fields.Enum(CheckRunStatus, dump_only=True)
     message = SanitizedUnicode(dump_only=True)
+
+    result = fields.Dict(dump_only=True)

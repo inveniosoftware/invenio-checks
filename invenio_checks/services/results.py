@@ -69,3 +69,25 @@ class List(RecordList):
                     link.expand(self._identity, hit, projection)
 
             yield projection
+
+
+class ChecksRunList(List):
+    """List result for checks run."""
+
+    @property
+    def hits(self):
+        """Iterator over the hits."""
+        for hit in self.items:
+            projection = self._schema.dump(
+                hit,
+                context=dict(identity=self._identity, record=hit),
+            )
+
+            if self._links_item_tpl:
+                projection["links"] = self._links_item_tpl.expand(self._identity, hit)
+
+            if self._nested_links_item:
+                for link in self._nested_links_item:
+                    link.expand(self._identity, hit, projection)
+
+            yield projection
