@@ -7,6 +7,17 @@
 Changes
 =======
 
+Version v12.0.0 (released 2026-08-12)
+
+- feat(checks): run checks asynchronously via Celery, with a ``sync`` flag on ``Check`` to keep a check inline. Runs go through PENDING/RUNNING states, are retried on failure, marked ERROR after max retries, and ``cleanup_stale_check_runs`` fails runs whose worker never came back (``CHECKS_RUN_STALE_AFTER``).
+- fix(checks): handle concurrent check runs across publish and edit, so a check still running at publish time lands on the published record and records no longer become uneditable.
+- feat(checks): support subcommunity checks (``CHECKS_SUBCOMMUNITY_ENABLED``), including a member check component and filtering of check runs by community or parent community.
+- feat(checks): allow manual re-runs of a check via ``allow_rerun``, with a per-check ``can_rerun`` permission and ``should_rerun`` to decide whether an existing run can be reused.
+- feat(checks): add a ``CheckTarget`` registry and ``target_type``, so checks can run against things other than records.
+- feat(rules): allow rules to be skipped when their condition does not hold; skipped results are not displayed.
+- feat(checks): add ``hide_parent_checks`` to hide a parent community's checks when only the subcommunity's runs are relevant.
+- refactor(ui): show a single icon per check class with the worst severity across its runs, and display async error states.
+
 Version v11.0.2 (released 2026-08-04)
 
 - ci: enable CI for feature branches

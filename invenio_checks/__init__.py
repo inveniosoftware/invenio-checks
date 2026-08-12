@@ -7,6 +7,6 @@
 
 from .ext import InvenioChecks
 
-__version__ = "11.0.2"
+__version__ = "12.0.0"
 
 __all__ = ("__version__", "InvenioChecks")
