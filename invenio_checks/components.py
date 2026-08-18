@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 CERN.
+# SPDX-FileCopyrightText: 2025-2026 CERN.
 # SPDX-License-Identifier: MIT
 
 """Record service component."""
@@ -6,15 +6,14 @@
 import functools
 
 from flask import current_app
+from invenio_communities.communities.records.api import Community
 from invenio_db import db
 from invenio_db.uow import ModelDeleteOp
 from invenio_drafts_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.errors import ValidationErrorGroup
-from invenio_requests.records.api import Request
-from invenio_requests.records.models import RequestMetadata
 
 from .api import ChecksAPI
-from .models import CheckConfig, CheckRun
+from .models import CheckRun
 
 
 def toggle_on_feature_flag(config_key):
@@ -199,31 +198,20 @@ class CommunityChecksComponent(ServiceComponent):
     """Subcommunity checks component."""
 
     def update(self, identity, data=None, record=None, **kwargs):
-        """Rerun checks if this community is a subcommunity."""
-        open_requests = RequestMetadata.query.filter(
-            RequestMetadata.json.op("->>")("type") == "subcommunity",
-            RequestMetadata.json.op("->>")("status") == "submitted",
-            RequestMetadata.json["topic"].op("->>")("community") == str(record.id),
-        ).all()
-        if not open_requests:
-            return
-
-        for req_model in open_requests:
-            request = Request.get_record(req_model.id)
-            parent = request.receiver.resolve()
-
-            configs = ChecksAPI.get_configs([parent.id], "community")
-            for config in configs:
-                try:
-                    ChecksAPI.run_check(config, record, self.uow)
-                except Exception:
-                    current_app.logger.exception(
-                        "Error running community check",
-                        extra={
-                            "check_config_id": str(config.id),
-                            "record_id": str(record.id),
-                        },
-                    )
+        """Rerun checks for subcommunity."""
+        past_runs = ChecksAPI.get_runs(record, is_draft=False)
+        for run in past_runs:
+            config = run.config
+            try:
+                ChecksAPI.run_check(config, record, self.uow)
+            except Exception:
+                current_app.logger.exception(
+                    "Error running community check",
+                    extra={
+                        "check_config_id": str(config.id),
+                        "record_id": str(record.id),
+                    },
+                )
 
 
 @toggle_on_feature_flag(config_key="CHECKS_SUBCOMMUNITY_ENABLED")
@@ -231,42 +219,28 @@ class CommunityMemberChecksComponent(ServiceComponent):
     """Reruns membership checks when community members change."""
 
     def _rerun_membership_checks(self, member, uow, deleted_member_id=None):
+        """Rerun membership checks for subcommunity."""
         community_id = member.community_id
         if not community_id:
             return
 
-        open_requests = RequestMetadata.query.filter(
-            RequestMetadata.json.op("->>")("type") == "subcommunity",
-            RequestMetadata.json.op("->>")("status") == "submitted",
-            RequestMetadata.json["topic"].op("->>")("community") == str(community_id),
-        ).all()
-        if not open_requests:
-            return
-
-        for req_model in open_requests:
-            request = Request.get_record(req_model.id)
-            parent = request.receiver.resolve()
-            subcommunity = request.topic.resolve()
-
-            config = CheckConfig.query.filter(
-                CheckConfig.community_id == parent.id,
-                CheckConfig.enabled.is_(True),
-                CheckConfig.check_id == "subcommunity_member",
-                CheckConfig.target_type == "community",
-            ).one_or_none()
-
-            try:
-                ChecksAPI.run_check(
-                    config, subcommunity, uow, deleted_member_id=deleted_member_id
-                )
-            except Exception:
-                current_app.logger.exception(
-                    "Error running membership check",
-                    extra={
-                        "check_config_id": str(config.id) if config else None,
-                        "community_id": str(community_id),
-                    },
-                )
+        community = Community.get_record(community_id)
+        past_runs = ChecksAPI.get_runs(community, is_draft=False)
+        for run in past_runs:
+            config = run.config
+            if config.check_id == "subcommunity_member":
+                try:
+                    ChecksAPI.run_check(
+                        config, community, uow, deleted_member_id=deleted_member_id
+                    )
+                except Exception:
+                    current_app.logger.exception(
+                        "Error running membership check",
+                        extra={
+                            "check_config_id": str(config.id),
+                            "record_id": str(community_id),
+                        },
+                    )
 
     def accept_member_request(self, identity, record=None, **kwargs):
         """Rerun on invitation accepted."""
