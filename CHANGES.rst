@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v12.0.1 (released 2026-08-18)
+
+- fix(components): use past check runs to rerun
+
 Version v12.0.0 (released 2026-08-12)
 
 - feat(checks): run checks asynchronously via Celery, with a ``sync`` flag on ``Check`` to keep a check inline. Runs go through PENDING/RUNNING states, are retried on failure, marked ERROR after max retries, and ``cleanup_stale_check_runs`` fails runs whose worker never came back (``CHECKS_RUN_STALE_AFTER``).
