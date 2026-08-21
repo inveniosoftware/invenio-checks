@@ -27,150 +27,162 @@ msgstr ""
 
 #: invenio_checks/contrib/file_formats.py:92
 msgid "File formats check"
-msgstr ""
+msgstr "Comprobación de formatos de archivo"
 
 #: invenio_checks/contrib/file_formats.py:94
 msgid ""
 "Validates that record files are in open and scientific formats, optionally "
 "suggesting alternatives."
 msgstr ""
+"Verifica que los archivos de registro estén en formatos abiertos y "
+"científicos, sugiriendo opcionalmente alternativas."
 
 #: invenio_checks/contrib/file_formats.py:103
 #, python-brace-format
 msgid ".{ext} is not a known open or scientific file format."
-msgstr ""
+msgstr ".{ext} no es un formato de archivo abierto o científico conocido."
 
 #: invenio_checks/contrib/file_formats.py:106
 msgid ""
 "Using closed or proprietary formats hinders reusability and preservation of "
 "published files."
 msgstr ""
+"El uso de formatos cerrados o propietarios dificulta la reutilización y la "
+"conservación de los archivos publicados."
 
 #: invenio_checks/contrib/file_formats.py:108
 msgid "All files should be in open or scientific formats"
-msgstr ""
+msgstr "Todos los archivos deben estar en formatos abiertos o científicos."
 
 #: invenio_checks/contrib/metadata/check.py:53
 msgid "Metadata validation"
-msgstr ""
+msgstr "Validación de metadatos"
 
 #: invenio_checks/contrib/metadata/check.py:54
 msgid "Validates record metadata against configured rules."
-msgstr ""
+msgstr "Valida los metadatos de los registros según las reglas configuradas."
 
 #: invenio_checks/contrib/metadata/check.py:138
 msgid "Unnamed check"
-msgstr ""
+msgstr "Verificación sin nombre"
 
 #: invenio_checks/contrib/metadata/expressions.py:40
 #, python-brace-format
 msgid "Field {path} is required but missing"
-msgstr ""
+msgstr "El campo {path} es obligatorio pero falta"
 
 #: invenio_checks/contrib/metadata/expressions.py:90
 #, python-brace-format
 msgid "Expected {path} to be {expected}, but got {actual}"
-msgstr ""
+msgstr "Se esperaba que {path} fuera {expected}, pero se obtuvo {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:91
 #, python-brace-format
 msgid "Expected {path} not to be {unexpected}, but got {actual}"
 msgstr ""
+"Se esperaba que {path} no fuera {unexpected}, pero se obtuvo {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:92
 #, python-brace-format
 msgid "Expected {path} to contain {expected}, but got {actual}"
 msgstr ""
+"Se esperaba que {path} contuviera {expected}, pero se obtuvo {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:93
 #, python-brace-format
 msgid "Expected {path} not to contain {unexpected}, but got {actual}"
 msgstr ""
+"Se esperaba que {path} no contuviera {unexpected}, pero se obtuvo {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:94
 #, python-brace-format
 msgid "Expected {expected} in {path}, but got {actual}"
-msgstr ""
+msgstr "Se esperaba {expected} en {path}, pero se obtuvo {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:95
 #, python-brace-format
 msgid "Expected {unexpected} to not be in {path}, but got {actual}"
 msgstr ""
+"Se esperaba que {unexpected} no estuviera en {path}, pero obtuvo {actual}"
 
 #: invenio_checks/contrib/metadata/expressions.py:97
 #, python-brace-format
 msgid "Expected {path} to have at least {expected} {unit}, but got {actual}"
 msgstr ""
+"Se esperaba que {path} tuviera al menos {expected} {unit}, pero obtuvo "
+"{actual}"
 
 #: invenio_checks/contrib/metadata/expressions.py:100
 #, python-brace-format
 msgid "Expected {path} to have at most {expected} {unit}, but got {actual}"
 msgstr ""
+"Se esperaba que {path} tuviera como máximo {expected} {unit}, pero se obtuvo"
+" {actual}."
 
 #: invenio_checks/contrib/metadata/expressions.py:172
 #: invenio_checks/contrib/metadata/expressions.py:202
 #, python-brace-format
 msgid "Cannot check if {type} contains a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} contiene un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:187
 #: invenio_checks/contrib/metadata/expressions.py:217
 #, python-brace-format
 msgid "Cannot check if {type} does not contain a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} no contiene un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:227
 #, python-brace-format
 msgid "Expected {path} to start with {expected}"
-msgstr ""
+msgstr "Se esperaba que {path} comenzara con {expected}"
 
 #: invenio_checks/contrib/metadata/expressions.py:233
 #, python-brace-format
 msgid "Cannot check if {type} starts with a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} comienza con un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:242
 #, python-brace-format
 msgid "Expected {path} not to start with {unexpected}"
-msgstr ""
+msgstr "Se esperaba que {path} no comenzara con {unexpected}."
 
 #: invenio_checks/contrib/metadata/expressions.py:248
 #, python-brace-format
 msgid "Cannot check if {type} doesn't start with a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} no empieza con un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:257
 #, python-brace-format
 msgid "Expected {path} to end with {expected}"
-msgstr ""
+msgstr "Se esperaba que {path} terminara con {expected}"
 
 #: invenio_checks/contrib/metadata/expressions.py:263
 #, python-brace-format
 msgid "Cannot check if {type} ends with a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} termina con un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:272
 #, python-brace-format
 msgid "Expected {path} not to end with {unexpected}"
-msgstr ""
+msgstr "Se esperaba que {path} no terminara con {inesperado}"
 
 #: invenio_checks/contrib/metadata/expressions.py:278
 #, python-brace-format
 msgid "Cannot check if {type} doesn't end with a value"
-msgstr ""
+msgstr "No se puede comprobar si {type} no termina con un valor."
 
 #: invenio_checks/contrib/metadata/expressions.py:287
 #, python-brace-format
 msgid "Unknown operator: {operator}"
-msgstr ""
+msgstr "Operador desconocido: {operator}"
 
 #: invenio_checks/contrib/metadata/expressions.py:300
 msgid "characters"
-msgstr ""
+msgstr "caracteres"
 
 #: invenio_checks/contrib/metadata/expressions.py:302
 msgid "items"
-msgstr ""
+msgstr "Elementos"
 
 #: invenio_checks/contrib/metadata/expressions.py:304
 msgid "value"
@@ -179,52 +191,53 @@ msgstr "valor"
 #: invenio_checks/contrib/metadata/expressions.py:311
 #, python-brace-format
 msgid "Cannot check min for {type}"
-msgstr ""
+msgstr "No se puede comprobar min para {type}"
 
 #: invenio_checks/contrib/metadata/expressions.py:319
 #, python-brace-format
 msgid "Min threshold must be a number, got {type}"
-msgstr ""
+msgstr "El umbral mínimo debe ser un número, se obtuvo {type}"
 
 #: invenio_checks/contrib/metadata/expressions.py:342
 #, python-brace-format
 msgid "Cannot check max for {type}"
-msgstr ""
+msgstr "No se puede comprobar el valor máximo para {type}."
 
 #: invenio_checks/contrib/metadata/expressions.py:350
 #, python-brace-format
 msgid "Max threshold must be a number, got {type}"
-msgstr ""
+msgstr "El umbral máximo debe ser un número, se obtuvo {type}"
 
 #: invenio_checks/contrib/metadata/expressions.py:407
 #, python-brace-format
 msgid "Unknown logical operator: {operator}"
-msgstr ""
+msgstr "Operador lógico desconocido: {operator}"
 
 #: invenio_checks/contrib/metadata/expressions.py:417
 #, python-brace-format
 msgid "List field {path} is missing"
-msgstr ""
+msgstr "Falta el campo de lista {path}."
 
 #: invenio_checks/contrib/metadata/expressions.py:418
 #, python-brace-format
 msgid "Field {path} is not a list"
-msgstr ""
+msgstr "El campo {path} no es una lista."
 
 #: invenio_checks/contrib/metadata/expressions.py:419
 #, python-brace-format
 msgid "No items in list {path}"
-msgstr ""
+msgstr "No hay elementos en la lista {path}"
 
 #: invenio_checks/contrib/metadata/expressions.py:420
 #, python-brace-format
 msgid "No items in {path} match the required criteria"
-msgstr ""
+msgstr "Ningún elemento en {path} coincide con los criterios requeridos."
 
 #: invenio_checks/contrib/metadata/expressions.py:421
 #, python-brace-format
 msgid "Not all items in {path} match the required criteria"
 msgstr ""
+"No todos los elementos en {path} cumplen con los criterios requeridos."
 
 #: invenio_checks/services/config.py:26
 msgid "Ascending"
@@ -240,37 +253,46 @@ msgstr "Título"
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/file_formats_tab.html:25
 msgid "The following files are not using open or scientific formats:"
-msgstr ""
+msgstr "Los siguientes archivos no utilizan formatos abiertos ni científicos:"
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:9
 msgid "Editing in progress"
-msgstr ""
+msgstr "Edición en curso"
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:10
 msgid "You're viewing checks and feedback results for unpublished changes."
 msgstr ""
+"Está viendo los resultados de las comprobaciones y los comentarios sobre "
+"cambios no publicados."
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:12
 msgid ""
 "The published version available to users may differ from what's shown here."
 msgstr ""
+"La versión publicada y disponible para los usuarios puede diferir de la que "
+"se muestra aquí."
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:18
 msgid "What is this about?"
-msgstr ""
+msgstr "¿Sobre qué es esto?"
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:19
 msgid ""
 "These checks help ensure that your submission is compliant with this "
 "community's guidelines."
 msgstr ""
+"Estas comprobaciones ayudan a garantizar que su envío cumpla con las pautas "
+"de esta comunidad."
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:20
 msgid "How do I fix warnings/errors?"
-msgstr ""
+msgstr "¿Cómo soluciono las advertencias/errores?"
 
 #: invenio_checks/templates/semantic-ui/invenio_checks/requests/help_message.html:21
 msgid ""
 "Go to the \"Record\" tab and click the orange \"Edit\" button. All errors "
 "and recommendations are displayed inline in the upload form."
 msgstr ""
+"Vaya a la pestaña \"Registro\" y pulse en el botón naranja \"Editar\". Todos"
+" los errores y recomendaciones se muestran directamente en el formulario de "
+"carga."
