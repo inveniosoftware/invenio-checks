@@ -7,6 +7,10 @@
 Changes
 =======
 
+Version v13.0.0 (released 2026-11-10)
+
+- chore(setup): bump dependencies
+
 Version v12.0.1 (released 2026-08-18)
 
 - fix(components): use past check runs to rerun
