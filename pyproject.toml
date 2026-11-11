@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 CERN.
 # SPDX-FileCopyrightText: 2026 Graz University of Technology.
 # SPDX-FileCopyrightText: 2026 TU Wien.
+# SPDX-FileCopyrightText: 2026 KTH Royal Institute of Technology.
 # SPDX-License-Identifier: MIT
 
 [project]
@@ -56,6 +57,9 @@ invenio_checks = "invenio_checks:alembic"
 [project.entry-points."invenio_db.models"]
 invenio_checks = "invenio_checks.models"
 
+[project.entry-points."invenio_i18n.translations"]
+messages = "invenio_checks"
+
 [project.optional-dependencies]
 opensearch1 = [
   "invenio-search[opensearch1]>=3.0.0,<4.0.0",
@@ -109,3 +113,30 @@ conflicts = [
     { extra = "elasticsearch7" },
   ]
 ]
+
+[tool.babel]
+
+[tool.babel.compile_catalog]
+directory = "invenio_checks/translations/"
+
+[tool.babel.extract_messages]
+copyright_holder = "CERN"
+msgid_bugs_address = "info@inveniosoftware.org"
+mapping_file = "pyproject.toml"
+output_file = "invenio_checks/translations/messages.pot"
+add_comments = "NOTE"
+
+[tool.babel.init_catalog]
+input_file = "invenio_checks/translations/messages.pot"
+output_dir = "invenio_checks/translations/"
+
+[[tool.babel.mappings]]
+method = "python"
+pattern = "**.py"
+encoding = "utf-8"
+keywords = ["_l"]
+
+[[tool.babel.mappings]]
+method = "jinja2"
+pattern = "**/templates/**.html"
+encoding = "utf-8"
