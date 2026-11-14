@@ -8,6 +8,8 @@ from collections.abc import Iterable, Sized
 from flask_sqlalchemy.pagination import Pagination
 from invenio_records_resources.services.records.results import RecordItem, RecordList
 
+from ..api import AttrDict
+
 
 class Item(RecordItem):
     """Single item result."""

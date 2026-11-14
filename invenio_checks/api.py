@@ -19,6 +19,15 @@ from .proxies import current_checks_registry, current_targets_registry
 from .tasks import run_check_async
 
 
+class AttrDict(dict):
+    """Mock record class."""
+
+    def __init__(self, *args, **kwargs):
+        """Constructor."""
+        super().__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
 class ChecksAPI:
     """API for managing checks."""
 
