@@ -7,7 +7,7 @@
 name = "invenio-checks"
 description = "Invenio module to automated curation checks on records."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
   { name = "CERN", email = "info@inveniosoftware.org" },
